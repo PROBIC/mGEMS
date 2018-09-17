@@ -49,8 +49,8 @@ void read_alignment(const std::string &alignment_line, const std::unordered_map<
   }
 }
 
-std::map<std::vector<bool>, long unsigned> read_ec_ids(const std::string &ec_path, const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec, unsigned n_refs) {
-  std::map<std::vector<bool>, long unsigned> ec_to_id;
+std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(const std::string &ec_path, const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec, unsigned n_refs) {
+  std::unordered_map<std::vector<bool>, long unsigned> ec_to_id;
 
   std::ifstream ec_file(ec_path);
   if (ec_file.is_open()) {
@@ -61,7 +61,6 @@ std::map<std::vector<bool>, long unsigned> read_ec_ids(const std::string &ec_pat
       bool firstel = true;
       long unsigned key = 0;
       std::vector<bool> config(n_refs, 0);
-      bool lookup;
       while (getline(partition, part, '\t')) {
 	if (firstel) {
 	  key = std::stoi(part);
@@ -110,7 +109,10 @@ std::vector<double> read_abundances(const std::string &abundances_path, std::vec
 }
 
 std::unordered_map<long unsigned, std::vector<bool>> read_probs(const std::string &probs_path, const std::string &abundances_path, std::vector<std::string> &ref_names) {
+  std::cout << "  Reading abundances" << std::endl;
   std::vector<double> abundances = read_abundances(abundances_path, ref_names);
+
+  std::cout << "  Reading probs" << std::endl;
   std::ifstream probs_file(probs_path);
 
   std::unordered_map<long unsigned, std::vector<bool>> ec_to_cluster;
@@ -137,6 +139,7 @@ std::unordered_map<long unsigned, std::vector<bool>> read_probs(const std::strin
       }
     }
   }
+  return ec_to_cluster;
 }
 
 void read_sam(const std::string &sam_path, const std::string &ec_path, const std::string &outfile, const std::string &probs_path, const std::string &abundances_path) {
@@ -169,11 +172,12 @@ void read_sam(const std::string &sam_path, const std::string &ec_path, const std
   }
   std::cout << "Reading equivalence classes" << std::endl;
   unsigned n_refs = ref_to_id.size();
-  const std::map<std::vector<bool>, long unsigned> &ec_to_id = read_ec_ids(ec_path, reads_in_ec, n_refs);
+  const std::unordered_map<std::vector<bool>, long unsigned> &ec_to_id = read_ec_ids(ec_path, reads_in_ec, n_refs);
 
+  std::cout << "Reading probs" << std::endl;
   std::vector<std::string> ref_names;
-  std::unordered_map<long unsigned, std::vector<bool>> probs = read_probs(probs_path, abundances_path, ref_names);
+  const std::unordered_map<long unsigned, std::vector<bool>> &probs = read_probs(probs_path, abundances_path, ref_names);
 
   std::cout << "Writing read to equivalence class" << std::endl;
-  write_reads(ec_to_id, reads_in_ec, probs, ref_names, std::string(outfile));  
+  write_reads(ec_to_id, reads_in_ec, probs, ref_names, outfile);  
 }
