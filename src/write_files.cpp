@@ -36,7 +36,7 @@ void write_reads(const std::unordered_map<long unsigned, std::vector<std::string
 }
 
 void write_ecs(const std::unordered_map<long unsigned, std::vector<std::string>> &reads_in_ec, const std::string &outfile) {
-  std::ofstream of(outfile);
+  std::ofstream of(outfile + "/" + "ec_to_read.csv");
   if (of.is_open()) {
     for (auto kv : reads_in_ec) {
       of << kv.first;
