@@ -17,11 +17,13 @@ bool CmdOptionPresent(char **begin, char **end, const std::string &option) {
 }
 
 int main(int argc, char* argv[]) {
+  double theta_frac = std::stod(std::string(GetOpt(argv, argv+argc, "-q")));
+  
   std::string probs_file = std::string(GetOpt(argv, argv+argc, "-p"));
   std::string abundances_file = std::string(GetOpt(argv, argv+argc, "-a"));
   std::vector<std::string> ref_names;
   std::cout << "Reading probs" << std::endl;
-  const std::unordered_map<long unsigned, std::vector<bool>> &probs = read_probs(probs_file, abundances_file, ref_names);
+  const std::unordered_map<long unsigned, std::vector<bool>> &probs = read_probs(probs_file, abundances_file, ref_names, theta_frac);
 
   std::unordered_map<long unsigned, std::vector<std::string>> reads_to_ec;
   std::cout << "Reading read assignments to equivalence classes" << std::endl;

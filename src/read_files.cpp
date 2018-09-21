@@ -80,7 +80,7 @@ std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(const std::stri
   return ec_to_id;
 }
 
-std::vector<double> read_abundances(const std::string &abundances_path, std::vector<std::string> &ref_names) {
+std::vector<double> read_abundances(const std::string &abundances_path, std::vector<std::string> &ref_names, const double &theta_frac) {
   std::ifstream abundances_file(abundances_path);
   std::vector<double> abundances;
 
@@ -95,7 +95,7 @@ std::vector<double> read_abundances(const std::string &abundances_path, std::vec
       std::stringstream partition(line);
       while (getline(partition, part, '\t')) {
 	if (abundance) {
-	  abundances.emplace_back(std::stod(part));
+	  abundances.emplace_back(std::stod(part)*theta_frac);
 	} else {
 	  ref_names.push_back(part);
 	  abundance = true;
@@ -106,8 +106,8 @@ std::vector<double> read_abundances(const std::string &abundances_path, std::vec
   return abundances;
 }
 
-std::unordered_map<long unsigned, std::vector<bool>> read_probs(const std::string &probs_path, const std::string &abundances_path, std::vector<std::string> &ref_names) {
-  std::vector<double> abundances = read_abundances(abundances_path, ref_names);
+std::unordered_map<long unsigned, std::vector<bool>> read_probs(const std::string &probs_path, const std::string &abundances_path, std::vector<std::string> &ref_names, const double &theta_frac) {
+  std::vector<double> abundances = read_abundances(abundances_path, ref_names, theta_frac);
   std::ifstream probs_file(probs_path);
 
   std::unordered_map<long unsigned, std::vector<bool>> ec_to_cluster;
