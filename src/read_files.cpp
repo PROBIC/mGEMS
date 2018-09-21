@@ -171,7 +171,9 @@ std::unordered_map<long unsigned, std::vector<std::string>> reads_in_ec(const st
   const std::unordered_map<std::vector<bool>, long unsigned> &ec_to_id = read_ec_ids(ec_file, reads_in_ec);
   std::unordered_map<long unsigned, std::vector<std::string>> reads_in_ec_num(reads_in_ec.size());
   for (auto kv : reads_in_ec) {
-    reads_in_ec_num.insert(make_pair(ec_to_id.at(kv.first), kv.second));
+    if (ec_to_id.find(kv.first) != ec_to_id.end()) {
+      reads_in_ec_num.insert(make_pair(ec_to_id.at(kv.first), kv.second));
+    }
   }
   return reads_in_ec_num;
 }
