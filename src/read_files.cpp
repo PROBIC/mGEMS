@@ -165,3 +165,13 @@ std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(const s
 
   return reads_in_ec;
 }
+
+std::unordered_map<long unsigned, std::vector<std::string>> reads_in_ec(const std::string &sam_file, const std::string &ec_file) {
+  const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec = read_sam(sam_file);
+  const std::unordered_map<std::vector<bool>, long unsigned> &ec_to_id = read_ec_ids(ec_file, reads_in_ec);
+  std::unordered_map<long unsigned, std::vector<std::string>> reads_in_ec_num(reads_in_ec.size());
+  for (auto kv : reads_in_ec) {
+    reads_in_ec_num.insert(make_pair(ec_to_id.at(kv.first), kv.second));
+  }
+  return reads_in_ec_num;
+}
