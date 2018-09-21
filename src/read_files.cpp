@@ -3,12 +3,10 @@
 #include <unordered_map>
 #include <vector>
 #include <algorithm>
-#include <iostream>
 #include <map>
 #include <set>
 
 #include <read_files.h>
-#include <write_files.h>
 
 void read_header(const std::string &header_line, std::unordered_map<std::string, long unsigned> &ref_to_id, long unsigned &ref_id) {
   if (header_line.at(1) == 'S') {
@@ -49,9 +47,9 @@ void read_alignment(const std::string &alignment_line, const std::unordered_map<
   }
 }
 
-std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(const std::string &ec_path, const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec, unsigned n_refs) {
+std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(const std::string &ec_path, const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec) {
   std::unordered_map<std::vector<bool>, long unsigned> ec_to_id;
-
+  unsigned n_refs = reads_in_ec.begin()->first.size();
   std::ifstream ec_file(ec_path);
   if (ec_file.is_open()) {
     std::string line;
@@ -109,14 +107,10 @@ std::vector<double> read_abundances(const std::string &abundances_path, std::vec
 }
 
 std::unordered_map<long unsigned, std::vector<bool>> read_probs(const std::string &probs_path, const std::string &abundances_path, std::vector<std::string> &ref_names) {
-  std::cout << "  Reading abundances" << std::endl;
   std::vector<double> abundances = read_abundances(abundances_path, ref_names);
-
-  std::cout << "  Reading probs" << std::endl;
   std::ifstream probs_file(probs_path);
 
   std::unordered_map<long unsigned, std::vector<bool>> ec_to_cluster;
-
   if (probs_file.is_open()) {
     std::string line;
     getline(probs_file, line); // 1st line is header
@@ -142,13 +136,12 @@ std::unordered_map<long unsigned, std::vector<bool>> read_probs(const std::strin
   return ec_to_cluster;
 }
 
-void read_sam(const std::string &sam_path, const std::string &ec_path, const std::string &outfile, const std::string &probs_path, const std::string &abundances_path) {
+std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(const std::string &sam_path) {
   std::ifstream sam_file(sam_path);
   std::unordered_map<std::string, long unsigned> ref_to_id;
   std::unordered_map<std::string, std::vector<bool>> read_to_ec;
   std::unordered_map<std::vector<bool>, std::vector<std::string>> reads_in_ec;
   if (sam_file.is_open()) {
-    std::cout << "Reading .sam file" << std::endl;
     std::string line;
     long unsigned ref_id = 0;
     while (getline(sam_file, line)) {
@@ -162,7 +155,6 @@ void read_sam(const std::string &sam_path, const std::string &ec_path, const std
   }
 
   // Assign reads to equivalence classes.
-  std::cout << "Assigning reads to equivalence classes" << std::endl;
   for (auto kv : read_to_ec) {
     if (reads_in_ec.find(kv.second) == reads_in_ec.end()) {
       std::vector<std::string> reads;
@@ -170,14 +162,6 @@ void read_sam(const std::string &sam_path, const std::string &ec_path, const std
     }
     reads_in_ec[kv.second].emplace_back(kv.first);
   }
-  std::cout << "Reading equivalence classes" << std::endl;
-  unsigned n_refs = ref_to_id.size();
-  const std::unordered_map<std::vector<bool>, long unsigned> &ec_to_id = read_ec_ids(ec_path, reads_in_ec, n_refs);
 
-  std::cout << "Reading probs" << std::endl;
-  std::vector<std::string> ref_names;
-  const std::unordered_map<long unsigned, std::vector<bool>> &probs = read_probs(probs_path, abundances_path, ref_names);
-
-  std::cout << "Writing read to equivalence class" << std::endl;
-  write_reads(ec_to_id, reads_in_ec, probs, ref_names, outfile);  
+  return reads_in_ec;
 }
