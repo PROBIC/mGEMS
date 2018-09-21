@@ -23,10 +23,16 @@ int main(int argc, char* argv[]) {
   std::cout << "Reading probs" << std::endl;
   const std::unordered_map<long unsigned, std::vector<bool>> &probs = read_probs(probs_file, abundances_file, ref_names);
 
+  std::unordered_map<long unsigned, std::vector<std::string>> reads_to_ec;
   std::cout << "Reading read assignments to equivalence classes" << std::endl;
-  std::string sam_file = std::string(GetOpt(argv, argv+argc, "-s"));
-  std::string ec_file = std::string(GetOpt(argv, argv+argc, "-e"));
-  const std::unordered_map<long unsigned, std::vector<std::string>> &reads_to_ec = reads_in_ec(sam_file, ec_file);
+  if (CmdOptionPresent(argv, argv+argc, "-f")) {
+    std::string assignments_file = std::string(GetOpt(argv, argv+argc, "-f"));
+    reads_to_ec = read_assignments(assignments_file);
+  } else {
+    std::string sam_file = std::string(GetOpt(argv, argv+argc, "-s"));
+    std::string ec_file = std::string(GetOpt(argv, argv+argc, "-e"));
+    reads_to_ec = reads_in_ec(sam_file, ec_file);
+  }
 
   std::string outfile = std::string(GetOpt(argv, argv+argc, "-o"));
   if (CmdOptionPresent(argv, argv+argc, "--write-ecs")) {

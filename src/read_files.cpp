@@ -175,3 +175,29 @@ std::unordered_map<long unsigned, std::vector<std::string>> reads_in_ec(const st
   }
   return reads_in_ec_num;
 }
+
+std::unordered_map<long unsigned, std::vector<std::string>> read_assignments(const std::string &assignments_path) {
+  std::ifstream assignments_file(assignments_path);
+  std::unordered_map<long unsigned, std::vector<std::string>> assignments;
+  if (assignments_file.is_open()) {
+    std::string line;
+    while(getline(assignments_file, line)) {
+      std::string part;
+      std::stringstream partition(line);
+      bool ec_id = true;
+      long unsigned current_ec;
+      while (getline(partition, part, ',')) {	
+	if (ec_id) {
+	  current_ec = std::stoi(part);
+	  std::vector<std::string> reads;
+	  assignments.insert(make_pair(current_ec, reads));
+	  ec_id = false;
+	} else {
+	  assignments.at(current_ec).push_back(part);
+	}
+      }
+    }
+    assignments_file.close();
+  }
+  return assignments;
+}
