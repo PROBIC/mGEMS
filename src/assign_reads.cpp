@@ -27,9 +27,14 @@ int main(int argc, char* argv[]) {
   std::string sam_file = std::string(GetOpt(argv, argv+argc, "-s"));
   std::string ec_file = std::string(GetOpt(argv, argv+argc, "-e"));
   const std::unordered_map<long unsigned, std::vector<std::string>> &reads_to_ec = reads_in_ec(sam_file, ec_file);
+
+  std::string outfile = std::string(GetOpt(argv, argv+argc, "-o"));
+  if (CmdOptionPresent(argv, argv+argc, "--write-ecs")) {
+    std::cout << "Writing read assignments to equivalence classes" << std::endl;
+    write_ecs(reads_to_ec, outfile);
+  }
   
   std::cout << "Assigning reads to reference groups" << std::endl;
-  std::string outfile = std::string(GetOpt(argv, argv+argc, "-o"));
   write_reads(reads_to_ec, probs, ref_names, outfile);
 
   return 0;

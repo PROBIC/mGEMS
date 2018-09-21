@@ -34,3 +34,17 @@ void write_reads(const std::unordered_map<long unsigned, std::vector<std::string
     ofs[i].close();
   }
 }
+
+void write_ecs(const std::unordered_map<long unsigned, std::vector<std::string>> &reads_in_ec, const std::string &outfile) {
+  std::ofstream of(outfile);
+  if (of.is_open()) {
+    for (auto kv : reads_in_ec) {
+      of << kv.first;
+      for (auto read : kv.second) {
+	of << ',' << read;
+      }
+      of << '\n';
+    }
+  }
+  of.close();
+}
