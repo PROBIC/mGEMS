@@ -7,12 +7,13 @@
 void write_reads(const std::unordered_map<long unsigned, std::vector<std::string>> &reads_in_ec,
 		 const std::unordered_map<long unsigned, std::vector<bool>> &probs,
 		 const std::vector<std::string> &refnames,
+		 const std::vector<short unsigned> &group_indices,
 		 const std::string &outfile) {
 
   std::cout << "n_refs: " << refnames.size() << std::endl;
   std::cout << "n_probs: " << probs.size() << std::endl;
   std::vector<std::ofstream> ofs(refnames.size());
-  for (size_t i = 0; i < refnames.size(); ++i) {
+  for (auto i : group_indices) {
     ofs[i].open(outfile + "/" + refnames[i] + "_reads.txt");
   }
 
@@ -20,7 +21,7 @@ void write_reads(const std::unordered_map<long unsigned, std::vector<std::string
   for (auto kv : reads_in_ec) {
     bool any_probs = (probs.find(kv.first) != probs.end());
     if (any_probs) {
-      for (size_t i = 0; i < refnames.size(); ++i) {
+      for (auto i : group_indices) {
 	if (probs.at(kv.first)[i]) {
 	  for (auto read : kv.second) {
 	    ofs[i] << read << '\n';
@@ -30,7 +31,7 @@ void write_reads(const std::unordered_map<long unsigned, std::vector<std::string
     }
   }
 
-  for (size_t i = 0; i < refnames.size(); ++i) {
+  for (auto i : group_indices) {
     ofs[i].close();
   }
 }

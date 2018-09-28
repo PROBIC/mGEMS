@@ -203,3 +203,26 @@ std::unordered_map<long unsigned, std::vector<std::string>> read_assignments(con
   }
   return assignments;
 }
+
+std::vector<short unsigned> read_groups(const std::string &groups_path, const std::vector<std::string> &ref_names) {
+  std::ifstream groups_file(groups_path);
+  std::set<std::string> groups;
+  if (groups_file.is_open()) {
+    std::string line;
+    while(getline(groups_file, line)) {
+      std::string part;
+      std::stringstream partition(line);
+      while (getline(partition, part, '\t')) {
+	groups.insert(part);
+      }
+    }
+    groups_file.close();
+  }
+  std::vector<short unsigned> group_indices;
+  for (size_t i = 0; i < ref_names.size(); ++i) {
+    if (groups.find(ref_names.at(i)) != groups.end()) {
+      group_indices.push_back(i);
+    }
+  }
+  return group_indices;
+}
