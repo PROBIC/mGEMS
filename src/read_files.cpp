@@ -8,6 +8,10 @@
 
 #include <read_files.h>
 
+double _EPSILON = 1e-15;
+bool _PLACEHOLDER_MAX_ASSIGN = false;
+bool _PLACEHOLDER_FRAC_ASSIGN = false;
+
 void read_header(const std::string &header_line, std::unordered_map<std::string, long unsigned> &ref_to_id, long unsigned &ref_id) {
   if (header_line.at(1) == 'S') {
     std::stringstream parts(header_line);
@@ -95,7 +99,7 @@ std::vector<double> read_abundances(const std::string &abundances_path, std::vec
       std::stringstream partition(line);
       while (getline(partition, part, '\t')) {
 	if (abundance) {
-	  abundances.emplace_back(std::stod(part)*theta_frac);
+	    abundances.emplace_back(std::stod(part));
 	} else {
 	  ref_names.push_back(part);
 	  abundance = true;
@@ -119,17 +123,31 @@ std::unordered_map<long unsigned, std::vector<bool>> read_probs(const std::strin
       std::stringstream partition(line);
       short unsigned ref_id = 0;
       long unsigned ec_id;
+
+      short unsigned max_id = 1;
+      double max_val = 0.0;
       while(getline(partition, part, ',')) {
 	if (ref_id == 0) {
 	  ec_id = std::stoi(part);
-	  std::vector<bool> refs(abundances.size());
+	  std::vector<bool> refs(abundances.size(), false);
 	  ec_to_cluster[ec_id] = refs;
 	  ++ref_id;
 	} else {
-	  double abundance = std::stod(part);
-	  ec_to_cluster[ec_id][ref_id - 1] = (abundance >= abundances[ref_id - 1]);
-	  ++ref_id;
+	    double abundance = std::stod(part);
+	    if (_PLACEHOLDER_MAX_ASSIGN) {
+		if (abundance > max_val) {
+		  max_val = abundance;
+		  max_id = ref_id;
+		}
+	    } else if (_PLACEHOLDER_FRAC_ASSIGN) {
+		abundance *= theta_frac;
+	    }
+	    ec_to_cluster[ec_id][ref_id - 1] = (abundance >= abundances[ref_id - 1] - _EPSILON) && (!_PLACEHOLDER_MAX_ASSIGN);
+	    ++ref_id;
 	}
+      }
+      if (_PLACEHOLDER_MAX_ASSIGN) {
+	  ec_to_cluster[ec_id][max_id - 1] = true;
       }
     }
   }
