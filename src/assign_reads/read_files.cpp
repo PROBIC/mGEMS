@@ -6,7 +6,7 @@
 #include <map>
 #include <set>
 
-#include <read_files.h>
+#include "assign_reads/read_files.h"
 
 double _EPSILON = 1e-15;
 bool _PLACEHOLDER_MAX_ASSIGN = false;

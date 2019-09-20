@@ -4,8 +4,8 @@
 #include <unordered_map>
 #include <iostream>
 
-#include "read_files.h"
-#include "write_files.h"
+#include "assign_reads/read_files.h"
+#include "assign_reads/write_files.h"
 
 char* GetOpt(char **begin, char **end, const std::string &option) {
   char **it = std::find(begin, end, option);

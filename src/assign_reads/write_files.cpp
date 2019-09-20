@@ -2,7 +2,7 @@
 #include <set>
 #include <iostream>
 
-#include "write_files.h"
+#include "assign_reads/write_files.h"
 
 void write_reads(const std::unordered_map<long unsigned, std::vector<std::string>> &reads_in_ec,
 		 const std::unordered_map<long unsigned, std::vector<bool>> &probs,
