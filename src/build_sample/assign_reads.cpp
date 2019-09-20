@@ -1,0 +1,132 @@
+#include <string>
+#include <map>
+#include <set>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+
+void read_assignments(const std::string &assignment_path, const unsigned short assignment_id, std::map<std::string, std::set<short unsigned>> &assignments) {
+  std::ifstream assignment_file(assignment_path);
+
+  if (assignment_file.is_open()) {
+    std::cout << "Reading assignment file" << std::endl;
+    std::string read_id; // input file should contain only read names ** as they appear in the fastq files **
+    while (getline(assignment_file, read_id)) {
+      read_id = "@" + read_id;
+      //      std::stringstream parts(line);
+      //      std::string part;
+      //      bool id = false;
+      // while (getline(parts, part, '.')) {
+      // 	if (id) {
+      // 	  long unsigned read_id = std::stoi(part)*4 - 4;
+      // 	  if (assignments.find(read_id) == assignments.end()) {
+      // 	    std::set<short unsigned> assign;
+      // 	    assignments.insert(std::pair<long unsigned, std::set<short unsigned>>(read_id, assign));
+      // 	  }
+      // 	  assignments.at(read_id).insert(assignment_id);
+      // 	  id = false;
+      // 	} else {
+      // 	  id = true;
+      // 	}
+      // }
+      if (assignments.find(read_id) == assignments.end()) {
+	std::set<short unsigned> assign;
+	assignments.insert(std::pair<std::string, std::set<short unsigned>>(read_id, assign));
+      }
+      assignments.at(read_id).insert(assignment_id);
+    }
+    assignment_file.close();
+  }
+}
+
+void assign_reads(const std::string &assignment_file, const std::string &outfile, const std::string &strand1, const std::string &strand2) {
+  unsigned short K = 1;
+  std::ifstream strand_1(strand1);
+  std::ifstream strand_2(strand2);
+
+  std::map<std::string, std::set<short unsigned>> assignments;
+  read_assignments(assignment_file, 0, assignments);
+  
+  std::ofstream outfiles[K][2];
+  for (size_t i = 0; i < K; ++i) {
+    outfiles[i][0].open(outfile + "_1.fastq");
+    outfiles[i][1].open(outfile + "_2.fastq");
+  }
+
+  std::string line;
+  long unsigned line_nr = 0;
+  while (getline(strand_1, line)) {
+    if ((line_nr % 4) == 0) {
+      std::stringstream parts(line);
+      std::string part;
+      bool read_name = true;
+      while (getline(parts, part, ' ') && read_name) {
+	read_name = false;
+	if (assignments.find(part) != assignments.end()) {
+	  std::string read_id = part;
+	  for (short unsigned val : assignments.at(read_id)) {
+	    outfiles[val][0] << line << '\n';	  
+	  }
+	  for (short unsigned j = 0; j < 3; ++j) {
+	    getline(strand_1, line);
+	    ++line_nr;
+	    for (short unsigned val : assignments.at(read_id)) {
+	      outfiles[val][0] << line << '\n';	  
+	    }
+	  }
+	}
+      }
+    }
+    ++line_nr;
+    // if (assignments.find(line_nr) != assignments.end()) {
+    //   long unsigned read_id = line_nr;
+    //   for (short unsigned val : assignments.at(read_id)) {
+    // 	outfiles[val][0] << line << '\n';	  
+    //   }
+    //   for (short unsigned j = 0; j < 3; ++j) {
+    // 	getline(strand_1, line);
+    // 	++line_nr;
+    // 	for (short unsigned val : assignments.at(read_id)) {
+    // 	  outfiles[val][0] << line << '\n';	  
+    // 	}
+    //   }
+    // }
+    //    ++line_nr;
+  }
+  for (size_t i = 0; i < K; ++i) {
+    outfiles[i][0].close();
+  }
+  strand_1.close();
+  
+  line_nr = 0;
+  while (getline(strand_2, line)) {
+    if ((line_nr % 4) == 0) {
+      std::stringstream parts(line);
+      std::string part;
+      bool read_name = true;
+      while (getline(parts, part, ' ') && read_name) {
+	read_name = false;
+	if (assignments.find(part) != assignments.end()) {
+	  std::string read_id = part;
+	  for (short unsigned val : assignments.at(read_id)) {
+	    outfiles[val][1] << line << '\n';	  
+	  }
+	  for (short unsigned j = 0; j < 3; ++j) {
+	    getline(strand_2, line);
+	    ++line_nr;
+	    for (short unsigned val : assignments.at(read_id)) {
+	      outfiles[val][1] << line << '\n';	  
+	    }
+	  }
+	}
+      }
+    }
+    ++line_nr;
+  }
+  for (size_t i = 0; i < K; ++i) {
+    outfiles[i][1].close();
+  }
+  strand_2.close();
+}
