@@ -38,5 +38,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 add_executable(assign_reads ${ASSIGN_READS_SOURCES})
 add_executable(build_sample ${BUILD_SAMPLE_SOURCES})
 
+# Link libraries
+target_link_libraries(assign_reads z)
+
 # Configure compiler flags, release enables -O2 optimization.
 set(CMAKE_BUILD_TYPE Release)

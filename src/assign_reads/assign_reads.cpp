@@ -28,10 +28,12 @@ int main(int argc, char* argv[]) {
     reads_to_ec = reads_in_ec(sam_file, ec_file);
   }
 
+  bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
+
   std::string outfile = std::string(GetOpt(argv, argv+argc, "-o"));
   if (CmdOptionPresent(argv, argv+argc, "--write-ecs")) {
     std::cout << "Writing read assignments to equivalence classes" << std::endl;
-    write_ecs(reads_to_ec, outfile);
+    write_ecs(reads_to_ec, outfile, gzip_output);
   } else {
     double theta_frac = 1.0;
     if (CmdOptionPresent(argv, argv+argc, "-q")) {
@@ -51,11 +53,11 @@ int main(int argc, char* argv[]) {
       for (size_t i = 0; i < ref_names.size(); ++i) {
 	group_indices[i] = i;
       }
-      write_reads(reads_to_ec, probs, ref_names, group_indices, outfile);
+      write_reads(reads_to_ec, probs, ref_names, group_indices, outfile, gzip_output);
     } else {
       std::string groups_file = std::string(GetOpt(argv, argv+argc, "--groups"));
       std::vector<short unsigned> group_indices = read_groups(groups_file, ref_names);
-      write_reads(reads_to_ec, probs, ref_names, group_indices, outfile);
+      write_reads(reads_to_ec, probs, ref_names, group_indices, outfile, gzip_output);
     }
   }
 

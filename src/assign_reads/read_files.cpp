@@ -7,6 +7,7 @@
 #include <set>
 
 #include "assign_reads/read_files.h"
+#include "zstr/zstr.hpp"
 
 double _EPSILON = 1e-15;
 bool _PLACEHOLDER_MAX_ASSIGN = false;
@@ -54,8 +55,8 @@ void read_alignment(const std::string &alignment_line, const std::unordered_map<
 std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(const std::string &ec_path, const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec) {
   std::unordered_map<std::vector<bool>, long unsigned> ec_to_id;
   unsigned n_refs = reads_in_ec.begin()->first.size();
-  std::ifstream ec_file(ec_path);
-  if (ec_file.is_open()) {
+  zstr::ifstream ec_file(ec_path);
+  if (ec_file.good()) {
     std::string line;
     while (getline(ec_file, line)) {
       std::string part;
@@ -155,11 +156,11 @@ std::unordered_map<long unsigned, std::vector<bool>> read_probs(const std::strin
 }
 
 std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(const std::string &sam_path) {
-  std::ifstream sam_file(sam_path);
+  zstr::ifstream sam_file(sam_path);
   std::unordered_map<std::string, long unsigned> ref_to_id;
   std::unordered_map<std::string, std::vector<bool>> read_to_ec;
   std::unordered_map<std::vector<bool>, std::vector<std::string>> reads_in_ec;
-  if (sam_file.is_open()) {
+  if (sam_file.good()) {
     std::string line;
     long unsigned ref_id = 0;
     while (getline(sam_file, line)) {
@@ -169,7 +170,6 @@ std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(const s
 	read_alignment(line, ref_to_id, read_to_ec);
       }
     }
-    sam_file.close();
   }
 
   // Assign reads to equivalence classes.
