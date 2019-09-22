@@ -6,6 +6,7 @@
 #include <sstream>
 #include <algorithm>
 #include <vector>
+#include <memory>
 
 #include "zstr/zstr.hpp"
 
@@ -42,7 +43,7 @@ void read_assignments(const std::string &assignment_path, const unsigned short a
   }
 }
 
-void assign_reads(const std::string &assignment_file, const std::string &outfile, const std::string &strand1, const std::string &strand2) {
+void assign_reads(const std::string &assignment_file, const std::string &outfile, const std::string &strand1, const std::string &strand2, const bool gzip_output) {
   unsigned short K = 1;
   zstr::ifstream strand_1(strand1);
   zstr::ifstream strand_2(strand2);
@@ -50,10 +51,15 @@ void assign_reads(const std::string &assignment_file, const std::string &outfile
   std::map<std::string, std::set<short unsigned>> assignments;
   read_assignments(assignment_file, 0, assignments);
   
-  std::ofstream outfiles[K][2];
+  std::unique_ptr<std::ostream> outfiles[K][2];
   for (size_t i = 0; i < K; ++i) {
-    outfiles[i][0].open(outfile + "_1.fastq");
-    outfiles[i][1].open(outfile + "_2.fastq");
+    if (gzip_output) {
+      outfiles[i][0] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_1.fastq.gz"));
+      outfiles[i][0] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_2.fastq.gz"));
+    } else {
+      outfiles[i][0] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_1.fastq"));
+      outfiles[i][0] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_2.fastq"));
+    }
   }
 
   std::string line;
@@ -68,13 +74,13 @@ void assign_reads(const std::string &assignment_file, const std::string &outfile
 	if (assignments.find(part) != assignments.end()) {
 	  std::string read_id = part;
 	  for (short unsigned val : assignments.at(read_id)) {
-	    outfiles[val][0] << line << '\n';	  
+	    *outfiles[val][0] << line << '\n';	  
 	  }
 	  for (short unsigned j = 0; j < 3; ++j) {
 	    getline(strand_1, line);
 	    ++line_nr;
 	    for (short unsigned val : assignments.at(read_id)) {
-	      outfiles[val][0] << line << '\n';	  
+	      *outfiles[val][0] << line << '\n';	  
 	    }
 	  }
 	}
@@ -97,7 +103,7 @@ void assign_reads(const std::string &assignment_file, const std::string &outfile
     //    ++line_nr;
   }
   for (size_t i = 0; i < K; ++i) {
-    outfiles[i][0].close();
+    outfiles[i][0]->flush();
   }
   
   line_nr = 0;
@@ -111,13 +117,13 @@ void assign_reads(const std::string &assignment_file, const std::string &outfile
 	if (assignments.find(part) != assignments.end()) {
 	  std::string read_id = part;
 	  for (short unsigned val : assignments.at(read_id)) {
-	    outfiles[val][1] << line << '\n';	  
+	    *outfiles[val][1] << line << '\n';	  
 	  }
 	  for (short unsigned j = 0; j < 3; ++j) {
 	    getline(strand_2, line);
 	    ++line_nr;
 	    for (short unsigned val : assignments.at(read_id)) {
-	      outfiles[val][1] << line << '\n';	  
+	      *outfiles[val][1] << line << '\n';	  
 	    }
 	  }
 	}
@@ -126,6 +132,6 @@ void assign_reads(const std::string &assignment_file, const std::string &outfile
     ++line_nr;
   }
   for (size_t i = 0; i < K; ++i) {
-    outfiles[i][1].close();
+    outfiles[i][1]->flush();
   }
 }

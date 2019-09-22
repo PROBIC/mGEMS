@@ -17,8 +17,9 @@ int main(int argc, char* argv[]) {
   std::string outfile = std::string(GetOpt(argv, argv+argc, "-o"));
   std::string strand1 = std::string(GetOpt(argv, argv+argc, "-1"));
   std::string strand2 = std::string(GetOpt(argv, argv+argc, "-2"));
+  bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
 
-  assign_reads(assignment_file, outfile, strand1, strand2);
+  assign_reads(assignment_file, outfile, strand1, strand2, gzip_output);
   
   return 0;
 }
