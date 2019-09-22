@@ -7,10 +7,12 @@
 #include <algorithm>
 #include <vector>
 
-void read_assignments(const std::string &assignment_path, const unsigned short assignment_id, std::map<std::string, std::set<short unsigned>> &assignments) {
-  std::ifstream assignment_file(assignment_path);
+#include "zstr/zstr.hpp"
 
-  if (assignment_file.is_open()) {
+void read_assignments(const std::string &assignment_path, const unsigned short assignment_id, std::map<std::string, std::set<short unsigned>> &assignments) {
+  zstr::ifstream assignment_file(assignment_path);
+
+  if (assignment_file.good()) {
     std::cout << "Reading assignment file" << std::endl;
     std::string read_id; // input file should contain only read names ** as they appear in the fastq files **
     while (getline(assignment_file, read_id)) {
@@ -37,14 +39,13 @@ void read_assignments(const std::string &assignment_path, const unsigned short a
       }
       assignments.at(read_id).insert(assignment_id);
     }
-    assignment_file.close();
   }
 }
 
 void assign_reads(const std::string &assignment_file, const std::string &outfile, const std::string &strand1, const std::string &strand2) {
   unsigned short K = 1;
-  std::ifstream strand_1(strand1);
-  std::ifstream strand_2(strand2);
+  zstr::ifstream strand_1(strand1);
+  zstr::ifstream strand_2(strand2);
 
   std::map<std::string, std::set<short unsigned>> assignments;
   read_assignments(assignment_file, 0, assignments);
@@ -98,7 +99,6 @@ void assign_reads(const std::string &assignment_file, const std::string &outfile
   for (size_t i = 0; i < K; ++i) {
     outfiles[i][0].close();
   }
-  strand_1.close();
   
   line_nr = 0;
   while (getline(strand_2, line)) {
@@ -128,5 +128,4 @@ void assign_reads(const std::string &assignment_file, const std::string &outfile
   for (size_t i = 0; i < K; ++i) {
     outfiles[i][1].close();
   }
-  strand_2.close();
 }

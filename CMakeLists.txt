@@ -40,6 +40,7 @@ add_executable(build_sample ${BUILD_SAMPLE_SOURCES})
 
 # Link libraries
 target_link_libraries(assign_reads z)
+target_link_libraries(build_sample z)
 
 # Configure compiler flags, release enables -O2 optimization.
 set(CMAKE_BUILD_TYPE Release)
