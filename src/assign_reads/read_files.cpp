@@ -110,10 +110,7 @@ std::vector<double> read_abundances(std::istream &abundances_file, std::vector<s
   return abundances;
 }
 
-std::unordered_map<long unsigned, std::vector<bool>> read_probs(const double &theta_frac, std::istream &probs_file, std::istream &abundances_file, std::vector<std::string> &ref_names) {
-  const std::vector<double> &abundances = read_abundances(abundances_file, ref_names);
-
-  std::unordered_map<long unsigned, std::vector<bool>> ec_to_cluster;
+void read_probs(const double &theta_frac, const std::vector<double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::vector<bool>> *ec_to_cluster) {
   if (probs_file.good()) {
     std::string line;
     getline(probs_file, line); // 1st line is header
@@ -129,7 +126,7 @@ std::unordered_map<long unsigned, std::vector<bool>> read_probs(const double &th
 	if (ref_id == 0) {
 	  ec_id = std::stoi(part);
 	  std::vector<bool> refs(abundances.size(), false);
-	  ec_to_cluster[ec_id] = refs;
+	  (*ec_to_cluster)[ec_id] = refs;
 	  ++ref_id;
 	} else {
 	    double abundance = std::stod(part);
@@ -141,16 +138,15 @@ std::unordered_map<long unsigned, std::vector<bool>> read_probs(const double &th
 	    } else if (_PLACEHOLDER_FRAC_ASSIGN) {
 		abundance *= theta_frac;
 	    }
-	    ec_to_cluster[ec_id][ref_id - 1] = (abundance >= abundances[ref_id - 1] - _EPSILON) && (!_PLACEHOLDER_MAX_ASSIGN);
+	    (*ec_to_cluster)[ec_id][ref_id - 1] = (abundance >= abundances.at(ref_id - 1) - _EPSILON) && (!_PLACEHOLDER_MAX_ASSIGN);
 	    ++ref_id;
 	}
       }
       if (_PLACEHOLDER_MAX_ASSIGN) {
-	  ec_to_cluster[ec_id][max_id - 1] = true;
+	(*ec_to_cluster)[ec_id][max_id - 1] = true;
       }
     }
   }
-  return ec_to_cluster;
 }
 
 std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(std::istream &sam_file) {

@@ -56,13 +56,21 @@ int main(int argc, char* argv[]) {
     if (CmdOptionPresent(argv, argv+argc, "-q")) {
       theta_frac = std::stod(std::string(GetOpt(argv, argv+argc, "-q")));
     }
-    std::string probs_path = std::string(GetOpt(argv, argv+argc, "-p"));
+    std::cout << "Reading abundances" << std::endl;
     std::string abundances_path = std::string(GetOpt(argv, argv+argc, "-a"));
-    zstr::ifstream probs_file(probs_path);
     zstr::ifstream abundances_file(abundances_path);
     std::vector<std::string> ref_names;
+    const std::vector<double> &abundances = read_abundances(abundances_file, ref_names);
+
     std::cout << "Reading probs" << std::endl;
-    const std::unordered_map<long unsigned, std::vector<bool>> &probs = read_probs(theta_frac, probs_file, abundances_file, ref_names);
+    std::string probs_path = std::string(GetOpt(argv, argv+argc, "-p"));
+    std::unordered_map<long unsigned, std::vector<bool>> probs;
+    if (read_from_cin) {
+      read_probs(theta_frac, abundances, std::cin, &probs);
+    } else {
+      zstr::ifstream probs_file(probs_path);
+      read_probs(theta_frac, abundances, probs_file, &probs);
+    }
 
     bool all_groups = !CmdOptionPresent(argv, argv+argc, "--groups");
 
