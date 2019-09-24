@@ -177,8 +177,9 @@ std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(std::is
   return reads_in_ec;
 }
 
-void reads_in_ec(std::istream &sam_file, std::istream &ec_file, std::unordered_map<long unsigned, std::vector<std::string>> *reads_in_ec_num) {
+void reads_in_ec(std::istream &sam_file, const std::string &ec_path, std::unordered_map<long unsigned, std::vector<std::string>> *reads_in_ec_num) {
   const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec = read_sam(sam_file);
+  zstr::ifstream ec_file(ec_path);
   const std::unordered_map<std::vector<bool>, long unsigned> &ec_to_id = read_ec_ids(ec_file, reads_in_ec);
   reads_in_ec_num->reserve(ec_to_id.bucket_count());
   for (auto kv : reads_in_ec) {

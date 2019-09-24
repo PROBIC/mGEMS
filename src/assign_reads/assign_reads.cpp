@@ -28,14 +28,13 @@ int main(int argc, char* argv[]) {
     read_assignments(assignments_file, &reads_to_ec);
     assignments_file.close();
   } else {
-    std::string sam_path = std::string(GetOpt(argv, argv+argc, "-s"));
     std::string ec_path = std::string(GetOpt(argv, argv+argc, "-e"));
-    zstr::ifstream ec_file(ec_path);
     if (read_from_cin) {
-      reads_in_ec(std::cin, ec_file, &reads_to_ec);
+      reads_in_ec(std::cin, ec_path, &reads_to_ec);
     } else {
+      std::string sam_path = std::string(GetOpt(argv, argv+argc, "-s"));
       zstr::ifstream sam_file(sam_path);
-      reads_in_ec(sam_file, ec_file, &reads_to_ec);
+      reads_in_ec(sam_file, ec_path, &reads_to_ec);
     }
   }
 
