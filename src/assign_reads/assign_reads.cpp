@@ -63,17 +63,18 @@ int main(int argc, char* argv[]) {
     bool all_groups = !CmdOptionPresent(argv, argv+argc, "--groups");
 
     std::cout << "Assigning reads to reference groups" << std::endl;
+    std::vector<short unsigned> group_indices;
     if (all_groups) {
-      std::vector<short unsigned> group_indices(ref_names.size());
+      group_indices.resize(ref_names.size());
       for (size_t i = 0; i < ref_names.size(); ++i) {
 	group_indices[i] = i;
       }
-      write_reads(reads_to_ec, probs, ref_names, group_indices, outfile_name, gzip_output);
     } else {
-      std::string groups_file = std::string(GetOpt(argv, argv+argc, "--groups"));
-      std::vector<short unsigned> group_indices = read_groups(groups_file, ref_names);
-      write_reads(reads_to_ec, probs, ref_names, group_indices, outfile_name, gzip_output);
+      std::string groups_path = std::string(GetOpt(argv, argv+argc, "--groups"));
+      std::ifstream groups_file(groups_path);
+      read_groups(ref_names, groups_file, &group_indices);
     }
+    write_reads(reads_to_ec, probs, ref_names, group_indices, outfile_name, gzip_output);
   }
 
   return 0;
