@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include <memory>
 
 #include "assign_reads/read_files.h"
 #include "assign_reads/write_files.h"
@@ -33,17 +34,21 @@ int main(int argc, char* argv[]) {
     } else {
       zstr::ifstream sam_file(sam_path);
       reads_to_ec = reads_in_ec(sam_file, ec_file);
-      sam_file.close();
     }
-    ec_file.close();
   }
 
   bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
 
-  std::string outfile = std::string(GetOpt(argv, argv+argc, "-o"));
+  std::string outfile_name = std::string(GetOpt(argv, argv+argc, "-o"));
   if (CmdOptionPresent(argv, argv+argc, "--write-ecs")) {
     std::cout << "Writing read assignments to equivalence classes" << std::endl;
-    write_ecs(reads_to_ec, outfile, gzip_output);
+    std::unique_ptr<std::ostream> outfile;
+    if (gzip_output) {
+      outfile = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile_name + "/" + "ec_to_read.csv" + ".gz"));
+    } else {
+      outfile = std::unique_ptr<std::ostream>(new std::ofstream(outfile_name + "/" + "ec_to_read.csv"));
+    }
+    write_ecs(reads_to_ec, outfile);
   } else {
     double theta_frac = 1.0;
     if (CmdOptionPresent(argv, argv+argc, "-q")) {
@@ -63,11 +68,11 @@ int main(int argc, char* argv[]) {
       for (size_t i = 0; i < ref_names.size(); ++i) {
 	group_indices[i] = i;
       }
-      write_reads(reads_to_ec, probs, ref_names, group_indices, outfile, gzip_output);
+      write_reads(reads_to_ec, probs, ref_names, group_indices, outfile_name, gzip_output);
     } else {
       std::string groups_file = std::string(GetOpt(argv, argv+argc, "--groups"));
       std::vector<short unsigned> group_indices = read_groups(groups_file, ref_names);
-      write_reads(reads_to_ec, probs, ref_names, group_indices, outfile, gzip_output);
+      write_reads(reads_to_ec, probs, ref_names, group_indices, outfile_name, gzip_output);
     }
   }
 

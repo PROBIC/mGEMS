@@ -44,14 +44,7 @@ void write_reads(const std::unordered_map<long unsigned, std::vector<std::string
   }
 }
 
-void write_ecs(const std::unordered_map<long unsigned, std::vector<std::string>> &reads_in_ec, const std::string &outfile, const bool gzip_output) {
-  std::unique_ptr<std::ostream> of;
-  std::string outfile_name = outfile + "/" + "ec_to_read.csv";
-  if (gzip_output) {
-    of = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile_name + ".gz"));
-  } else {
-    of = std::unique_ptr<std::ostream>(new std::ofstream(outfile_name));
-  }
+void write_ecs(const std::unordered_map<long unsigned, std::vector<std::string>> &reads_in_ec, std::unique_ptr<std::ostream> &of) {
   if (of->good()) {
     for (auto kv : reads_in_ec) {
       *of << kv.first;
