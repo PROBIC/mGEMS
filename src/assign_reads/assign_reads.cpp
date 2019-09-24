@@ -74,7 +74,19 @@ int main(int argc, char* argv[]) {
       std::ifstream groups_file(groups_path);
       read_groups(ref_names, groups_file, &group_indices);
     }
-    write_reads(reads_to_ec, probs, ref_names, group_indices, outfile_name, gzip_output);
+    std::vector<std::unique_ptr<std::ostream>> outfiles(ref_names.size());
+    for (auto i : group_indices) {
+      std::string fname = outfile_name + "/" + ref_names[i] + "_reads.txt";
+      if (gzip_output) {
+	outfiles[i] = std::unique_ptr<std::ostream>(new zstr::ofstream(fname + ".gz"));
+      } else {
+	outfiles[i] = std::unique_ptr<std::ostream>(new std::ofstream(fname));
+      }
+    }
+    std::cout << "n_refs: " << ref_names.size() << std::endl;
+    std::cout << "n_probs: " << probs.size() << std::endl;
+    std::cout << "writing reads..." << std::endl;
+    write_reads(reads_to_ec, probs, group_indices, outfiles);
   }
 
   return 0;
