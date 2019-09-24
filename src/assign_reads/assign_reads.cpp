@@ -32,10 +32,10 @@ int main(int argc, char* argv[]) {
     std::string ec_path = std::string(GetOpt(argv, argv+argc, "-e"));
     zstr::ifstream ec_file(ec_path);
     if (read_from_cin) {
-      reads_to_ec = reads_in_ec(std::cin, ec_file);
+      reads_in_ec(std::cin, ec_file, &reads_to_ec);
     } else {
       zstr::ifstream sam_file(sam_path);
-      reads_to_ec = reads_in_ec(sam_file, ec_file);
+      reads_in_ec(sam_file, ec_file, &reads_to_ec);
     }
   }
 
