@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <map>
 #include <set>
+#include <iostream>
 
 #include "assign_reads/read_files.h"
 #include "zstr/zstr.hpp"
@@ -52,10 +53,9 @@ void read_alignment(const std::string &alignment_line, const std::unordered_map<
   }
 }
 
-std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(const std::string &ec_path, const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec) {
+std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(std::istream &ec_file, const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec) {
   std::unordered_map<std::vector<bool>, long unsigned> ec_to_id;
   unsigned n_refs = reads_in_ec.begin()->first.size();
-  zstr::ifstream ec_file(ec_path);
   if (ec_file.good()) {
     std::string line;
     while (getline(ec_file, line)) {
@@ -155,8 +155,7 @@ std::unordered_map<long unsigned, std::vector<bool>> read_probs(const std::strin
   return ec_to_cluster;
 }
 
-std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(const std::string &sam_path) {
-  zstr::ifstream sam_file(sam_path);
+std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(std::istream &sam_file) {
   std::unordered_map<std::string, long unsigned> ref_to_id;
   std::unordered_map<std::string, std::vector<bool>> read_to_ec;
   std::unordered_map<std::vector<bool>, std::vector<std::string>> reads_in_ec;
@@ -184,7 +183,7 @@ std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(const s
   return reads_in_ec;
 }
 
-std::unordered_map<long unsigned, std::vector<std::string>> reads_in_ec(const std::string &sam_file, const std::string &ec_file) {
+std::unordered_map<long unsigned, std::vector<std::string>> reads_in_ec(std::istream &sam_file, std::istream &ec_file) {
   const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec = read_sam(sam_file);
   const std::unordered_map<std::vector<bool>, long unsigned> &ec_to_id = read_ec_ids(ec_file, reads_in_ec);
   std::unordered_map<long unsigned, std::vector<std::string>> reads_in_ec_num(reads_in_ec.size());

@@ -6,6 +6,7 @@
 
 #include "assign_reads/read_files.h"
 #include "assign_reads/write_files.h"
+#include "zstr/zstr.hpp"
 
 char* GetOpt(char **begin, char **end, const std::string &option) {
   char **it = std::find(begin, end, option);
@@ -18,14 +19,21 @@ bool CmdOptionPresent(char **begin, char **end, const std::string &option) {
 
 int main(int argc, char* argv[]) {
   std::unordered_map<long unsigned, std::vector<std::string>> reads_to_ec;
+  bool read_from_cin = CmdOptionPresent(argv, argv+argc, "--cin");
   std::cout << "Reading read assignments to equivalence classes" << std::endl;
   if (CmdOptionPresent(argv, argv+argc, "-f")) {
     std::string assignments_file = std::string(GetOpt(argv, argv+argc, "-f"));
     reads_to_ec = read_assignments(assignments_file);
   } else {
-    std::string sam_file = std::string(GetOpt(argv, argv+argc, "-s"));
-    std::string ec_file = std::string(GetOpt(argv, argv+argc, "-e"));
-    reads_to_ec = reads_in_ec(sam_file, ec_file);
+    std::string sam_path = std::string(GetOpt(argv, argv+argc, "-s"));
+    std::string ec_path = std::string(GetOpt(argv, argv+argc, "-e"));
+    zstr::ifstream ec_file(ec_path);
+    if (read_from_cin) {
+      reads_to_ec = reads_in_ec(std::cin, ec_file);
+    } else {
+      zstr::ifstream sam_file(sam_path);
+      reads_to_ec = reads_in_ec(sam_file, ec_file);
+    }
   }
 
   bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
