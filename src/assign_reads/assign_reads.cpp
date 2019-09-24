@@ -33,7 +33,9 @@ int main(int argc, char* argv[]) {
     } else {
       zstr::ifstream sam_file(sam_path);
       reads_to_ec = reads_in_ec(sam_file, ec_file);
+      sam_file.close();
     }
+    ec_file.close();
   }
 
   bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
