@@ -85,11 +85,10 @@ std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(std::istream &e
   return ec_to_id;
 }
 
-std::vector<double> read_abundances(const std::string &abundances_path, std::vector<std::string> &ref_names, const double &theta_frac) {
-  std::ifstream abundances_file(abundances_path);
+std::vector<double> read_abundances(std::istream &abundances_file, std::vector<std::string> &ref_names) {
   std::vector<double> abundances;
 
-  if (abundances_file.is_open()) {
+  if (abundances_file.good()) {
     std::string line;
     getline(abundances_file, line); // 2 first lines are header
     getline(abundances_file, line); // todo: identify header by first char == #
@@ -111,12 +110,11 @@ std::vector<double> read_abundances(const std::string &abundances_path, std::vec
   return abundances;
 }
 
-std::unordered_map<long unsigned, std::vector<bool>> read_probs(const std::string &probs_path, const std::string &abundances_path, std::vector<std::string> &ref_names, const double &theta_frac) {
-  std::vector<double> abundances = read_abundances(abundances_path, ref_names, theta_frac);
-  std::ifstream probs_file(probs_path);
+std::unordered_map<long unsigned, std::vector<bool>> read_probs(const double &theta_frac, std::istream &probs_file, std::istream &abundances_file, std::vector<std::string> &ref_names) {
+  const std::vector<double> &abundances = read_abundances(abundances_file, ref_names);
 
   std::unordered_map<long unsigned, std::vector<bool>> ec_to_cluster;
-  if (probs_file.is_open()) {
+  if (probs_file.good()) {
     std::string line;
     getline(probs_file, line); // 1st line is header
     while (getline(probs_file, line)) {
