@@ -195,10 +195,8 @@ std::unordered_map<long unsigned, std::vector<std::string>> reads_in_ec(std::ist
   return reads_in_ec_num;
 }
 
-std::unordered_map<long unsigned, std::vector<std::string>> read_assignments(const std::string &assignments_path) {
-  std::ifstream assignments_file(assignments_path);
-  std::unordered_map<long unsigned, std::vector<std::string>> assignments;
-  if (assignments_file.is_open()) {
+void read_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::vector<std::string>> *assignments) {
+  if (assignments_file.good()) {
     std::string line;
     while(getline(assignments_file, line)) {
       std::string part;
@@ -209,16 +207,14 @@ std::unordered_map<long unsigned, std::vector<std::string>> read_assignments(con
 	if (ec_id) {
 	  current_ec = std::stoi(part);
 	  std::vector<std::string> reads;
-	  assignments.insert(make_pair(current_ec, reads));
+	  assignments->insert(make_pair(current_ec, reads));
 	  ec_id = false;
 	} else {
-	  assignments.at(current_ec).push_back(part);
+	  assignments->at(current_ec).push_back(part);
 	}
       }
     }
-    assignments_file.close();
   }
-  return assignments;
 }
 
 void read_groups(const std::vector<std::string> &ref_names, std::istream &groups_file, std::vector<short unsigned> *group_indices) {

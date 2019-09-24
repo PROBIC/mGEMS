@@ -23,8 +23,10 @@ int main(int argc, char* argv[]) {
   bool read_from_cin = CmdOptionPresent(argv, argv+argc, "--cin");
   std::cout << "Reading read assignments to equivalence classes" << std::endl;
   if (CmdOptionPresent(argv, argv+argc, "-f")) {
-    std::string assignments_file = std::string(GetOpt(argv, argv+argc, "-f"));
-    reads_to_ec = read_assignments(assignments_file);
+    std::string assignments_path = std::string(GetOpt(argv, argv+argc, "-f"));
+    std::ifstream assignments_file(assignments_path);
+    read_assignments(assignments_file, &reads_to_ec);
+    assignments_file.close();
   } else {
     std::string sam_path = std::string(GetOpt(argv, argv+argc, "-s"));
     std::string ec_path = std::string(GetOpt(argv, argv+argc, "-e"));
