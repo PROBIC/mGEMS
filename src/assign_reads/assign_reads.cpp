@@ -24,9 +24,8 @@ int main(int argc, char* argv[]) {
   std::cout << "Reading read assignments to equivalence classes" << std::endl;
   if (CmdOptionPresent(argv, argv+argc, "-f")) {
     std::string assignments_path = std::string(GetOpt(argv, argv+argc, "-f"));
-    std::ifstream assignments_file(assignments_path);
+    zstr::ifstream assignments_file(assignments_path);
     read_assignments(assignments_file, &reads_to_ec);
-    assignments_file.close();
   } else {
     std::string ec_path = std::string(GetOpt(argv, argv+argc, "-e"));
     if (read_from_cin) {
@@ -62,11 +61,11 @@ int main(int argc, char* argv[]) {
     const std::vector<double> &abundances = read_abundances(abundances_file, ref_names);
 
     std::cout << "Reading probs" << std::endl;
-    std::string probs_path = std::string(GetOpt(argv, argv+argc, "-p"));
     std::unordered_map<long unsigned, std::vector<bool>> probs;
     if (read_from_cin) {
       read_probs(theta_frac, abundances, std::cin, &probs);
     } else {
+      std::string probs_path = std::string(GetOpt(argv, argv+argc, "-p"));
       zstr::ifstream probs_file(probs_path);
       read_probs(theta_frac, abundances, probs_file, &probs);
     }
@@ -78,7 +77,7 @@ int main(int argc, char* argv[]) {
     if (all_groups) {
       group_indices.resize(ref_names.size());
       for (size_t i = 0; i < ref_names.size(); ++i) {
-	group_indices[i] = i;
+    	group_indices[i] = i;
       }
     } else {
       std::string groups_path = std::string(GetOpt(argv, argv+argc, "--groups"));
@@ -91,7 +90,7 @@ int main(int argc, char* argv[]) {
       if (gzip_output) {
 	outfiles[i] = std::unique_ptr<std::ostream>(new zstr::ofstream(fname + ".gz"));
       } else {
-	outfiles[i] = std::unique_ptr<std::ostream>(new std::ofstream(fname));
+    	outfiles[i] = std::unique_ptr<std::ostream>(new std::ofstream(fname));
       }
     }
     std::cout << "n_refs: " << ref_names.size() << std::endl;
