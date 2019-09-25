@@ -55,10 +55,10 @@ void assign_reads(const std::string &assignment_file, const std::string &outfile
   for (size_t i = 0; i < K; ++i) {
     if (gzip_output) {
       outfiles[i][0] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_1.fastq.gz"));
-      outfiles[i][0] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_2.fastq.gz"));
+      outfiles[i][1] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_2.fastq.gz"));
     } else {
       outfiles[i][0] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_1.fastq"));
-      outfiles[i][0] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_2.fastq"));
+      outfiles[i][1] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_2.fastq"));
     }
   }
 
@@ -70,20 +70,20 @@ void assign_reads(const std::string &assignment_file, const std::string &outfile
       std::string part;
       bool read_name = true;
       while (getline(parts, part, ' ') && read_name) {
-	read_name = false;
-	if (assignments.find(part) != assignments.end()) {
-	  std::string read_id = part;
-	  for (short unsigned val : assignments.at(read_id)) {
-	    *outfiles[val][0] << line << '\n';	  
-	  }
-	  for (short unsigned j = 0; j < 3; ++j) {
-	    getline(strand_1, line);
-	    ++line_nr;
-	    for (short unsigned val : assignments.at(read_id)) {
-	      *outfiles[val][0] << line << '\n';	  
-	    }
-	  }
-	}
+  	read_name = false;
+  	if (assignments.find(part) != assignments.end()) {
+  	  std::string read_id = part;
+  	  for (short unsigned val : assignments.at(read_id)) {
+  	    *outfiles[val][0] << line << '\n';	  
+  	  }
+  	  for (short unsigned j = 0; j < 3; ++j) {
+  	    getline(strand_1, line);
+  	    ++line_nr;
+  	    for (short unsigned val : assignments.at(read_id)) {
+  	      *outfiles[val][0] << line << '\n';	  
+  	    }
+  	  }
+  	}
       }
     }
     ++line_nr;
@@ -113,20 +113,20 @@ void assign_reads(const std::string &assignment_file, const std::string &outfile
       std::string part;
       bool read_name = true;
       while (getline(parts, part, ' ') && read_name) {
-	read_name = false;
-	if (assignments.find(part) != assignments.end()) {
-	  std::string read_id = part;
-	  for (short unsigned val : assignments.at(read_id)) {
-	    *outfiles[val][1] << line << '\n';	  
-	  }
-	  for (short unsigned j = 0; j < 3; ++j) {
-	    getline(strand_2, line);
-	    ++line_nr;
-	    for (short unsigned val : assignments.at(read_id)) {
-	      *outfiles[val][1] << line << '\n';	  
-	    }
-	  }
-	}
+  	read_name = false;
+  	if (assignments.find(part) != assignments.end()) {
+  	  std::string read_id = part;
+  	  for (short unsigned val : assignments.at(read_id)) {
+  	    *outfiles[val][1] << line << '\n';	  
+  	  }
+  	  for (short unsigned j = 0; j < 3; ++j) {
+  	    getline(strand_2, line);
+  	    ++line_nr;
+  	    for (short unsigned val : assignments.at(read_id)) {
+  	      *outfiles[val][1] << line << '\n';	  
+  	    }
+  	  }
+  	}
       }
     }
     ++line_nr;
