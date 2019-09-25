@@ -92,6 +92,7 @@ std::vector<double> read_abundances(std::istream &abundances_file, std::vector<s
     std::string line;
     getline(abundances_file, line); // 2 first lines are header
     getline(abundances_file, line); // todo: identify header by first char == #
+    getline(abundances_file, line);
 
     while (getline(abundances_file, line)) {
       bool abundance = false;
