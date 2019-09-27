@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "build_sample/assign_reads.h"
+#include "zstr/zstr.hpp"
 
 char* GetOpt(char **begin, char **end, const std::string &option) {
   char **it = std::find(begin, end, option);
@@ -19,7 +20,9 @@ int main(int argc, char* argv[]) {
   std::string strand2 = std::string(GetOpt(argv, argv+argc, "-2"));
   bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
 
-  assign_reads(assignment_file, outfile, strand1, strand2, gzip_output);
+  const std::map<std::string, std::set<short unsigned>> &assignments = read_assignments(assignment_file, 0);
+  
+  assign_reads(outfile, strand1, strand2, gzip_output, assignments);
   
   return 0;
 }

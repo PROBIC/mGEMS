@@ -10,7 +10,8 @@
 
 #include "zstr/zstr.hpp"
 
-void read_assignments(const std::string &assignment_path, const unsigned short assignment_id, std::map<std::string, std::set<short unsigned>> &assignments) {
+std::map<std::string, std::set<short unsigned>> read_assignments(const std::string &assignment_path, const unsigned short assignment_id) {
+  std::map<std::string, std::set<short unsigned>> assignments;
   zstr::ifstream assignment_file(assignment_path);
 
   if (assignment_file.good()) {
@@ -25,16 +26,14 @@ void read_assignments(const std::string &assignment_path, const unsigned short a
       assignments.at(read_id).insert(assignment_id);
     }
   }
+  return assignments;
 }
 
-void assign_reads(const std::string &assignment_file, const std::string &outfile, const std::string &strand1, const std::string &strand2, const bool gzip_output) {
+void assign_reads(const std::string &outfile, const std::string &strand1, const std::string &strand2, const bool gzip_output, const std::map<std::string, std::set<short unsigned>> &assignments) {
   unsigned short K = 1;
   zstr::ifstream strand_1(strand1);
   zstr::ifstream strand_2(strand2);
 
-  std::map<std::string, std::set<short unsigned>> assignments;
-  read_assignments(assignment_file, 0, assignments);
-  
   std::unique_ptr<std::ostream> outfiles[K][2];
   for (size_t i = 0; i < K; ++i) {
     if (gzip_output) {
