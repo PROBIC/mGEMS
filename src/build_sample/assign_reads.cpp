@@ -23,12 +23,12 @@ std::map<std::string, std::set<short unsigned>> read_assignments(std::istream &a
   return assignments;
 }
 
-void assign_reads(std::unique_ptr<std::ostream> outfiles[1][2], std::istream &strand_1, std::istream &strand_2, const bool gzip_output, const std::map<std::string, std::set<short unsigned>> &assignments) {
+void assign_reads(std::unique_ptr<std::ostream> outfiles[1][2], std::unique_ptr<std::istream> infiles[2], const bool gzip_output, const std::map<std::string, std::set<short unsigned>> &assignments) {
   unsigned short K = 1;
 
   std::string line;
   long unsigned line_nr = 0;
-  while (getline(strand_1, line)) {
+  while (getline((*infiles[0]), line)) {
     if ((line_nr % 4) == 0) {
       std::stringstream parts(line);
       std::string part;
@@ -41,7 +41,7 @@ void assign_reads(std::unique_ptr<std::ostream> outfiles[1][2], std::istream &st
   	    *outfiles[val][0] << line << '\n';	  
   	  }
   	  for (short unsigned j = 0; j < 3; ++j) {
-  	    getline(strand_1, line);
+  	    getline((*infiles[0]), line);
   	    ++line_nr;
   	    for (short unsigned val : assignments.at(read_id)) {
   	      *outfiles[val][0] << line << '\n';	  
@@ -57,7 +57,7 @@ void assign_reads(std::unique_ptr<std::ostream> outfiles[1][2], std::istream &st
   }
   
   line_nr = 0;
-  while (getline(strand_2, line)) {
+  while (getline((*infiles[1]), line)) {
     if ((line_nr % 4) == 0) {
       std::stringstream parts(line);
       std::string part;
@@ -70,7 +70,7 @@ void assign_reads(std::unique_ptr<std::ostream> outfiles[1][2], std::istream &st
   	    *outfiles[val][1] << line << '\n';	  
   	  }
   	  for (short unsigned j = 0; j < 3; ++j) {
-  	    getline(strand_2, line);
+  	    getline((*infiles[1]), line);
   	    ++line_nr;
   	    for (short unsigned val : assignments.at(read_id)) {
   	      *outfiles[val][1] << line << '\n';	  

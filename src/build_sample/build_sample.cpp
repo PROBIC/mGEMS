@@ -23,8 +23,9 @@ int main(int argc, char* argv[]) {
   zstr::ifstream assignment_file(assignment_path);
   const std::map<std::string, std::set<short unsigned>> &assignments = read_assignments(assignment_file, 0);
 
-  zstr::ifstream fastq_1(strand1);
-  zstr::ifstream fastq_2(strand2);
+  std::unique_ptr<std::istream> infiles[2];
+  infiles[0] = std::unique_ptr<std::istream>(new zstr::ifstream(strand1));
+  infiles[1] = std::unique_ptr<std::istream>(new zstr::ifstream(strand2));
   std::unique_ptr<std::ostream> outfiles[1][2];
   if (gzip_output) {
     outfiles[0][0] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_1.fastq.gz"));
@@ -34,7 +35,7 @@ int main(int argc, char* argv[]) {
     outfiles[0][1] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_2.fastq"));
   }
 
-  assign_reads(outfiles, fastq_1, fastq_2, gzip_output, assignments);
+  assign_reads(outfiles, infiles, gzip_output, assignments);
   
   return 0;
 }
