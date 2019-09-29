@@ -1,5 +1,5 @@
-#ifndef WRITE_FILES_H
-#define WRITE_FILES_H
+#ifndef ASSIGN_READS_WRITE_FILES_H
+#define ASSIGN_READS_WRITE_FILES_H
 
 #include <unordered_map>
 #include <vector>

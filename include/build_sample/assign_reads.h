@@ -1,5 +1,5 @@
-#ifndef ASSIGN_READS_H
-#define ASSIGN_READS_H
+#ifndef BUILD_SAMPLE_ASSIGN_READS_H
+#define BUILD_SAMPLE_ASSIGN_READS_H
 
 #include <map>
 #include <string>

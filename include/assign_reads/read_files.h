@@ -1,5 +1,5 @@
-#ifndef READ_FILES_H
-#define READ_FILES_H
+#ifndef ASSIGN_READS_READ_FILES_H
+#define ASSIGN_READS_READ_FILES_H
 
 #include <string>
 #include <unordered_map>
