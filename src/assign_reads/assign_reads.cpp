@@ -5,18 +5,10 @@
 #include <iostream>
 #include <memory>
 
+#include "arguments.h"
 #include "assign_reads/read_files.h"
 #include "assign_reads/write_files.h"
 #include "zstr/zstr.hpp"
-
-char* GetOpt(char **begin, char **end, const std::string &option) {
-  char **it = std::find(begin, end, option);
-  return ((it != end && ++it != end) ? *it : 0);
-}
-
-bool CmdOptionPresent(char **begin, char **end, const std::string &option) {
-  return (std::find(begin, end, option) != end);
-}
 
 int main(int argc, char* argv[]) {
   std::unordered_map<long unsigned, std::vector<std::string>> reads_to_ec;
