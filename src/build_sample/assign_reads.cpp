@@ -52,8 +52,8 @@ void process_strand(const std::map<std::string, std::set<short unsigned>> &assig
   }
     outstrand.flush();
 }
-  
-void assign_reads(std::unique_ptr<std::ostream> outfiles[1][2], std::unique_ptr<std::istream> infiles[2], const bool gzip_output, const std::map<std::string, std::set<short unsigned>> &assignments) {
-  process_strand(assignments, *infiles[0], *outfiles[0][0]);
-  process_strand(assignments, *infiles[1], *outfiles[0][1]);
+
+void assign_reads(const std::map<std::string, std::set<short unsigned>> &assignments, std::unique_ptr<std::ostream> outfiles[2], std::unique_ptr<std::istream> infiles[2]) {
+  process_strand(assignments, *infiles[0], *outfiles[0]);
+  process_strand(assignments, *infiles[1], *outfiles[1]);
 }

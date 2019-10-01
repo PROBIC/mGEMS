@@ -18,16 +18,16 @@ int main(int argc, char* argv[]) {
   std::unique_ptr<std::istream> infiles[2];
   infiles[0] = std::unique_ptr<std::istream>(new zstr::ifstream(strand1));
   infiles[1] = std::unique_ptr<std::istream>(new zstr::ifstream(strand2));
-  std::unique_ptr<std::ostream> outfiles[1][2];
+  std::unique_ptr<std::ostream> outfiles[2];
   if (gzip_output) {
-    outfiles[0][0] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_1.fastq.gz"));
-    outfiles[0][1] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_2.fastq.gz"));
+    outfiles[0] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_1.fastq.gz"));
+    outfiles[1] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_2.fastq.gz"));
   } else {
-    outfiles[0][0] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_1.fastq"));
-    outfiles[0][1] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_2.fastq"));
+    outfiles[0] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_1.fastq"));
+    outfiles[1] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_2.fastq"));
   }
 
-  assign_reads(outfiles, infiles, gzip_output, assignments);
+  assign_reads(assignments, outfiles, infiles);
   
   return 0;
 }
