@@ -10,7 +10,6 @@
 #include "assign_reads/read_files.h"
 #include "zstr/zstr.hpp"
 
-double _EPSILON = 1e-15;
 bool _PLACEHOLDER_MAX_ASSIGN = false;
 bool _PLACEHOLDER_FRAC_ASSIGN = false;
 
@@ -111,8 +110,11 @@ std::vector<double> read_abundances(std::istream &abundances_file, std::vector<s
   return abundances;
 }
 
-void read_probs(const double &theta_frac, const std::vector<double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::vector<bool>> *ec_to_cluster) {
+void read_probs(const double &theta_frac, const std::vector<double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::vector<bool>> *ec_to_cluster, uint64_t num_ecs) {
+  uint16_t num_refs = abundances.size();
+  long double epsilon = (long double)1.0 - ((long double)1.0/(long double)num_ecs)*(long double)num_refs;
   if (probs_file.good()) {
+    double _EPSILON = 1 - 0.9999;
     std::string line;
     getline(probs_file, line); // 1st line is header
     while (getline(probs_file, line)) {
@@ -126,7 +128,7 @@ void read_probs(const double &theta_frac, const std::vector<double> &abundances,
       while(getline(partition, part, ',')) {
 	if (ref_id == 0) {
 	  ec_id = std::stoi(part);
-	  std::vector<bool> refs(abundances.size(), false);
+	  std::vector<bool> refs(num_refs, false);
 	  (*ec_to_cluster)[ec_id] = refs;
 	  ++ref_id;
 	} else {
@@ -139,7 +141,7 @@ void read_probs(const double &theta_frac, const std::vector<double> &abundances,
 	    } else if (_PLACEHOLDER_FRAC_ASSIGN) {
 		abundance *= theta_frac;
 	    }
-	    (*ec_to_cluster)[ec_id][ref_id - 1] = (abundance >= abundances.at(ref_id - 1) - _EPSILON) && (!_PLACEHOLDER_MAX_ASSIGN);
+	    (*ec_to_cluster)[ec_id][ref_id - 1] = (abundance >= abundances.at(ref_id - 1)*epsilon) && (!_PLACEHOLDER_MAX_ASSIGN);
 	    ++ref_id;
 	}
       }
@@ -190,10 +192,11 @@ void reads_in_ec(std::istream &sam_file, const std::string &ec_path, std::unorde
   }
 }
 
-void read_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::vector<std::string>> *assignments) {
+void read_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::vector<std::string>> *assignments, uint64_t &num_ecs) {
   if (assignments_file.good()) {
     std::string line;
     while(getline(assignments_file, line)) {
+      ++num_ecs;
       std::string part;
       std::stringstream partition(line);
       bool ec_id = true;
