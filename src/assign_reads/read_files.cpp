@@ -82,25 +82,22 @@ std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(std::istream &e
   return ec_to_id;
 }
 
-std::vector<double> read_abundances(std::istream &abundances_file, std::vector<std::string> &ref_names) {
-  std::vector<double> abundances;
-
+std::vector<long double> read_abundances(std::istream &abundances_file, std::vector<std::string> &ref_names) {
+  std::vector<long double> abundances;
   if (abundances_file.good()) {
     std::string line;
-    getline(abundances_file, line); // 2 first lines are header
-    getline(abundances_file, line); // todo: identify header by first char == #
-    getline(abundances_file, line);
-
     while (getline(abundances_file, line)) {
-      bool abundance = false;
-      std::string part;
-      std::stringstream partition(line);
-      while (getline(partition, part, '\t')) {
-	if (abundance) {
-	    abundances.emplace_back(std::stod(part));
-	} else {
-	  ref_names.push_back(part);
-	  abundance = true;
+      if (line.at(0) != '#') { // skip header lines
+	bool abundance = false;
+	std::string part;
+	std::stringstream partition(line);
+	while (getline(partition, part, '\t')) {
+	  if (abundance) {
+	    abundances.emplace_back(std::stold(part));
+	  } else {
+	    ref_names.push_back(part);
+	    abundance = true;
+	  }
 	}
       }
     }
@@ -108,7 +105,7 @@ std::vector<double> read_abundances(std::istream &abundances_file, std::vector<s
   return abundances;
 }
 
-void read_probs(const std::vector<double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::vector<bool>> *ec_to_cluster) {
+void read_probs(const std::vector<long double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::vector<bool>> *ec_to_cluster) {
   uint16_t num_refs = abundances.size();
   if (probs_file.good()) {
     std::string line;

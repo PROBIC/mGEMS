@@ -11,7 +11,7 @@
 #include "assign_reads/write_files.h"
 #include "zstr/zstr.hpp"
 
-void multiply_abundances(std::vector<double> &abundances, long double log_thresh) {
+void multiply_abundances(std::vector<long double> &abundances, long double log_thresh) {
   for (size_t i = 0; i < abundances.size(); ++i) {
     abundances[i] = std::exp(std::log(abundances.at(i)) + log_thresh);
   }
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     std::string abundances_path = std::string(GetOpt(argv, argv+argc, "-a"));
     zstr::ifstream abundances_file(abundances_path);
     std::vector<std::string> ref_names;
-    std::vector<double> abundances = read_abundances(abundances_file, ref_names);
+    std::vector<long double> abundances = read_abundances(abundances_file, ref_names);
     double log_thresh = std::log1pl(-(long double)abundances.size()/(long double)num_ecs);
     if (CmdOptionPresent(argv, argv+argc, "-q")) {
       log_thresh += std::stold(std::string(GetOpt(argv, argv+argc, "-q")));
