@@ -108,9 +108,8 @@ std::vector<double> read_abundances(std::istream &abundances_file, std::vector<s
   return abundances;
 }
 
-void read_probs(const std::vector<double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::vector<bool>> *ec_to_cluster, uint64_t num_ecs) {
+void read_probs(const std::vector<double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::vector<bool>> *ec_to_cluster) {
   uint16_t num_refs = abundances.size();
-  long double epsilon = (long double)1.0 - ((long double)num_refs/(long double)num_ecs);
   if (probs_file.good()) {
     std::string line;
     getline(probs_file, line); // 1st line is header
@@ -130,7 +129,7 @@ void read_probs(const std::vector<double> &abundances, std::istream &probs_file,
 	  ++ref_id;
 	} else {
 	  long double abundance = std::stold(part);
-	  ec_to_cluster->at(ec_id)[ref_id - 1] = (abundance >= abundances.at(ref_id - 1)*epsilon);
+	  ec_to_cluster->at(ec_id)[ref_id - 1] = (abundance >= abundances.at(ref_id - 1));
 	  ++ref_id;
 	}
       }
