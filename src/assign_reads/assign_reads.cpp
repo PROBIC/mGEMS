@@ -19,13 +19,12 @@ void multiply_abundances(std::vector<long double> &abundances, long double log_t
 
 int main(int argc, char* argv[]) {
   std::unordered_map<long unsigned, std::vector<std::string>> reads_to_ec;
-  uint64_t num_ecs = 0;
   bool read_from_cin = CmdOptionPresent(argv, argv+argc, "--cin");
   std::cout << "Reading read assignments to equivalence classes" << std::endl;
   if (CmdOptionPresent(argv, argv+argc, "-f")) {
     std::string assignments_path = std::string(GetOpt(argv, argv+argc, "-f"));
     zstr::ifstream assignments_file(assignments_path);
-    read_assignments(assignments_file, &reads_to_ec, num_ecs);
+    read_assignments(assignments_file, &reads_to_ec);
   } else {
     std::string ec_path = std::string(GetOpt(argv, argv+argc, "-e"));
     if (read_from_cin) {
@@ -55,7 +54,7 @@ int main(int argc, char* argv[]) {
     zstr::ifstream abundances_file(abundances_path);
     std::vector<std::string> ref_names;
     std::vector<long double> abundances = read_abundances(abundances_file, ref_names);
-    double log_thresh = std::log1pl(-(long double)abundances.size()/(long double)num_ecs);
+    double log_thresh = std::log1pl(-(long double)abundances.size()/(long double)reads_to_ec.size());
     if (CmdOptionPresent(argv, argv+argc, "-q")) {
       log_thresh += std::stold(std::string(GetOpt(argv, argv+argc, "-q")));
     }

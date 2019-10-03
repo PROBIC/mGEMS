@@ -174,23 +174,22 @@ void reads_in_ec(std::istream &sam_file, const std::string &ec_path, std::unorde
   }
 }
 
-void read_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::vector<std::string>> *assignments, uint64_t &num_ecs) {
+void read_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::vector<std::string>> *assignments) {
   if (assignments_file.good()) {
     std::string line;
     while(getline(assignments_file, line)) {
-      ++num_ecs;
       std::string part;
       std::stringstream partition(line);
-      bool ec_id = true;
-      long unsigned current_ec;
+      bool at_ec_id = true;
+      uint64_t current_ec_id;
       while (getline(partition, part, ',')) {	
-	if (ec_id) {
-	  current_ec = std::stoi(part);
+	if (at_ec_id) {
+	  current_ec_id = std::stoul(part);
 	  std::vector<std::string> reads;
-	  assignments->insert(make_pair(current_ec, reads));
-	  ec_id = false;
+	  assignments->insert(std::make_pair(current_ec_id, reads));
+	  at_ec_id = false;
 	} else {
-	  assignments->at(current_ec).push_back(part);
+	  assignments->at(current_ec_id).push_back(part);
 	}
       }
     }
