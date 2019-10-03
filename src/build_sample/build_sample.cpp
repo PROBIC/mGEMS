@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
   bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
 
   zstr::ifstream assignment_file(assignment_path);
-  const std::map<std::string, std::set<short unsigned>> &assignments = read_assignments(assignment_file, 0);
+  const std::set<std::string> &assignments = read_assignments(assignment_file);
 
   std::unique_ptr<std::istream> infiles[2];
   infiles[0] = std::unique_ptr<std::istream>(new zstr::ifstream(strand1));

@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <vector>
 
-std::map<std::string, std::set<short unsigned>> read_assignments(std::istream &assignment_file, const unsigned short assignment_id) {
-  std::map<std::string, std::set<short unsigned>> assignments;
+std::set<std::string> read_assignments(std::istream &assignment_file) {
+  std::set<std::string> assignments;
 
   if (assignment_file.good()) {
     std::cout << "Reading assignment file" << std::endl;
@@ -14,16 +14,14 @@ std::map<std::string, std::set<short unsigned>> read_assignments(std::istream &a
     while (getline(assignment_file, read_id)) {
       read_id = "@" + read_id;
       if (assignments.find(read_id) == assignments.end()) {
-	std::set<short unsigned> assign;
-	assignments.insert(std::pair<std::string, std::set<short unsigned>>(read_id, assign));
+	assignments.insert(read_id);
       }
-      assignments.at(read_id).insert(assignment_id);
     }
   }
   return assignments;
 }
 
-void process_strand(const std::map<std::string, std::set<short unsigned>> &assignments, std::istream &instrand, std::ostream &outstrand) {
+void process_strand(const std::set<std::string> &assignments, std::istream &instrand, std::ostream &outstrand) {
   std::string line;
   long unsigned line_nr = 0;
   while (getline(instrand, line)) {
@@ -34,26 +32,21 @@ void process_strand(const std::map<std::string, std::set<short unsigned>> &assig
       while (getline(parts, part, ' ') && read_name) {
   	read_name = false;
   	if (assignments.find(part) != assignments.end()) {
-  	  std::string read_id = part;
-  	  for (short unsigned val : assignments.at(read_id)) {
-  	    outstrand << line << '\n';	  
-  	  }
-  	  for (short unsigned j = 0; j < 3; ++j) {
-  	    getline(instrand, line);
-  	    ++line_nr;
-  	    for (short unsigned val : assignments.at(read_id)) {
-  	      outstrand << line << '\n';	  
-  	    }
-  	  }
+	  outstrand << line << '\n';
+	  for (uint8_t j = 0; j < 3; ++j) {
+	    getline(instrand, line);
+	    ++line_nr;
+	    outstrand << line << '\n';
+	  }
   	}
       }
     }
-    ++line_nr;
+      ++line_nr;
   }
     outstrand.flush();
 }
 
-void assign_reads(const std::map<std::string, std::set<short unsigned>> &assignments, std::unique_ptr<std::ostream> outfiles[2], std::unique_ptr<std::istream> infiles[2]) {
+void assign_reads(const std::set<std::string> &assignments, std::unique_ptr<std::ostream> outfiles[2], std::unique_ptr<std::istream> infiles[2]) {
   process_strand(assignments, *infiles[0], *outfiles[0]);
   process_strand(assignments, *infiles[1], *outfiles[1]);
 }
