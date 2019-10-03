@@ -12,7 +12,7 @@
 
 int main(int argc, char* argv[]) {
   std::unordered_map<long unsigned, std::vector<std::string>> reads_to_ec;
-  uint64_t num_ecs;
+  uint64_t num_ecs = 0;
   bool read_from_cin = CmdOptionPresent(argv, argv+argc, "--cin");
   std::cout << "Reading read assignments to equivalence classes" << std::endl;
   if (CmdOptionPresent(argv, argv+argc, "-f")) {
@@ -56,11 +56,11 @@ int main(int argc, char* argv[]) {
     std::cout << "Reading probs" << std::endl;
     std::unordered_map<long unsigned, std::vector<bool>> probs;
     if (read_from_cin) {
-      read_probs(theta_frac, abundances, std::cin, &probs, num_ecs);
+      read_probs(abundances, std::cin, &probs, num_ecs);
     } else {
       std::string probs_path = std::string(GetOpt(argv, argv+argc, "-p"));
       zstr::ifstream probs_file(probs_path);
-      read_probs(theta_frac, abundances, probs_file, &probs, num_ecs);
+      read_probs(abundances, probs_file, &probs, num_ecs);
     }
 
     bool all_groups = !CmdOptionPresent(argv, argv+argc, "--groups");

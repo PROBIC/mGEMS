@@ -6,12 +6,10 @@
 #include <map>
 #include <set>
 #include <iostream>
+#include <utility>
 
 #include "assign_reads/read_files.h"
 #include "zstr/zstr.hpp"
-
-bool _PLACEHOLDER_MAX_ASSIGN = false;
-bool _PLACEHOLDER_FRAC_ASSIGN = false;
 
 void read_header(const std::string &header_line, std::unordered_map<std::string, long unsigned> &ref_to_id, long unsigned &ref_id) {
   if (header_line.at(1) == 'S') {
@@ -110,43 +108,31 @@ std::vector<double> read_abundances(std::istream &abundances_file, std::vector<s
   return abundances;
 }
 
-void read_probs(const double &theta_frac, const std::vector<double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::vector<bool>> *ec_to_cluster, uint64_t num_ecs) {
+void read_probs(const std::vector<double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::vector<bool>> *ec_to_cluster, uint64_t num_ecs) {
   uint16_t num_refs = abundances.size();
-  long double epsilon = (long double)1.0 - ((long double)1.0/(long double)num_ecs)*(long double)num_refs;
+  long double epsilon = (long double)1.0 - ((long double)num_refs/(long double)num_ecs);
   if (probs_file.good()) {
-    double _EPSILON = 1 - 0.9999;
     std::string line;
     getline(probs_file, line); // 1st line is header
+    uint64_t linenr = 0;
     while (getline(probs_file, line)) {
       std::string part;
       std::stringstream partition(line);
-      short unsigned ref_id = 0;
-      long unsigned ec_id;
+      uint16_t ref_id = 0;
+      uint64_t ec_id;
+      ++linenr;
 
-      short unsigned max_id = 1;
-      double max_val = 0.0;
       while(getline(partition, part, ',')) {
 	if (ref_id == 0) {
-	  ec_id = std::stoi(part);
+	  ec_id = std::stoul(part);
 	  std::vector<bool> refs(num_refs, false);
-	  (*ec_to_cluster)[ec_id] = refs;
+	  ec_to_cluster->insert(std::make_pair(ec_id, refs));
 	  ++ref_id;
 	} else {
-	    double abundance = std::stod(part);
-	    if (_PLACEHOLDER_MAX_ASSIGN) {
-		if (abundance > max_val) {
-		  max_val = abundance;
-		  max_id = ref_id;
-		}
-	    } else if (_PLACEHOLDER_FRAC_ASSIGN) {
-		abundance *= theta_frac;
-	    }
-	    (*ec_to_cluster)[ec_id][ref_id - 1] = (abundance >= abundances.at(ref_id - 1)*epsilon) && (!_PLACEHOLDER_MAX_ASSIGN);
-	    ++ref_id;
+	  long double abundance = std::stold(part);
+	  ec_to_cluster->at(ec_id)[ref_id - 1] = (abundance >= abundances.at(ref_id - 1)*epsilon);
+	  ++ref_id;
 	}
-      }
-      if (_PLACEHOLDER_MAX_ASSIGN) {
-	(*ec_to_cluster)[ec_id][max_id - 1] = true;
       }
     }
   }
