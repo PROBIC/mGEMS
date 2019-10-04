@@ -9,31 +9,6 @@
 #include <utility>
 
 #include "assign_reads/read_files.h"
-#include "zstr/zstr.hpp"
-
-std::vector<std::pair<std::string, long double>> read_abundances(std::istream &abundances_file) {
-  std::vector<std::pair<std::string, long double>> abundances;
-  if (abundances_file.good()) {
-    std::string line;
-    while (getline(abundances_file, line)) {
-      if (line.at(0) != '#') { // skip header lines
-	abundances.emplace_back(std::pair<std::string, long double>());
-	bool at_abundance = false;
-	std::string part;
-	std::stringstream partition(line);
-	while (getline(partition, part, '\t')) {
-	  if (at_abundance) {
-	    abundances.back().second = std::stold(part);
-	  } else {
-	    abundances.back().first = part;
-	    at_abundance = true;
-	  }
-	}
-      }
-    }
-  }
-  return abundances;
-}
 
 void read_probs(const std::vector<std::pair<std::string, long double>> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *ec_to_cluster) {
   uint16_t num_refs = abundances.size();
