@@ -32,15 +32,18 @@ configure_file(include/version.h.in ${CMAKE_SOURCE_DIR}/include/version.h @ONLY)
 include_directories(include)
 file(GLOB ASSIGN_READS_SOURCES "src/assign_reads/*.cpp")
 file(GLOB BUILD_SAMPLE_SOURCES "src/build_sample/*.cpp")
+file(GLOB READ_ALIGNMENT_SOURCES "src/read_alignment/*.cpp")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_executable(assign_reads ${ASSIGN_READS_SOURCES})
 add_executable(build_sample ${BUILD_SAMPLE_SOURCES})
+add_executable(read_alignment ${READ_ALIGNMENT_SOURCES})
 
 # Link libraries
 target_link_libraries(assign_reads z)
 target_link_libraries(build_sample z)
+target_link_libraries(read_alignment z)
 
 # Configure compiler flags, release enables -O2 optimization.
 set(CMAKE_BUILD_TYPE Release)
