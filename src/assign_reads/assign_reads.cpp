@@ -18,7 +18,7 @@ void multiply_abundances(std::vector<long double> &abundances, long double log_t
 }
 
 int main(int argc, char* argv[]) {
-  std::unordered_map<long unsigned, std::vector<std::string>> reads_to_ec;
+  std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> reads_to_ec;
   bool read_from_cin = CmdOptionPresent(argv, argv+argc, "--cin");
   std::cout << "Reading read assignments to equivalence classes" << std::endl;
   if (CmdOptionPresent(argv, argv+argc, "-f")) {
@@ -43,13 +43,12 @@ int main(int argc, char* argv[]) {
   multiply_abundances(abundances, log_thresh);
     
   std::cout << "Reading probs" << std::endl;
-  std::unordered_map<long unsigned, std::vector<bool>> probs;
   if (read_from_cin) {
-    read_probs(abundances, std::cin, &probs);
+    read_probs(abundances, std::cin, &reads_to_ec);
   } else {
     std::string probs_path = std::string(GetOpt(argv, argv+argc, "-p"));
     zstr::ifstream probs_file(probs_path);
-    read_probs(abundances, probs_file, &probs);
+    read_probs(abundances, probs_file, &reads_to_ec);
   }
 
   bool all_groups = !CmdOptionPresent(argv, argv+argc, "--groups");
@@ -76,9 +75,9 @@ int main(int argc, char* argv[]) {
     }
   }
   std::cout << "n_refs: " << ref_names.size() << std::endl;
-  std::cout << "n_probs: " << probs.size() << std::endl;
+  std::cout << "n_probs: " << reads_to_ec.size() << std::endl;
   std::cout << "writing reads..." << std::endl;
-  write_reads(reads_to_ec, probs, group_indices, outfiles);
+  write_reads(reads_to_ec, group_indices, outfiles);
 
   return 0;
 }

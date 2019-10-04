@@ -34,7 +34,7 @@ std::vector<long double> read_abundances(std::istream &abundances_file, std::vec
   return abundances;
 }
 
-void read_probs(const std::vector<long double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::vector<bool>> *ec_to_cluster) {
+void read_probs(const std::vector<long double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *ec_to_cluster) {
   uint16_t num_refs = abundances.size();
   if (probs_file.good()) {
     std::string line;
@@ -51,11 +51,12 @@ void read_probs(const std::vector<long double> &abundances, std::istream &probs_
 	if (ref_id == 0) {
 	  ec_id = std::stoul(part);
 	  std::vector<bool> refs(num_refs, false);
-	  ec_to_cluster->insert(std::make_pair(ec_id, refs));
+	  ec_to_cluster->at(ec_id).second.resize(num_refs);
+	  std::fill(ec_to_cluster->at(ec_id).second.begin(), ec_to_cluster->at(ec_id).second.end(), false);
 	  ++ref_id;
 	} else {
 	  long double abundance = std::stold(part);
-	  ec_to_cluster->at(ec_id)[ref_id - 1] = (abundance >= abundances.at(ref_id - 1));
+	  ec_to_cluster->at(ec_id).second[ref_id - 1] = (abundance >= abundances.at(ref_id - 1));
 	  ++ref_id;
 	}
       }
@@ -63,7 +64,7 @@ void read_probs(const std::vector<long double> &abundances, std::istream &probs_
   }
 }
 
-void read_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::vector<std::string>> *assignments) {
+void read_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *assignments) {
   if (assignments_file.good()) {
     std::string line;
     while(getline(assignments_file, line)) {
@@ -75,10 +76,11 @@ void read_assignments(std::istream &assignments_file, std::unordered_map<long un
 	if (at_ec_id) {
 	  current_ec_id = std::stoul(part);
 	  std::vector<std::string> reads;
-	  assignments->insert(std::make_pair(current_ec_id, reads));
+	  std::vector<bool> assign_to;
+	  assignments->insert(std::make_pair(current_ec_id, std::make_pair(reads, assign_to)));
 	  at_ec_id = false;
 	} else {
-	  assignments->at(current_ec_id).push_back(part);
+	  assignments->at(current_ec_id).first.push_back(part);
 	}
       }
     }
