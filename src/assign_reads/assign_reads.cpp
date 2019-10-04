@@ -23,11 +23,13 @@ int main(int argc, char* argv[]) {
   if (CmdOptionPresent(argv, argv+argc, "-f")) {
     std::unique_ptr<std::istream> assignments_file = OpenInstream(argv, argv+argc, "-f");
     read_assignments(*assignments_file, &reads_to_ec);
+    assignments_file.reset();
   }
 
   std::cout << "Reading abundances" << std::endl;
   std::unique_ptr<std::istream> abundances_file = OpenInstream(argv, argv+argc, "-a");
   std::vector<std::pair<std::string, long double>> abundances = read_abundances(*abundances_file);
+  abundances_file.reset();
   uint16_t n_refs = abundances.size();
   double log_thresh = std::log1pl(-(long double)n_refs/(long double)reads_to_ec.size());
   if (CmdOptionPresent(argv, argv+argc, "-q")) {
@@ -43,6 +45,7 @@ int main(int argc, char* argv[]) {
   } else {
     std::unique_ptr<std::istream> probs_file = OpenInstream(argv, argv+argc, "-p");
     read_probs(abundances, *probs_file, &reads_to_ec);
+    probs_file.reset();
   }
 
   bool all_groups = !CmdOptionPresent(argv, argv+argc, "--groups");
@@ -56,6 +59,7 @@ int main(int argc, char* argv[]) {
   } else {
     std::unique_ptr<std::istream> groups_file = OpenInstream(argv, argv+argc, "--groups");
     read_groups(abundances, *groups_file, &group_indices);
+    groups_file.reset();
   }
   
   bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
