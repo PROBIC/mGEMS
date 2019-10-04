@@ -11,15 +11,14 @@
 #include "assign_reads/write_files.h"
 #include "zstr/zstr.hpp"
 
-void multiply_abundances(std::vector<long double> &abundances, long double log_thresh) {
+void multiply_abundances(std::vector<std::pair<std::string, long double>> &abundances, long double log_thresh) {
   for (size_t i = 0; i < abundances.size(); ++i) {
-    abundances[i] = std::exp(std::log(abundances.at(i)) + log_thresh);
+    abundances.at(i).second = std::exp(std::log(abundances.at(i).second) + log_thresh);
   }
 }
 
 int main(int argc, char* argv[]) {
   std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> reads_to_ec;
-  bool read_from_cin = CmdOptionPresent(argv, argv+argc, "--cin");
   std::cout << "Reading read assignments to equivalence classes" << std::endl;
   if (CmdOptionPresent(argv, argv+argc, "-f")) {
     std::string assignments_path = std::string(GetOpt(argv, argv+argc, "-f"));
@@ -27,15 +26,12 @@ int main(int argc, char* argv[]) {
     read_assignments(assignments_file, &reads_to_ec);
   }
 
-  bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
-
-  std::string outfile_name = std::string(GetOpt(argv, argv+argc, "-o"));
   std::cout << "Reading abundances" << std::endl;
   std::string abundances_path = std::string(GetOpt(argv, argv+argc, "-a"));
   zstr::ifstream abundances_file(abundances_path);
-  std::vector<std::string> ref_names;
-  std::vector<long double> abundances = read_abundances(abundances_file, ref_names);
-  double log_thresh = std::log1pl(-(long double)abundances.size()/(long double)reads_to_ec.size());
+  std::vector<std::pair<std::string, long double>> abundances = read_abundances(abundances_file);
+  uint16_t n_refs = abundances.size();
+  double log_thresh = std::log1pl(-(long double)n_refs/(long double)reads_to_ec.size());
   if (CmdOptionPresent(argv, argv+argc, "-q")) {
     log_thresh += std::stold(std::string(GetOpt(argv, argv+argc, "-q")));
   }
@@ -43,6 +39,7 @@ int main(int argc, char* argv[]) {
   multiply_abundances(abundances, log_thresh);
     
   std::cout << "Reading probs" << std::endl;
+  bool read_from_cin = CmdOptionPresent(argv, argv+argc, "--cin");
   if (read_from_cin) {
     read_probs(abundances, std::cin, &reads_to_ec);
   } else {
@@ -52,30 +49,30 @@ int main(int argc, char* argv[]) {
   }
 
   bool all_groups = !CmdOptionPresent(argv, argv+argc, "--groups");
-
   std::cout << "Assigning reads to reference groups" << std::endl;
   std::vector<short unsigned> group_indices;
   if (all_groups) {
-    group_indices.resize(ref_names.size());
-    for (size_t i = 0; i < ref_names.size(); ++i) {
+    group_indices.resize(n_refs);
+    for (size_t i = 0; i < n_refs; ++i) {
       group_indices[i] = i;
     }
   } else {
     std::string groups_path = std::string(GetOpt(argv, argv+argc, "--groups"));
     std::ifstream groups_file(groups_path);
-    read_groups(ref_names, groups_file, &group_indices);
+    read_groups(abundances, groups_file, &group_indices);
   }
-  std::vector<std::unique_ptr<std::ostream>> outfiles(ref_names.size());
+  
+  bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
+  std::string outfile_name = std::string(GetOpt(argv, argv+argc, "-o"));
+  std::vector<std::unique_ptr<std::ostream>> outfiles(n_refs);
   for (auto i : group_indices) {
-    std::string fname = outfile_name + "/" + ref_names[i] + "_reads.txt";
+    std::string fname = outfile_name + "/" + abundances.at(i).first + "_reads.txt";
     if (gzip_output) {
       outfiles[i] = std::unique_ptr<std::ostream>(new zstr::ofstream(fname + ".gz"));
     } else {
       outfiles[i] = std::unique_ptr<std::ostream>(new std::ofstream(fname));
     }
   }
-  std::cout << "n_refs: " << ref_names.size() << std::endl;
-  std::cout << "n_probs: " << reads_to_ec.size() << std::endl;
   std::cout << "writing reads..." << std::endl;
   write_reads(reads_to_ec, group_indices, outfiles);
 

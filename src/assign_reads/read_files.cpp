@@ -11,21 +11,22 @@
 #include "assign_reads/read_files.h"
 #include "zstr/zstr.hpp"
 
-std::vector<long double> read_abundances(std::istream &abundances_file, std::vector<std::string> &ref_names) {
-  std::vector<long double> abundances;
+std::vector<std::pair<std::string, long double>> read_abundances(std::istream &abundances_file) {
+  std::vector<std::pair<std::string, long double>> abundances;
   if (abundances_file.good()) {
     std::string line;
     while (getline(abundances_file, line)) {
       if (line.at(0) != '#') { // skip header lines
-	bool abundance = false;
+	abundances.emplace_back(std::pair<std::string, long double>());
+	bool at_abundance = false;
 	std::string part;
 	std::stringstream partition(line);
 	while (getline(partition, part, '\t')) {
-	  if (abundance) {
-	    abundances.emplace_back(std::stold(part));
+	  if (at_abundance) {
+	    abundances.back().second = std::stold(part);
 	  } else {
-	    ref_names.push_back(part);
-	    abundance = true;
+	    abundances.back().first = part;
+	    at_abundance = true;
 	  }
 	}
       }
@@ -34,7 +35,7 @@ std::vector<long double> read_abundances(std::istream &abundances_file, std::vec
   return abundances;
 }
 
-void read_probs(const std::vector<long double> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *ec_to_cluster) {
+void read_probs(const std::vector<std::pair<std::string, long double>> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *ec_to_cluster) {
   uint16_t num_refs = abundances.size();
   if (probs_file.good()) {
     std::string line;
@@ -56,7 +57,7 @@ void read_probs(const std::vector<long double> &abundances, std::istream &probs_
 	  ++ref_id;
 	} else {
 	  long double abundance = std::stold(part);
-	  ec_to_cluster->at(ec_id).second[ref_id - 1] = (abundance >= abundances.at(ref_id - 1));
+	  ec_to_cluster->at(ec_id).second[ref_id - 1] = (abundance >= abundances.at(ref_id - 1).second);
 	  ++ref_id;
 	}
       }
@@ -87,7 +88,7 @@ void read_assignments(std::istream &assignments_file, std::unordered_map<long un
   }
 }
 
-void read_groups(const std::vector<std::string> &ref_names, std::istream &groups_file, std::vector<short unsigned> *group_indices) {
+void read_groups(const std::vector<std::pair<std::string, long double>> &ref_names, std::istream &groups_file, std::vector<short unsigned> *group_indices) {
   std::set<std::string> groups;
   if (groups_file.good()) {
     std::string line;
@@ -100,7 +101,7 @@ void read_groups(const std::vector<std::string> &ref_names, std::istream &groups
     }
   }
   for (size_t i = 0; i < ref_names.size(); ++i) {
-    if (groups.find(ref_names.at(i)) != groups.end()) {
+    if (groups.find(ref_names.at(i).first) != groups.end()) {
       group_indices->push_back(i);
     }
   }
