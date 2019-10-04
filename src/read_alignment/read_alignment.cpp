@@ -3,8 +3,8 @@
 
 #include "arguments.h"
 #include "zstr/zstr.hpp"
-#include "read_alignment/read_files.hpp"
-#include "read_alignment/write_files.hpp"
+#include "read_alignment/read_files.h"
+#include "read_alignment/write_files.h"
 
 int main(int argc, char* argv[]) {
   std::cout << "Reading alignment files" << std::endl;

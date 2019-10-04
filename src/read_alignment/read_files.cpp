@@ -1,4 +1,4 @@
-#include "read_alignment/read_files.hpp"
+#include "read_alignment/read_files.h"
 
 #include <sstream>
 
