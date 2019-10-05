@@ -10,8 +10,8 @@
 
 #include "assign_reads/read_files.h"
 
-void read_probs(const std::vector<std::pair<std::string, long double>> &abundances, std::istream &probs_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *ec_to_cluster) {
-  uint16_t num_refs = abundances.size();
+void read_probs(const std::vector<std::pair<std::string, long double>> &thresholds, std::istream &probs_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *ec_to_cluster) {
+  uint16_t num_refs = thresholds.size();
   if (probs_file.good()) {
     std::string line;
     getline(probs_file, line); // 1st line is header
@@ -32,7 +32,7 @@ void read_probs(const std::vector<std::pair<std::string, long double>> &abundanc
 	  ++ref_id;
 	} else {
 	  long double abundance = std::stold(part);
-	  ec_to_cluster->at(ec_id).second[ref_id - 1] = (abundance >= abundances.at(ref_id - 1).second);
+	  ec_to_cluster->at(ec_id).second[ref_id - 1] = (abundance >= thresholds.at(ref_id - 1).second);
 	  ++ref_id;
 	}
       }
