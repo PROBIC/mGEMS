@@ -10,7 +10,7 @@
 
 #include "assign_reads/read_files.h"
 
-void read_probs(const std::vector<std::pair<std::string, long double>> &thresholds, std::istream &probs_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *ec_to_cluster) {
+void assign_reads(const std::vector<std::pair<std::string, long double>> &thresholds, std::istream &probs_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *ec_to_cluster) {
   uint16_t num_refs = thresholds.size();
   if (probs_file.good()) {
     std::string line;
@@ -40,7 +40,7 @@ void read_probs(const std::vector<std::pair<std::string, long double>> &threshol
   }
 }
 
-void read_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *assignments) {
+void read_ec_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *assignments) {
   if (assignments_file.good()) {
     std::string line;
     while(getline(assignments_file, line)) {
@@ -63,7 +63,7 @@ void read_assignments(std::istream &assignments_file, std::unordered_map<long un
   }
 }
 
-void read_groups(const std::vector<std::pair<std::string, long double>> &ref_names, std::istream &groups_file, std::vector<short unsigned> *group_indices) {
+void read_groups_filter(const std::vector<std::pair<std::string, long double>> &ref_names, std::istream &groups_file, std::vector<short unsigned> *group_indices) {
   std::set<std::string> groups;
   if (groups_file.good()) {
     std::string line;

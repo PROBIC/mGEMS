@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Reading read assignments to equivalence classes" << std::endl;
   if (CmdOptionPresent(argv, argv+argc, "-f")) {
     std::unique_ptr<std::istream> assignments_file = OpenInstream(argv, argv+argc, "-f");
-    read_assignments(*assignments_file, &reads_to_ec);
+    read_ec_assignments(*assignments_file, &reads_to_ec);
   }
 
   std::cout << "Constructing assignment thresholds from abundances" << std::endl;
@@ -34,10 +34,10 @@ int main(int argc, char* argv[]) {
   std::cout << "Reading probs" << std::endl;
   bool read_from_cin = CmdOptionPresent(argv, argv+argc, "--cin");
   if (read_from_cin) {
-    read_probs(thresholds, std::cin, &reads_to_ec);
+    assign_reads(thresholds, std::cin, &reads_to_ec);
   } else {
     std::unique_ptr<std::istream> probs_file = OpenInstream(argv, argv+argc, "-p");
-    read_probs(thresholds, *probs_file, &reads_to_ec);
+    assign_reads(thresholds, *probs_file, &reads_to_ec);
   }
 
   bool all_groups = !CmdOptionPresent(argv, argv+argc, "--groups");
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     }
   } else {
     std::unique_ptr<std::istream> groups_file = OpenInstream(argv, argv+argc, "--groups");
-    read_groups(thresholds, *groups_file, &group_indices);
+    read_groups_filter(thresholds, *groups_file, &group_indices);
   }
   
   bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
