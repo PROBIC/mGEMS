@@ -10,7 +10,7 @@
 
 #include "assign_reads/read_files.h"
 
-void assign_reads(const std::vector<std::pair<std::string, long double>> &thresholds, std::istream &probs_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *ec_to_cluster) {
+void assign_reads(const std::vector<std::pair<std::string, long double>> &thresholds, std::istream &probs_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *reads_in_ec) {
   uint16_t num_refs = thresholds.size();
   if (probs_file.good()) {
     std::string line;
@@ -27,12 +27,12 @@ void assign_reads(const std::vector<std::pair<std::string, long double>> &thresh
 	if (ref_id == 0) {
 	  ec_id = std::stoul(part);
 	  std::vector<bool> refs(num_refs, false);
-	  ec_to_cluster->at(ec_id).second.resize(num_refs);
-	  std::fill(ec_to_cluster->at(ec_id).second.begin(), ec_to_cluster->at(ec_id).second.end(), false);
+	  reads_in_ec->at(ec_id).second.resize(num_refs);
+	  std::fill(reads_in_ec->at(ec_id).second.begin(), reads_in_ec->at(ec_id).second.end(), false);
 	  ++ref_id;
 	} else {
 	  long double abundance = std::stold(part);
-	  ec_to_cluster->at(ec_id).second[ref_id - 1] = (abundance >= thresholds.at(ref_id - 1).second);
+	  reads_in_ec->at(ec_id).second[ref_id - 1] = (abundance >= thresholds.at(ref_id - 1).second);
 	  ++ref_id;
 	}
       }
@@ -40,7 +40,7 @@ void assign_reads(const std::vector<std::pair<std::string, long double>> &thresh
   }
 }
 
-void read_ec_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *assignments) {
+void read_ec_assignments(std::istream &assignments_file, std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> *reads_in_ec) {
   if (assignments_file.good()) {
     std::string line;
     while(getline(assignments_file, line)) {
@@ -53,17 +53,17 @@ void read_ec_assignments(std::istream &assignments_file, std::unordered_map<long
 	  current_ec_id = std::stoul(part);
 	  std::vector<std::string> reads;
 	  std::vector<bool> assign_to;
-	  assignments->insert(std::make_pair(current_ec_id, std::make_pair(reads, assign_to)));
+	  reads_in_ec->insert(std::make_pair(current_ec_id, std::make_pair(reads, assign_to)));
 	  at_ec_id = false;
 	} else {
-	  assignments->at(current_ec_id).first.push_back(part);
+	  reads_in_ec->at(current_ec_id).first.push_back(part);
 	}
       }
     }
   }
 }
 
-void read_groups_filter(const std::vector<std::pair<std::string, long double>> &ref_names, std::istream &groups_file, std::vector<short unsigned> *group_indices) {
+void read_groups_filter(const std::vector<std::pair<std::string, long double>> &thresholds, std::istream &groups_file, std::vector<short unsigned> *group_indices) {
   std::set<std::string> groups;
   if (groups_file.good()) {
     std::string line;
@@ -75,8 +75,8 @@ void read_groups_filter(const std::vector<std::pair<std::string, long double>> &
       }
     }
   }
-  for (size_t i = 0; i < ref_names.size(); ++i) {
-    if (groups.find(ref_names.at(i).first) != groups.end()) {
+  for (size_t i = 0; i < thresholds.size(); ++i) {
+    if (groups.find(thresholds.at(i).first) != groups.end()) {
       group_indices->push_back(i);
     }
   }

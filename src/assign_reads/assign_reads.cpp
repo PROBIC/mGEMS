@@ -11,11 +11,11 @@
 #include "zstr/zstr.hpp"
 
 int main(int argc, char* argv[]) {
-  std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> reads_to_ec;
+  std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> reads_in_ec;
   std::cout << "Reading read assignments to equivalence classes" << std::endl;
   if (CmdOptionPresent(argv, argv+argc, "-f")) {
     std::unique_ptr<std::istream> assignments_file = OpenInstream(argv, argv+argc, "-f");
-    read_ec_assignments(*assignments_file, &reads_to_ec);
+    read_ec_assignments(*assignments_file, &reads_in_ec);
   }
 
   std::cout << "Constructing assignment thresholds from abundances" << std::endl;
@@ -24,9 +24,9 @@ int main(int argc, char* argv[]) {
     std::unique_ptr<std::istream> abundances_file = OpenInstream(argv, argv+argc, "-a");
     if (CmdOptionPresent(argv, argv+argc, "-q")) {
       double mult = std::stold(std::string(GetOpt(argv, argv+argc, "-q")));
-      construct_thresholds(reads_to_ec.size(), *abundances_file, &thresholds, mult);
+      construct_thresholds(reads_in_ec.size(), *abundances_file, &thresholds, mult);
     } else {
-      construct_thresholds(reads_to_ec.size(), *abundances_file, &thresholds);
+      construct_thresholds(reads_in_ec.size(), *abundances_file, &thresholds);
     }
   }
   uint16_t n_refs = thresholds.size();
@@ -34,10 +34,10 @@ int main(int argc, char* argv[]) {
   std::cout << "Reading probs" << std::endl;
   bool read_from_cin = CmdOptionPresent(argv, argv+argc, "--cin");
   if (read_from_cin) {
-    assign_reads(thresholds, std::cin, &reads_to_ec);
+    assign_reads(thresholds, std::cin, &reads_in_ec);
   } else {
     std::unique_ptr<std::istream> probs_file = OpenInstream(argv, argv+argc, "-p");
-    assign_reads(thresholds, *probs_file, &reads_to_ec);
+    assign_reads(thresholds, *probs_file, &reads_in_ec);
   }
 
   bool all_groups = !CmdOptionPresent(argv, argv+argc, "--groups");
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
     }
   }
   std::cout << "writing reads..." << std::endl;
-  write_reads(reads_to_ec, group_indices, outfiles);
+  write_reads(reads_in_ec, group_indices, outfiles);
 
   return 0;
 }
