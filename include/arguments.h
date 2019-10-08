@@ -2,6 +2,8 @@
 #define ARGUMENTS_H
 
 #include <string>
+#include <algorithm>
+#include <memory>
 
 #include "zstr/zstr.hpp"
 
