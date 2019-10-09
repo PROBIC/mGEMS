@@ -26,7 +26,6 @@ void assign_reads(const std::vector<std::pair<std::string, long double>> &thresh
       while(getline(partition, part, ',')) {
 	if (ref_id == 0) {
 	  ec_id = std::stoul(part);
-	  std::vector<bool> refs(num_refs, false);
 	  reads_in_ec->at(ec_id).second.resize(num_refs);
 	  std::fill(reads_in_ec->at(ec_id).second.begin(), reads_in_ec->at(ec_id).second.end(), false);
 	  ++ref_id;
