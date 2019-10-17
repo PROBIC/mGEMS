@@ -22,12 +22,8 @@ int main(int argc, char* argv[]) {
   std::vector<std::pair<std::string, long double>> thresholds;
   if (CmdOptionPresent(argv, argv+argc, "-a")) {
     std::unique_ptr<std::istream> abundances_file = OpenInstream(argv, argv+argc, "-a");
-    if (CmdOptionPresent(argv, argv+argc, "-q")) {
-      double mult = std::stold(std::string(GetOpt(argv, argv+argc, "-q")));
-      construct_thresholds(reads_in_ec.size(), *abundances_file, &thresholds, mult);
-    } else {
-      construct_thresholds(reads_in_ec.size(), *abundances_file, &thresholds);
-    }
+    long double mult = (CmdOptionPresent(argv, argv+argc, "-q") ? std::stold(std::string(GetOpt(argv, argv+argc, "-q"))) : (long double)1.0);
+    construct_thresholds(reads_in_ec.size(), *abundances_file, &thresholds, mult);
   }
   uint16_t n_refs = thresholds.size();
 

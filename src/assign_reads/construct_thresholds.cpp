@@ -31,15 +31,9 @@ void read_abundances(std::istream &abundances_file, std::vector<std::pair<std::s
   }
 }
 
-void construct_thresholds(const uint64_t num_ecs, std::istream &abundances_file, std::vector<std::pair<std::string, long double>> *thresholds) {
-  read_abundances(abundances_file, thresholds);
-  long double log_thresh = std::log1pl(-(long double)thresholds->size()/(long double)num_ecs);
-  multiply_abundances(thresholds, log_thresh);
-}
-
 void construct_thresholds(const uint64_t num_ecs, std::istream &abundances_file, std::vector<std::pair<std::string, long double>> *thresholds, long double theta_frac) {
   read_abundances(abundances_file, thresholds);
   long double log_thresh = std::log1pl(-(long double)thresholds->size()/(long double)num_ecs);
-  log_thresh += theta_frac;
+  log_thresh += std::log(theta_frac);
   multiply_abundances(thresholds, log_thresh);
 }
