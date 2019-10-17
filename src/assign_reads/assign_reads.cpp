@@ -40,18 +40,10 @@ int main(int argc, char* argv[]) {
     assign_reads(thresholds, *probs_file, &reads_in_ec);
   }
 
-  bool all_groups = !CmdOptionPresent(argv, argv+argc, "--groups");
   std::cout << "Assigning reads to reference groups" << std::endl;
   std::vector<short unsigned> group_indices;
-  if (all_groups) {
-    group_indices.resize(n_refs);
-    for (size_t i = 0; i < n_refs; ++i) {
-      group_indices[i] = i;
-    }
-  } else {
-    std::unique_ptr<std::istream> groups_file = OpenInstream(argv, argv+argc, "--groups");
-    read_groups_filter(thresholds, *groups_file, &group_indices);
-  }
+  std::unique_ptr<std::istream> groups_file = OpenInstream(argv, argv+argc, "--groups");
+  read_groups_filter(thresholds, *groups_file, &group_indices);
   
   bool gzip_output = CmdOptionPresent(argv, argv+argc, "--gzip-output");
   std::string outfile_name = std::string(GetOpt(argv, argv+argc, "-o"));
