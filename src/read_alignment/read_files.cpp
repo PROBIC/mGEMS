@@ -43,10 +43,9 @@ void read_alignment(const std::string &alignment_line, const std::unordered_map<
   }
 }
 
-std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(std::istream &sam_file) {
+void read_sam(std::istream &sam_file, std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec) {
   std::unordered_map<std::string, long unsigned> ref_to_id;
   std::unordered_map<std::string, std::vector<bool>> read_to_ec;
-  std::unordered_map<std::vector<bool>, std::vector<std::string>> reads_in_ec;
   if (sam_file.good()) {
     std::string line;
     long unsigned ref_id = 0;
@@ -67,8 +66,29 @@ std::unordered_map<std::vector<bool>, std::vector<std::string>> read_sam(std::is
     }
     reads_in_ec[kv.second].emplace_back(kv.first);
   }
+}
 
-  return reads_in_ec;
+void read_themisto(std::istream &sam_file, std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec, uint16_t n_refs) {
+  if (sam_file.good()) {
+    std::string line;
+    std::string read_id;
+    while (getline(sam_file, line)) {
+      std::stringstream parts(line);
+      std::string part;
+      getline(parts, part, ' ');
+      read_id = part;
+      std::vector<bool> ec_config(n_refs, false);
+      while (getline(parts, part, ' ')) {
+	size_t aligned = std::stoi(part);
+	ec_config.at(aligned) = true;
+      }
+      if (reads_in_ec.find(ec_config) == reads_in_ec.end()) {
+	std::vector<std::string> aligned_reads;
+	reads_in_ec[ec_config] = aligned_reads;
+      }
+      reads_in_ec.at(ec_config).push_back(read_id);
+    }
+  }
 }
 
 std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(std::istream &ec_file, const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec) {
@@ -103,8 +123,13 @@ std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(std::istream &e
   return ec_to_id;
 }
 
-void reads_in_ec(std::istream &sam_file, const std::string &ec_path, std::unordered_map<long unsigned, std::vector<std::string>> *reads_in_ec_num) {
-  const std::unordered_map<std::vector<bool>, std::vector<std::string>> &reads_in_ec = read_sam(sam_file);
+void reads_in_ec(std::istream &sam_file, const std::string &ec_path, std::unordered_map<long unsigned, std::vector<std::string>> *reads_in_ec_num, bool themisto, uint16_t n_refs) {
+  std::unordered_map<std::vector<bool>, std::vector<std::string>> reads_in_ec;
+  if (themisto) {
+    read_themisto(sam_file, reads_in_ec, n_refs);
+  } else {
+    read_sam(sam_file, reads_in_ec);
+  }
   zstr::ifstream ec_file(ec_path);
   const std::unordered_map<std::vector<bool>, long unsigned> &ec_to_id = read_ec_ids(ec_file, reads_in_ec);
   reads_in_ec_num->reserve(ec_to_id.bucket_count());

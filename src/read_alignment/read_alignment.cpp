@@ -11,12 +11,15 @@ int main(int argc, char* argv[]) {
   std::unordered_map<long unsigned, std::vector<std::string>> reads_to_ec;
   std::string ec_path = std::string(GetOpt(argv, argv+argc, "-e"));
   bool read_from_cin = CmdOptionPresent(argv, argv+argc, "--cin");
+  bool themisto = CmdOptionPresent(argv, argv+argc, "--themisto");
   if (read_from_cin) {
-    reads_in_ec(std::cin, ec_path, &reads_to_ec);
+    reads_in_ec(std::cin, ec_path, &reads_to_ec, themisto, (themisto ? std::stoi(GetOpt(argv, argv+argc, "--n-refs")) : 0));
   } else {
     std::string sam_path = std::string(GetOpt(argv, argv+argc, "-s"));
+    std::cout << "reading from: "  << sam_path << std::endl;
     zstr::ifstream sam_file(sam_path);
-    reads_in_ec(sam_file, ec_path, &reads_to_ec);
+    std::cout << "which is: " << sam_file.good() << std::endl;
+    reads_in_ec(sam_file, ec_path, &reads_to_ec, themisto, (themisto ? std::stoi(GetOpt(argv, argv+argc, "--n-refs")) : 0));
   }
 
   std::cout << "Writing read assignments to equivalence classes" << std::endl;
