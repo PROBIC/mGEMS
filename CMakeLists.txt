@@ -29,7 +29,7 @@ string(TIMESTAMP _BUILD_TIMESTAMP)
 ## Generate a version.h file containing build version and timestamp
 configure_file(include/version.h.in ${CMAKE_SOURCE_DIR}/include/version.h @ONLY)
 
-include_directories(include)
+include_directories(include ${CMAKE_SOURCE_DIR}/external)
 file(GLOB ASSIGN_READS_SOURCES "src/assign_reads/*.cpp")
 file(GLOB BUILD_SAMPLE_SOURCES "src/build_sample/*.cpp")
 file(GLOB READ_ALIGNMENT_SOURCES "src/read_alignment/*.cpp")
