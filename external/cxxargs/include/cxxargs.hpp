@@ -11,6 +11,7 @@
 #include <vector>
 #include <utility>
 #include <exception>
+#include <memory>
 
 #define CXXARGS_VERSION_MAJOR 1
 #define CXXARGS_VERSION_MINOR 1
