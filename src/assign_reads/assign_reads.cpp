@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
   std::vector<File::Out> outfiles(n_refs);
   for (auto i : group_indices) {
     std::string fname = outfile_name + "/" + thresholds.at(i).first + "_reads.txt";
-    if (args.value<bool>("gzip")) {
+    if (args.value<bool>("gzip-output")) {
       outfiles[i].open_compressed(fname + ".gz");
     } else {
       outfiles[i].open(fname);
