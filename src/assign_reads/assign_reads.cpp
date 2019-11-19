@@ -32,27 +32,27 @@ void parse_args(int argc, char* argv[], cxxargs::Arguments &args) {
 int main(int argc, char* argv[]) {
   cxxargs::Arguments args("assign-reads", "Usage:...");
   try {
-    std::cout << "Parsing arguments" << std::endl;
+    std::cerr << "Parsing arguments" << std::endl;
     parse_args(argc, argv, args);
   } catch (std::exception &e) {
-    std::cout << "Parsing arguments failed:\n"
+    std::cerr << "Parsing arguments failed:\n"
 	      << '\t' << e.what()
 	      << "\nexiting\n";
     return 0;    
   }
 
   std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> reads_in_ec;
-  std::cout << "Reading read assignments to equivalence classes" << std::endl;
+  std::cerr << "Reading read assignments to equivalence classes" << std::endl;
   std::unique_ptr<std::istream> assignments_file(new zstr::ifstream(args.value<std::string>('f')));
   read_ec_assignments(*assignments_file, &reads_in_ec);
 
-  std::cout << "Constructing assignment thresholds from abundances" << std::endl;
+  std::cerr << "Constructing assignment thresholds from abundances" << std::endl;
   std::vector<std::pair<std::string, long double>> thresholds;
   std::unique_ptr<std::istream> abundances_file(new zstr::ifstream(args.value<std::string>('a')));
   construct_thresholds(reads_in_ec.size(), *abundances_file, &thresholds, args.value<long double>('q'));
   uint16_t n_refs = thresholds.size();
 
-  std::cout << "Reading probs" << std::endl;
+  std::cerr << "Reading probs" << std::endl;
   if (args.value<bool>("cin")) {
     assign_reads(thresholds, std::cin, &reads_in_ec);
   } else {
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
     assign_reads(thresholds, *probs_file, &reads_in_ec);
   }
 
-  std::cout << "Assigning reads to reference groups" << std::endl;
+  std::cerr << "Assigning reads to reference groups" << std::endl;
   std::vector<short unsigned> group_indices;
   std::unique_ptr<std::istream> groups_file(new zstr::ifstream(args.value<std::string>("groups")));
   read_groups_filter(thresholds, *groups_file, &group_indices);
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
       outfiles[i] = std::unique_ptr<std::ostream>(new std::ofstream(fname));
     }
   }
-  std::cout << "writing reads..." << std::endl;
+  std::cerr << "writing reads..." << std::endl;
   write_reads(reads_in_ec, group_indices, outfiles);
 
   return 0;

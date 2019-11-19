@@ -30,26 +30,26 @@ void parse_args(int argc, char* argv[], cxxargs::Arguments &args) {
 int main(int argc, char* argv[]) {
   cxxargs::Arguments args("read-alignment", "Usage:...");
   try {
-    std::cout << "Parsing arguments" << std::endl;
+    std::cerr << "Parsing arguments" << std::endl;
     parse_args(argc, argv, args);
   } catch (std::exception &e) {
-    std::cout << "Parsing arguments failed:\n"
+    std::cerr << "Parsing arguments failed:\n"
 	      << "\t" << e.what()
 	      << "\nexiting\n";
     return 0;
   }
-  std::cout << "Reading alignment files" << std::endl;
+  std::cerr << "Reading alignment files" << std::endl;
   std::unordered_map<long unsigned, std::vector<std::string>> reads_to_ec;
   if (args.value<bool>("cin")) {
     reads_in_ec(std::cin, args.value<std::string>('e'), &reads_to_ec, args.value<bool>("themisto"), (args.value<bool>("themisto") ? args.value<uint32_t>("n-refs") : 0));
   } else {
-    std::cout << "reading from: "  << args.value<std::string>('s') << std::endl;
+    std::cerr << "reading from: "  << args.value<std::string>('s') << std::endl;
     zstr::ifstream sam_file(args.value<std::string>('s'));
-    std::cout << "which is: " << sam_file.good() << std::endl;
+    std::cerr << "which is: " << sam_file.good() << std::endl;
     reads_in_ec(sam_file, args.value<std::string>('e'), &reads_to_ec, args.value<bool>("themisto"), (args.value<bool>("themisto") ? args.value<uint32_t>("n-refs") : 0));
   }
 
-  std::cout << "Writing read assignments to equivalence classes" << std::endl;
+  std::cerr << "Writing read assignments to equivalence classes" << std::endl;
   std::unique_ptr<std::ostream> outfile;
   if (args.value<bool>("gzip-output")) {
     outfile = std::unique_ptr<std::ostream>(new zstr::ofstream(args.value<std::string>('o') + "/" + "ec_to_read.csv" + ".gz"));

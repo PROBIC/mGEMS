@@ -21,10 +21,10 @@ void parse_args(int argc, char* argv[], cxxargs::Arguments &args) {
 int main(int argc, char* argv[]) {
   cxxargs::Arguments args("build-sample", "Usage:...");
   try {
-    std::cout << "Parsing arguments" << std::endl;
+    std::cerr << "Parsing arguments" << std::endl;
     parse_args(argc, argv, args);
   } catch (std::exception &e) {
-    std::cout << "Parsing arguments failed:\n"
+    std::cerr << "Parsing arguments failed:\n"
 	      << '\t' << e.what()
 	      << "\nexiting\n";
     return 0;
