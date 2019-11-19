@@ -7,6 +7,8 @@
 #include <memory>
 #include <fstream>
 
-void write_ecs(const std::unordered_map<long unsigned, std::vector<std::string>> &reads_in_ec, std::unique_ptr<std::ostream> &of);
+#include "file.hpp"
+
+void write_ecs(const std::unordered_map<long unsigned, std::vector<std::string>> &reads_in_ec, File::Out &of);
 
 #endif

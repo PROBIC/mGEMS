@@ -5,9 +5,10 @@
 #include <memory>
 #include <exception>
 
-#include "zstr/zstr.hpp"
+#include "zstr/src/zstr.hpp"
 #include "cxxargs/include/cxxargs.hpp"
 
+#include "file.hpp"
 #include "assign_reads/read_files.h"
 #include "assign_reads/write_files.h"
 #include "assign_reads/construct_thresholds.h"
@@ -43,36 +44,36 @@ int main(int argc, char* argv[]) {
 
   std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> reads_in_ec;
   std::cerr << "Reading read assignments to equivalence classes" << std::endl;
-  std::unique_ptr<std::istream> assignments_file(new zstr::ifstream(args.value<std::string>('f')));
-  read_ec_assignments(*assignments_file, &reads_in_ec);
+  File::In assignments_file(args.value<std::string>('f'));
+  read_ec_assignments(assignments_file.stream(), &reads_in_ec);
 
   std::cerr << "Constructing assignment thresholds from abundances" << std::endl;
   std::vector<std::pair<std::string, long double>> thresholds;
-  std::unique_ptr<std::istream> abundances_file(new zstr::ifstream(args.value<std::string>('a')));
-  construct_thresholds(reads_in_ec.size(), *abundances_file, &thresholds, args.value<long double>('q'));
+  File::In abundances_file(args.value<std::string>('a'));
+  construct_thresholds(reads_in_ec.size(), abundances_file.stream(), &thresholds, args.value<long double>('q'));
   uint16_t n_refs = thresholds.size();
 
   std::cerr << "Reading probs" << std::endl;
   if (args.value<bool>("cin")) {
     assign_reads(thresholds, std::cin, &reads_in_ec);
   } else {
-    std::unique_ptr<std::istream> probs_file(new zstr::ifstream(args.value<std::string>('p')));
-    assign_reads(thresholds, *probs_file, &reads_in_ec);
+    File::In probs_file(args.value<std::string>('p'));
+    assign_reads(thresholds, probs_file.stream(), &reads_in_ec);
   }
 
   std::cerr << "Assigning reads to reference groups" << std::endl;
   std::vector<short unsigned> group_indices;
-  std::unique_ptr<std::istream> groups_file(new zstr::ifstream(args.value<std::string>("groups")));
-  read_groups_filter(thresholds, *groups_file, &group_indices);
+  File::In groups_file(args.value<std::string>("groups"));
+  read_groups_filter(thresholds, groups_file.stream(), &group_indices);
   
   std::string outfile_name = args.value<std::string>('o');
-  std::vector<std::unique_ptr<std::ostream>> outfiles(n_refs);
+  std::vector<File::Out> outfiles(n_refs);
   for (auto i : group_indices) {
     std::string fname = outfile_name + "/" + thresholds.at(i).first + "_reads.txt";
     if (args.value<bool>("gzip")) {
-      outfiles[i] = std::unique_ptr<std::ostream>(new zstr::ofstream(fname + ".gz"));
+      outfiles[i].open_compressed(fname + ".gz");
     } else {
-      outfiles[i] = std::unique_ptr<std::ostream>(new std::ofstream(fname));
+      outfiles[i].open(fname);
     }
   }
   std::cerr << "writing reads..." << std::endl;

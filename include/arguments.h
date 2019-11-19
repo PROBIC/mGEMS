@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <memory>
 
-#include "zstr/zstr.hpp"
+#include "zstr/src/zstr.hpp"
 
 char* GetOpt(char **begin, char **end, const std::string &option) {
   char **it = std::find(begin, end, option);

@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "zstr/zstr.hpp"
+#include "zstr/src/zstr.hpp"
 
 void read_header(const std::string &header_line, std::unordered_map<std::string, long unsigned> &ref_to_id, long unsigned &ref_id) {
   if (header_line.at(1) == 'S') {

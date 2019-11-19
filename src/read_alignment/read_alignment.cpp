@@ -1,9 +1,10 @@
 #include <string>
 #include <iostream>
 
-#include "zstr/zstr.hpp"
+#include "zstr/src/zstr.hpp"
 #include "cxxargs/include/cxxargs.hpp"
 
+#include "file.hpp"
 #include "read_alignment/read_files.h"
 #include "read_alignment/write_files.h"
 
@@ -44,17 +45,16 @@ int main(int argc, char* argv[]) {
     reads_in_ec(std::cin, args.value<std::string>('e'), &reads_to_ec, args.value<bool>("themisto"), (args.value<bool>("themisto") ? args.value<uint32_t>("n-refs") : 0));
   } else {
     std::cerr << "reading from: "  << args.value<std::string>('s') << std::endl;
-    zstr::ifstream sam_file(args.value<std::string>('s'));
-    std::cerr << "which is: " << sam_file.good() << std::endl;
-    reads_in_ec(sam_file, args.value<std::string>('e'), &reads_to_ec, args.value<bool>("themisto"), (args.value<bool>("themisto") ? args.value<uint32_t>("n-refs") : 0));
+    File::In sam_file(args.value<std::string>('s'));
+    reads_in_ec(sam_file.stream(), args.value<std::string>('e'), &reads_to_ec, args.value<bool>("themisto"), (args.value<bool>("themisto") ? args.value<uint32_t>("n-refs") : 0));
   }
 
   std::cerr << "Writing read assignments to equivalence classes" << std::endl;
-  std::unique_ptr<std::ostream> outfile;
+  File::Out outfile;
   if (args.value<bool>("gzip-output")) {
-    outfile = std::unique_ptr<std::ostream>(new zstr::ofstream(args.value<std::string>('o') + "/" + "ec_to_read.csv" + ".gz"));
+    outfile.open_compressed(args.value<std::string>('o') + "/" + "ec_to_read.csv" + ".gz");
   } else {
-    outfile = std::unique_ptr<std::ostream>(new std::ofstream(args.value<std::string>('o') + "/" + "ec_to_read.csv"));
+    outfile.open(args.value<std::string>('o') + "/" + "ec_to_read.csv");
   }
   write_ecs(reads_to_ec, outfile);
 

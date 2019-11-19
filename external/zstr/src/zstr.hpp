@@ -9,11 +9,12 @@
 #ifndef __ZSTR_HPP
 #define __ZSTR_HPP
 
+#include <iostream>
 #include <cassert>
 #include <fstream>
 #include <sstream>
 #include <zlib.h>
-#include "zstr/strict_fstream.hpp"
+#include "strict_fstream.hpp"
 
 namespace zstr
 {
@@ -364,6 +365,7 @@ namespace detail
 template < typename FStream_Type >
 struct strict_fstream_holder
 {
+    strict_fstream_holder() {};
     strict_fstream_holder(const std::string& filename, std::ios_base::openmode mode = std::ios_base::in)
         : _fs(filename, mode)
     {}
@@ -377,10 +379,12 @@ class ifstream
       public std::istream
 {
 public:
+    ifstream() : std::istream(new istreambuf(_fs.rdbuf())) {}
     explicit ifstream(const std::string& filename, std::ios_base::openmode mode = std::ios_base::in)
         : detail::strict_fstream_holder< strict_fstream::ifstream >(filename, mode),
           std::istream(new istreambuf(_fs.rdbuf()))
     {
+        this->setstate(_fs.rdstate());
         exceptions(std::ios_base::badbit);
     }
     virtual ~ifstream()

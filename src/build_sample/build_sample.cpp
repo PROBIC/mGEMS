@@ -4,8 +4,9 @@
 #include <iostream>
 
 #include "cxxargs/include/cxxargs.hpp"
-#include "zstr/zstr.hpp"
+#include "zstr/src/zstr.hpp"
 
+#include "file.hpp"
 #include "arguments.h"
 #include "build_sample/assign_reads.h"
 
@@ -30,20 +31,20 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  zstr::ifstream assignment_file(args.value<std::string>('a'));
-  const std::set<std::string> &assignments = read_assignments(assignment_file);
+  File::In assignment_file(args.value<std::string>('a'));
+  const std::set<std::string> &assignments = read_assignments(assignment_file.stream());
 
-  std::unique_ptr<std::istream> infiles[2];
-  infiles[0] = std::unique_ptr<std::istream>(new zstr::ifstream(args.value<std::string>('1')));
-  infiles[1] = std::unique_ptr<std::istream>(new zstr::ifstream(args.value<std::string>('2')));
-  std::unique_ptr<std::ostream> outfiles[2];
+  File::In infiles[2];
+  infiles[0].open(args.value<std::string>('1'));
+  infiles[1].open(args.value<std::string>('2'));
+  File::Out outfiles[2];
   std::string outfile = args.value<std::string>('o');
   if (args.value<bool>("gzip-output")) {
-    outfiles[0] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_1.fastq.gz"));
-    outfiles[1] = std::unique_ptr<std::ostream>(new zstr::ofstream(outfile + "_2.fastq.gz"));
+    outfiles[0].open_compressed(outfile + "_1.fastq.gz");
+    outfiles[1].open_compressed(outfile + "_2.fastq.gz");
   } else {
-    outfiles[0] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_1.fastq"));
-    outfiles[1] = std::unique_ptr<std::ostream>(new std::ofstream(outfile + "_2.fastq"));
+    outfiles[0].open(outfile + "_1.fastq");
+    outfiles[1].open(outfile + "_2.fastq");
   }
 
   assign_reads(assignments, outfiles, infiles);

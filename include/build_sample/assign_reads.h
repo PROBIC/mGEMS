@@ -6,7 +6,9 @@
 #include <fstream>
 #include <memory>
 
+#include "file.hpp"
+
 std::set<std::string> read_assignments(std::istream &assignment_file);
-void assign_reads(const std::set<std::string> &assignments, std::unique_ptr<std::ostream> outfiles[2], std::unique_ptr<std::istream> infiles[2]);
+void assign_reads(const std::set<std::string> &assignments, File::Out outfiles[2], File::In infiles[2]);
 
 #endif

@@ -7,7 +7,9 @@
 #include <memory>
 #include <fstream>
 
+#include "file.hpp"
+
 void write_reads(const std::unordered_map<long unsigned, std::pair<std::vector<std::string>, std::vector<bool>>> &reads_in_ec,
 		 const std::vector<short unsigned> &group_indices,
-		 const std::vector<std::unique_ptr<std::ostream>> &outfiles);
+		 std::vector<File::Out> &outfiles);
 #endif

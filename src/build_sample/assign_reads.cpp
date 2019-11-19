@@ -46,7 +46,7 @@ void process_strand(const std::set<std::string> &assignments, std::istream &inst
     outstrand.flush();
 }
 
-void assign_reads(const std::set<std::string> &assignments, std::unique_ptr<std::ostream> outfiles[2], std::unique_ptr<std::istream> infiles[2]) {
-  process_strand(assignments, *infiles[0], *outfiles[0]);
-  process_strand(assignments, *infiles[1], *outfiles[1]);
+void assign_reads(const std::set<std::string> &assignments, File::Out outfiles[2], File::In infiles[2]) {
+  process_strand(assignments, infiles[0].stream(), outfiles[0].stream());
+  process_strand(assignments, infiles[1].stream(), outfiles[1].stream());
 }
