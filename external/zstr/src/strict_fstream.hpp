@@ -35,7 +35,7 @@ static std::string strerror()
     }
 #else
 // GNU-specific strerror_r()
-    int p = strerror_r(errno, &buff[0], buff.size());
+    auto p = strerror_r(errno, &buff[0], buff.size());
     std::string tmp(p, p);
     std::swap(buff, tmp);
 #endif
