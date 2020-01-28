@@ -8,7 +8,7 @@
 
 #include "file.hpp"
 #include "arguments.h"
-#include "build_sample/assign_reads.h"
+#include "build_sample/assign_reads_themisto.h"
 
 void parse_args(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_short_argument<std::string>('a', "Read assignments to equivalence classes.");
@@ -32,7 +32,8 @@ int main(int argc, char* argv[]) {
   }
 
   File::In assignment_file(args.value<std::string>('a'));
-  const std::set<std::string> &assignments = read_assignments(assignment_file.stream());
+  //  const std::set<std::string> &assignments = read_assignments(assignment_file.stream());
+  const std::vector<long unsigned> &assignments = read_assignments(assignment_file.stream());
 
   File::In infiles[2];
   infiles[0].open(args.value<std::string>('1'));
