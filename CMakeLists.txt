@@ -18,6 +18,11 @@ else()
   add_compile_options(-std=c++11)
 endif()
 
+## Configure bxzstr
+set(LIBLZMA_FOUND 0)
+set(BZIP2_FOUND 0)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/bxzstr)
+
 ## Get version number from git tags
 find_package(Git)
 if(GIT_FOUND)

@@ -1,3 +1,6 @@
 [submodule "external/cxxargs"]
 	path = external/cxxargs
-	url = git@github.com:tmaklin/cxxargs.git
+	url = https://github.com/tmaklin/cxxargs.git
+[submodule "external/bxzstr"]
+	path = external/bxzstr
+	url = https://github.com/tmaklin/bxzstr.git

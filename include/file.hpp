@@ -5,8 +5,9 @@
 #include <fstream>
 #include <memory>
 #include <exception>
+#include <iostream>
 
-#include "zstr/src/zstr.hpp"
+#include "bxzstr/include/bxzstr.hpp"
 
 namespace File {
   namespace exceptions {
@@ -44,7 +45,7 @@ namespace File {
     }
     void open_compressed(const std::string &filename) {
       os.flush();
-      byname.reset(new zstr::ofstream(filename));
+      byname.reset(new bxz::ofstream(filename));
       os.rdbuf(byname->rdbuf());
       os.setstate(byname->rdstate());
       if (!os)
@@ -61,12 +62,12 @@ namespace File {
   };
 
   class In {
-    std::unique_ptr<zstr::ifstream> byname;
+    std::unique_ptr<bxz::ifstream> byname;
     std::istream is;
     std::string myfile;
 
     void reset_state(const std::string &filename) {
-      byname.reset(new zstr::ifstream(filename));
+      byname.reset(new bxz::ifstream(filename));
       is.rdbuf(byname->rdbuf());
       is.setstate(byname->rdstate());      
     }
