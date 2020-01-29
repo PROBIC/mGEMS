@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <vector>
 
-void reads_in_ec(std::istream &sam_file, const std::string &ec_path, std::unordered_map<long unsigned, std::vector<std::string>> *reads_in_ec_num, bool themisto, uint16_t n_refs = 0);
+#include "file.hpp"
+
+void reads_in_ec(std::istream &sam_file, File::In &ec_file, std::unordered_map<long unsigned, std::vector<std::string>> *reads_in_ec_num, bool themisto, uint16_t n_refs = 0);
 
 #endif

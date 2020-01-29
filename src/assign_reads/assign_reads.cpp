@@ -5,7 +5,6 @@
 #include <memory>
 #include <exception>
 
-#include "zstr/src/zstr.hpp"
 #include "cxxargs/include/cxxargs.hpp"
 
 #include "file.hpp"

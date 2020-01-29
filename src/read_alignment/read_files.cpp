@@ -2,8 +2,6 @@
 
 #include <sstream>
 
-#include "zstr/src/zstr.hpp"
-
 void read_header(const std::string &header_line, std::unordered_map<std::string, long unsigned> &ref_to_id, long unsigned &ref_id) {
   if (header_line.at(1) == 'S') {
     std::stringstream parts(header_line);
@@ -123,15 +121,14 @@ std::unordered_map<std::vector<bool>, long unsigned> read_ec_ids(std::istream &e
   return ec_to_id;
 }
 
-void reads_in_ec(std::istream &sam_file, const std::string &ec_path, std::unordered_map<long unsigned, std::vector<std::string>> *reads_in_ec_num, bool themisto, uint16_t n_refs) {
+void reads_in_ec(std::istream &sam_file, File::In &ec_file, std::unordered_map<long unsigned, std::vector<std::string>> *reads_in_ec_num, bool themisto, uint16_t n_refs) {
   std::unordered_map<std::vector<bool>, std::vector<std::string>> reads_in_ec;
   if (themisto) {
     read_themisto(sam_file, reads_in_ec, n_refs);
   } else {
     read_sam(sam_file, reads_in_ec);
   }
-  zstr::ifstream ec_file(ec_path);
-  const std::unordered_map<std::vector<bool>, long unsigned> &ec_to_id = read_ec_ids(ec_file, reads_in_ec);
+  const std::unordered_map<std::vector<bool>, long unsigned> &ec_to_id = read_ec_ids(ec_file.stream(), reads_in_ec);
   reads_in_ec_num->reserve(ec_to_id.bucket_count());
   for (auto kv : reads_in_ec) {
     if (ec_to_id.find(kv.first) != ec_to_id.end()) {

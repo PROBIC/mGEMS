@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "cxxargs/include/cxxargs.hpp"
-#include "zstr/src/zstr.hpp"
 
 #include "file.hpp"
 #include "arguments.h"

@@ -1,7 +1,6 @@
 #include <string>
 #include <iostream>
 
-#include "zstr/src/zstr.hpp"
 #include "cxxargs/include/cxxargs.hpp"
 
 #include "file.hpp"
@@ -41,12 +40,13 @@ int main(int argc, char* argv[]) {
   }
   std::cerr << "Reading alignment files" << std::endl;
   std::unordered_map<long unsigned, std::vector<std::string>> reads_to_ec;
+  File::In ec_file(args.value<std::string>('e'));
   if (args.value<bool>("cin")) {
-    reads_in_ec(std::cin, args.value<std::string>('e'), &reads_to_ec, args.value<bool>("themisto"), (args.value<bool>("themisto") ? args.value<uint32_t>("n-refs") : 0));
+    reads_in_ec(std::cin, ec_file, &reads_to_ec, args.value<bool>("themisto"), (args.value<bool>("themisto") ? args.value<uint32_t>("n-refs") : 0));
   } else {
     std::cerr << "reading from: "  << args.value<std::string>('s') << std::endl;
     File::In sam_file(args.value<std::string>('s'));
-    reads_in_ec(sam_file.stream(), args.value<std::string>('e'), &reads_to_ec, args.value<bool>("themisto"), (args.value<bool>("themisto") ? args.value<uint32_t>("n-refs") : 0));
+    reads_in_ec(sam_file.stream(), ec_file, &reads_to_ec, args.value<bool>("themisto"), (args.value<bool>("themisto") ? args.value<uint32_t>("n-refs") : 0));
   }
 
   std::cerr << "Writing read assignments to equivalence classes" << std::endl;
