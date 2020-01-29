@@ -6,7 +6,6 @@
 #include "cxxargs/include/cxxargs.hpp"
 
 #include "file.hpp"
-#include "arguments.h"
 #include "build_sample/assign_reads_themisto.h"
 
 void parse_args(int argc, char* argv[], cxxargs::Arguments &args) {
