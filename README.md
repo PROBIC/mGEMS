@@ -9,9 +9,9 @@ mSWEEP genome assembly plugin code.
 - cmake
 
 ### Compilation
-Clone the repository
+Clone the repository (note the --recursive option in git clone)
 ```
-git clone https://github.com/PROBIC/msweep-assembly.git
+git clone --recursive https://github.com/PROBIC/msweep-assembly.git
 ```
 enter the directory and run
 ```
