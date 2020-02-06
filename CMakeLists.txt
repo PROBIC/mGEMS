@@ -22,6 +22,8 @@ endif()
 set(LIBLZMA_FOUND 0)
 set(BZIP2_FOUND 0)
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/bxzstr)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/telescope
+                 ${CMAKE_BINARY_DIR}/external/telescope/build)
 
 ## Get version number from git tags
 find_package(Git)
