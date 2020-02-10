@@ -85,7 +85,8 @@ grep -v "^[#]" msweep-out_abundances.txt | sort -rgk2 | cut -f1 | head -n3 > mos
 If you use a more refined method or know which reference groups (as
 specified in the reference_grouping.txt file) you want to assemble,
 put their names in a .txt file where each line corresponds to a
-cluster name instead.
+cluster name instead. It is also possible to supply the names in
+tab-separated format on one or more lines.
 
 Assign reads to the 3 most abundant reference groups based on the estimated probabilities
 ```
