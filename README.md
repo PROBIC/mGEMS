@@ -1,6 +1,6 @@
-# msweep-assembly
+# mGEMS
 
-mSWEEP binning + assembly plugin code.
+Bacterial sequencing data binning on strain-level based on probabilistic taxonomic classification.
 
 # Installation
 ## Dependencies
