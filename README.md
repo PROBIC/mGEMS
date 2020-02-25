@@ -103,3 +103,8 @@ done < most_abundant_groups.txt
 This will create the <group name>_1.fastq.gz and <group
 name>_2.fastq.gz files in the outfolder, which you can assemble with
 your assembler of choice.
+
+# License
+The source code from this project is subject to the terms of the MIT
+license. A copy of the MIT license is supplied with the project, or
+can be obtained at https://opensource.org/licenses/MIT.
