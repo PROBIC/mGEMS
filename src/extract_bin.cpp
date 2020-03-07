@@ -7,7 +7,8 @@ namespace mGEMS {
   void ProcessStrand(const std::vector<uint32_t> &bin_assignments, std::istream &instrand, std::ostream &outstrand) {
   std::string line;
   uint32_t line_nr = 0;
-  uint32_t bin_id = bin_assignments.size();
+  //  uint32_t bin_id = bin_assignments.size();
+  uint32_t bin_id = 0;
   while (std::getline(instrand, line)) {
     ++line_nr;
     uint32_t read_id = (line_nr - 1)/4 + 1;
@@ -18,7 +19,7 @@ namespace mGEMS {
 	++line_nr;
 	outstrand << line << '\n';
       }
-      --bin_id;
+      ++bin_id;
     } else {
       for (uint8_t j = 0; j < 3; ++j) {
 	std::getline(instrand, line);

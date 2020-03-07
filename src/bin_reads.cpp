@@ -59,7 +59,7 @@ void BinReads(const std::vector<std::vector<bool>> &assignments, const std::vect
     for (uint32_t j = 0; j < n_groups; ++j) {
       if (assignments[i][j] && groups_to_assign[j]) {
 	for (uint32_t k = 0; k < aligned_reads[i].size(); ++k) {
-	  (*assigned_reads)[group_id].push_back(aligned_reads[i][k]);
+	  (*assigned_reads)[group_id].emplace_back(aligned_reads[i][k] + 1);
 	}
 	++group_id;
       }
