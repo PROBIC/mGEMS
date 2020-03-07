@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 2.8.12)
-project (msweep-assembly)
-include(ExternalProject)
+project (mGEMS)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -33,24 +32,34 @@ else()
   add_compile_options(-std=c++11)
 endif()
 
-find_package(BZip2)
-include_directories(${BZIP2_INCLUDE_DIRS})
-    
-find_package(LibLZMA)
-include_directories(${LIBLZMA_INCLUDE_DIRS})
-
-find_package(ZLIB)
-include_directories(${ZLIB_INCLUDE_DIRS})
-
+## mGEMS executable
 add_executable(mGEMS ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 
+## Check supported compression types
+find_package(BZip2)
+if (BZIP2_FOUND)
+  include_directories(${BZIP2_INCLUDE_DIRS})
+  target_link_libraries(mGEMS ${BZIP2_LIBRARIES})
+endif()    
+find_package(LibLZMA)
+if (LIBLZMA_FOUND)
+  include_directories(${LIBLZMA_INCLUDE_DIRS})
+  target_link_libraries(mGEMS ${LIBLZMA_LIBRARIES})
+endif()
+find_package(ZLIB)
+if (ZLIB_FOUND)
+  include_directories(${ZLIB_INCLUDE_DIRS})
+  target_link_libraries(mGEMS ${ZLIB_LIBRARIES})
+endif()
+
 ## Check dependencies and download them if not given
+## telescope
 if (DEFINED CMAKE_TELESCOPE_LIBRARY AND DEFINED CMAKE_TELESCOPE_HEADERS)
   find_library(TELESCOPE NAMES telescope HINTS ${CMAKE_TELESCOPE_LIBRARY})
   target_link_libraries(mGEMS ${TELESCOPE})
   include_directories("${CMAKE_TELESCOPE_HEADERS}")
 else()
-  configure_file(CMakeLists-telescope.txt.in ${CMAKE_BINARY_DIR}/external/telescope-download/CMakeLists.txt)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/CMakeLists-telescope.txt.in ${CMAKE_BINARY_DIR}/external/telescope-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/telescope-download )
@@ -70,10 +79,11 @@ else()
   target_link_libraries(mGEMS libtelescope)
 endif()
 
+## bxzstr
 if (DEFINED CMAKE_BXZSTR_HEADERS)
   include_directories("${CMAKE_BXZSTR_HEADERS}")
 else()
-  configure_file(CMakeLists-bxzstr.txt.in ${CMAKE_BINARY_DIR}/external/bxzstr-download/CMakeLists.txt)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/CMakeLists-bxzstr.txt.in ${CMAKE_BINARY_DIR}/external/bxzstr-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/bxzstr-download )
@@ -89,10 +99,11 @@ else()
   include_directories(${CMAKE_CURRENT_BINARY_DIR}/external/bxzstr/include)
 endif()
 
+## cxxargs
 if (DEFINED CMAKE_CXXARGS_HEADERS)
   include_directories("${CMAKE_CXXARGS_HEADERS}")
 else()
-  configure_file(CMakeLists-cxxargs.txt.in ${CMAKE_BINARY_DIR}/external/cxxargs-download/CMakeLists.txt)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/CMakeLists-cxxargs.txt.in ${CMAKE_BINARY_DIR}/external/cxxargs-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/cxxargs-download )
@@ -128,8 +139,10 @@ string(TIMESTAMP _BUILD_TIMESTAMP)
 ## Generate a version.h file containing build version and timestamp
 configure_file(${CMAKE_SOURCE_DIR}/include/version.h.in ${CMAKE_BINARY_DIR}/include/version.h @ONLY)
 
+## external/include has the version info
 include_directories(include ${CMAKE_SOURCE_DIR}/external)
 
+## mGEMS library
 add_library(libmgems ${CMAKE_CURRENT_SOURCE_DIR}/src/mGEMS.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/bin_reads.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/extract_bin.cpp
@@ -137,4 +150,4 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/mGEMS.cpp)
 set_target_properties(libmgems PROPERTIES OUTPUT_NAME mgems)
 
 # Link libraries
-target_link_libraries(mGEMS libmgems ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
+target_link_libraries(mGEMS libmgems)
