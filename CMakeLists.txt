@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 2.8.12)
 project (msweep-assembly)
+include(ExternalProject)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -7,8 +8,22 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 ## Determine build type and set flags accordingly
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release) ## Build Release by default
+elseif(CMAKE_BUILD_TYPE MATCHES Debug)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wextra -Wpedantic")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g -Wall -Wextra -Wpedantic")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -g -Wall -Wextra -Wpedantic")
 endif()
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wno-sign-compare -g")
+
+if(CMAKE_BUILD_TYPE MATCHES Release)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_PARALLEL -flto")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -D_GLIBCXX_PARALLEL -flto")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -D_GLIBCXX_PARALLEL -flto")
+  if(CMAKE_CXX_COMPILER STREQUAL "GNU")
+    set(CMAKE_AR  "gcc-ar")
+    set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_C_ARCHIVE_FINISH true)
+  endif()
+endif()
 
 ## Set C++11 support depending on cmake version
 if (${CMAKE_MAJOR_VERSION} GREATER 2 AND ${CMAKE_MINOR_VERSION} GREATER 0)
@@ -18,12 +33,80 @@ else()
   add_compile_options(-std=c++11)
 endif()
 
-## Configure bxzstr
-set(LIBLZMA_FOUND 0)
-set(BZIP2_FOUND 0)
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/bxzstr)
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/telescope
-                 ${CMAKE_BINARY_DIR}/external/telescope/build)
+find_package(BZip2)
+include_directories(${BZIP2_INCLUDE_DIRS})
+    
+find_package(LibLZMA)
+include_directories(${LIBLZMA_INCLUDE_DIRS})
+
+find_package(ZLIB)
+include_directories(${ZLIB_INCLUDE_DIRS})
+
+add_executable(mGEMS ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+
+## Check dependencies and download them if not given
+if (DEFINED CMAKE_TELESCOPE_LIBRARY AND DEFINED CMAKE_TELESCOPE_HEADERS)
+  find_library(TELESCOPE NAMES telescope HINTS ${CMAKE_TELESCOPE_LIBRARY})
+  target_link_libraries(mGEMS ${TELESCOPE})
+  include_directories("${CMAKE_TELESCOPE_HEADERS}")
+else()
+  configure_file(CMakeLists-telescope.txt.in ${CMAKE_BINARY_DIR}/external/telescope-download/CMakeLists.txt)
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/telescope-download )
+  if(result)
+    message(FATAL_ERROR "CMake step for telescope failed: ${result}")
+  endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/telescope-download )
+  if(result)
+    message(FATAL_ERROR "Build step for telescope failed: ${result}")
+  endif()
+  add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/external/telescope
+                   ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/build)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR}/external/telescope/include)
+  set_target_properties(telescope PROPERTIES EXCLUDE_FROM_ALL 1)
+  target_link_libraries(mGEMS libtelescope)
+endif()
+
+if (DEFINED CMAKE_BXZSTR_HEADERS)
+  include_directories("${CMAKE_BXZSTR_HEADERS}")
+else()
+  configure_file(CMakeLists-bxzstr.txt.in ${CMAKE_BINARY_DIR}/external/bxzstr-download/CMakeLists.txt)
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/bxzstr-download )
+  if(result)
+    message(FATAL_ERROR "CMake step for bxzstr failed: ${result}")
+  endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/bxzstr-download )
+  if(result)
+    message(FATAL_ERROR "Build step for bxzstr failed: ${result}")
+  endif()
+  include_directories(${CMAKE_CURRENT_BINARY_DIR}/external/bxzstr/include)
+endif()
+
+if (DEFINED CMAKE_CXXARGS_HEADERS)
+  include_directories("${CMAKE_CXXARGS_HEADERS}")
+else()
+  configure_file(CMakeLists-cxxargs.txt.in ${CMAKE_BINARY_DIR}/external/cxxargs-download/CMakeLists.txt)
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/cxxargs-download )
+  if(result)
+    message(FATAL_ERROR "CMake step for cxxargs failed: ${result}")
+  endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/cxxargs-download )
+  if(result)
+    message(FATAL_ERROR "Build step for cxxargs failed: ${result}")
+  endif()
+  include_directories(${CMAKE_CURRENT_BINARY_DIR}/external/cxxargs/include)
+endif()
 
 ## Get version number from git tags
 find_package(Git)
@@ -45,16 +128,13 @@ string(TIMESTAMP _BUILD_TIMESTAMP)
 ## Generate a version.h file containing build version and timestamp
 configure_file(${CMAKE_SOURCE_DIR}/include/version.h.in ${CMAKE_BINARY_DIR}/include/version.h @ONLY)
 
-include_directories(include ${CMAKE_SOURCE_DIR}/external ${CMAKE_BINARY_DIR}/include)
-file(GLOB ASSIGN_READS_SOURCES "${CMAKE_SOURCE_DIR}/src/assign_reads/*.cpp")
-file(GLOB BUILD_SAMPLE_SOURCES "${CMAKE_SOURCE_DIR}/src/build_sample/*.cpp")
-file(GLOB READ_ALIGNMENT_SOURCES "${CMAKE_SOURCE_DIR}/src/read_alignment/*.cpp")
+include_directories(include ${CMAKE_SOURCE_DIR}/external)
 
-add_executable(assign_reads ${ASSIGN_READS_SOURCES})
-add_executable(build_sample ${BUILD_SAMPLE_SOURCES})
-add_executable(read_alignment ${READ_ALIGNMENT_SOURCES})
+add_library(libmgems ${CMAKE_CURRENT_SOURCE_DIR}/src/mGEMS.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/bin_reads.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/extract_bin.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/mGEMS.cpp)
+set_target_properties(libmgems PROPERTIES OUTPUT_NAME mgems)
 
 # Link libraries
-target_link_libraries(assign_reads z)
-target_link_libraries(build_sample z)
-target_link_libraries(read_alignment z)
+target_link_libraries(mGEMS libmgems ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})

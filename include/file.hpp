@@ -7,7 +7,7 @@
 #include <exception>
 #include <iostream>
 
-#include "bxzstr/include/bxzstr.hpp"
+#include "bxzstr.hpp"
 
 namespace File {
   namespace exceptions {
