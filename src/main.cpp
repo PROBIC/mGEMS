@@ -1,3 +1,5 @@
+#include <dirent.h>
+
 #include <exception>
 #include <iostream>
 #include <cstring>
@@ -56,6 +58,12 @@ void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<s
 }
 
 void ReadAndExtract(cxxargs::Arguments &args) {
+  DIR* dir = opendir(args.value<std::string>('o').c_str());
+  if (dir) {
+    closedir(dir);
+  } else {
+    throw std::runtime_error("Directory " + args.value<std::string>('o') + " does not seem to exist.");
+  }
   uint32_t n_bins = args.value<std::vector<std::string>>("bins").size();
   std::vector<std::vector<uint32_t>> bins;
   std::vector<std::string> target_groups(n_bins);
@@ -75,6 +83,12 @@ void ReadAndExtract(cxxargs::Arguments &args) {
 }
 
 void Bin(const cxxargs::Arguments &args, bool extract_bins) {
+  DIR* dir = opendir(args.value<std::string>('o').c_str());
+  if (dir) {
+    closedir(dir);
+  } else {
+    throw std::runtime_error("Directory " + args.value<std::string>('o') + " does not seem to exist.");
+  }
   std::vector<std::string> groups;
   std::vector<long double> abundances;
   File::In msweep_abundances(args.value<std::string>('a'));
@@ -82,6 +96,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   
   std::vector<std::istream*> themisto_alns;
   for (uint32_t i = 0; i < args.value<std::vector<std::string>>("themisto-alns").size(); ++i) {
+    File::In(args.value<std::vector<std::string>>("themisto-alns")[i]);
     themisto_alns.emplace_back(new bxz::ifstream(args.value<std::vector<std::string>>("themisto-alns")[i]));
   }
   
