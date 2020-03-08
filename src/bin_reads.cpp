@@ -1,8 +1,9 @@
-#include "assign_reads.h"
+#include "bin_reads.h"
 
 #include <sstream>
 #include <iterator>
 #include <algorithm>
+#include <utility>
 
 namespace mGEMS {
 uint32_t ReadAbundances(std::istream &stream, std::vector<long double> *abundances, std::vector<std::string> *groups) {
@@ -31,37 +32,58 @@ void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, c
   }
 }
 
-void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, std::vector<std::vector<bool>> *assignments) {
+void MaskProbs(const std::string &header_line, std::vector<std::string> *target_groups, std::vector<bool> *mask) {
+  std::string part;
+  std::stringstream partition(header_line);
+  std::getline(partition, part, ',');
+  uint32_t ref_id = 0;
+  std::vector<std::string> ordered_targets(target_groups->size());
+  uint32_t target_id = 0;
+  while (std::getline(partition, part, ',')) {
+    if (std::find(target_groups->begin(), target_groups->end(), part) != target_groups->end()) {
+      (*mask)[ref_id] = true;
+      ordered_targets[target_id] = part;
+      ++target_id;
+    }
+    ++ref_id;
+  }
+  (*target_groups) = ordered_targets;
+}
+
+std::vector<bool> AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<std::vector<bool>> *assignments) {
   uint32_t n_groups = thresholds.size();
   std::string line;
   std::getline(probs_file, line); // 1st line is header
+  std::vector<bool> mask(thresholds.size(), false);
+  MaskProbs(line, target_groups, &mask);
   uint32_t ec_id = 0;
   while (std::getline(probs_file, line)) {
     std::string part;
     std::stringstream partition(line);
     std::getline(partition, part, ','); // first element is the ec id
-
     uint32_t ref_id = 0;
     while(std::getline(partition, part, ',')) {
       long double abundance = std::stold(part);
-      (*assignments)[ec_id][ref_id] = (abundance >= thresholds[ref_id]);
+      (*assignments)[ec_id][ref_id] = (abundance >= thresholds[ref_id]) && mask[ref_id];
       ++ref_id;
     }
     ++ec_id;
   }
+  return mask;
 }
 
 void BinReads(const std::vector<std::vector<bool>> &assignments, const std::vector<bool> &groups_to_assign, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *assigned_reads) {
   uint32_t num_ecs = assignments.size();
   uint32_t n_groups = assignments[0].size();
-  for (uint32_t i = 0; i < num_ecs; ++i) {
-    uint32_t group_id = 0;
-    for (uint32_t j = 0; j < n_groups; ++j) {
-      if (assignments[i][j] && groups_to_assign[j]) {
-	for (uint32_t k = 0; k < aligned_reads[i].size(); ++k) {
-	  (*assigned_reads)[group_id].emplace_back(aligned_reads[i][k] + 1);
+  for (uint32_t j = 0; j < num_ecs; ++j) {
+    uint32_t n_aligned_reads = aligned_reads[j].size();
+    uint32_t bin_id = 0;
+    for (uint32_t k = 0; k < n_groups; ++k) {
+      if (assignments[j][k] && groups_to_assign[k]) {
+	for (uint32_t h = 0; h < n_aligned_reads; ++h) {
+	  (*assigned_reads)[bin_id].emplace_back(aligned_reads[j][h] + 1);
 	}
-	++group_id;
+	++bin_id;
       }
     }
   }

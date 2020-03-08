@@ -6,7 +6,7 @@
 #include "cxxargs.hpp"
 
 #include "file.hpp"
-#include "assign_reads.h"
+#include "bin_reads.h"
 #include "extract_bin.h"
 #include "mGEMS.h"
 

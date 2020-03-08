@@ -4,10 +4,9 @@
 #include <algorithm>
 
 namespace mGEMS {
-  void ProcessStrand(const std::vector<uint32_t> &bin_assignments, std::istream &instrand, std::ostream *outstrand) {
+void ProcessStrand(const std::vector<uint32_t> &bin_assignments, std::istream &instrand, std::ostream *outstrand) {
   std::string line;
   uint32_t line_nr = 0;
-  //  uint32_t bin_id = bin_assignments.size();
   uint32_t bin_id = 0;
   while (std::getline(instrand, line)) {
     ++line_nr;
