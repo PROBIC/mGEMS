@@ -19,20 +19,28 @@ for estimating the probability matrix.
 - cmake
 
 ### Compilation
-Clone the repository (note the *--recursive* option in git clone)
+Clone the repository
 ```
-git clone --recursive https://github.com/PROBIC/msweep-assembly.git
+git clone https://github.com/PROBIC/mGEMS.git
 ```
 enter the directory and run
 ```
-> mkdir build
-> cd build
-> cmake ..
-> make
+mkdir build
+cd build
+cmake ..
+make
 ```
-This will compile the read_alignment, assign_reads, build_sample, and telescope executables in the build/bin/ directory.
+This will compile the mGEMS executable in the build/bin/ directory.
 
 # Usage
+## mGEMS
+The mGEMS executable provides three commands: mGEMS, mGEMS bin, and
+mGEMS extract. The first command (mGEMS) is shorthand for running both
+mGEMS bin and mGEMS extract, which bin the reads in the input
+pseudoalignment (mGEMS bin) and extract the binned reads from the
+original mixed samples (mGEMS extract).
+
+## Tutorial — Full pipeline with Themisto and mSWEEP
 ## Indexing
 Build a [Themisto](https://github.com/jnalanko/themisto) index to
 align against.
@@ -44,65 +52,62 @@ build_index --k 31 --input-file example.fasta --auto-colors --index-dir themisto
 
 Align paired-end reads 'reads_1.fastq.gz' and 'reads_2.fastq.gz' with Themisto
 ```
-pseudoalign --index-dir themisto_index --query-file reads_1.fastq.gz --outfile pseudoalignments_1.txt --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192
-pseudoalign --index-dir themisto_index --query-file reads_2.fastq.gz --outfile pseudoalignments_2.txt --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192
-```
-
-Convert the pseudoalignment to
-[kallisto](https://github.com/pachterlab/kallisto) format using
-[telescope](https://github.com/tmaklin/telescope) (supplied with the msweep-assembly installation).
-```
-mkdir outfolder
-
-ntargets=$(sort themisto_index/coloring-names.txt | uniq | wc -l)
-telescope --n-refs $ntargets -r pseudoalignments_1.txt,pseudoalignments_2.txt -o outfolder --mode intersection
-```
-
-Create a fake kallisto-style run_info.json file using the
-Themisto_run_info.sh script in the root directory of this project
-```
-Themisto_run_info.sh $(wc -l < pseudoalignments_1.txt) $ntargets > outfolder/run_info.json
-```
-
-Determine read assignments to equivalence classes from the kallisto
-format files
-```
-read_alignment -e outfolder/pseudoalignments.ec -s outfolder/read-to-ref.txt -o outfolder --write-ecs --themisto --n-refs $ntargets --gzip-output
+pseudoalign --index-dir themisto_index --query-file reads_1.fastq.gz --outfile pseudoalignments_1.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192
+pseudoalign --index-dir themisto_index --query-file reads_2.fastq.gz --outfile pseudoalignments_2.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192
 ```
 
 Estimate the relative abundances with mSWEEP (reference_grouping.txt
 should contain the groups the sequences in 'example.fasta' are
 assigned to. See the [mSWEEP](https://github.com/probic/msweep-assembly) usage instructions for details).
 ```
-mSWEEP -f outfolder -i reference_grouping.txt -o msweep-out --write-probs --gzip-probs
+mSWEEP --themisto-1 pseudoalignments_1.aln --themisto-2 pseudoalignments_2.aln -o mSWEEP  -i reference_grouping.txt --write-probs
 ```
 
-(Optional) Extract the names of the 3 most abundant reference
-groups.
+Bin the reads and write all bins to the 'mGEMS-out' folder
 ```
-grep -v "^[#]" msweep-out_abundances.txt | sort -rgk2 | cut -f1 | head -n3 > most_abundant_groups.txt
+mkdir mGEMS-out
+mGEMS -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --n-refs $(wc -l reference_grouping.txt)
 ```
-If you use a more refined method or know which reference groups (as
-specified in the reference_grouping.txt file) you want to assemble,
-put their names in a .txt file where each line corresponds to a
-cluster name instead. It is also possible to supply the names in
-tab-separated format on one or more lines.
+This will write the binned paired-end reads for *all groups* in the
+mSWEEP_abundances.txt file in the mGEMS-out folder (compressed with
+zlib).
 
-Assign reads to the 3 most abundant reference groups based on the estimated probabilities
+### Advanced use
+... or bin and write only the reads that are assigned to "group-3" or
+"group-4" by adding the '--groups group-3,group-4' flag
 ```
-assign_reads -f outfolder/ec_to_read.csv.gz -p msweep-out_probs.csv.gz -a msweep-out_abundances.txt -o outfolder/ --groups most_abundant_groups.txt --gzip-output
+mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --n-refs $(wc -l reference_grouping.txt)
 ```
 
-Construct the binned samples from the original files
+Alternatively, find and write only the read bins for "group-3" and
+"group-4", skipping extracting the reads
+```
+mGEMS bin --groups group-3,group-4 --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --n-refs $(wc -l reference_grouping.txt)
+```
 
+... and extract the reads when feeling like it
 ```
-while read -r sample; do
-	build_sample -a outfolder/$sample""_reads.txt.gz -o outfolder/$sample -1 reads_1.fastq.gz -2 reads_2.fastq.gz --gzip-output
-done < most_abundant_groups.txt
+mGEMS extract --bins mGEMS-out/group-3.bin,mGEMS-out/group-4.bin -r
+reads_1.fastq.gz,reads_2.fastq.gz -o mGEMS-out
 ```
-This will create the <group name>_1.fastq.gz and <group
-name>_2.fastq.gz files in the outfolder, which you can assemble with
-your assembler of choice.
+
+### Accepted input flags
+mGEMS accepts the following input flags
+```
+	-r                 Comma-separated list of input read(s).
+	--themisto-alns    Comma-separated list of pseudoalignment file(s) 
+	                   for the reads from themisto.
+	-o                 Output directory (must exist before running!).
+	--probs            Comma-separated Posterior probability matrix (output from mSWEEP with
+	                   the --write-probs flag).
+	-a                 Relative abundance estimates from mSWEEP (tab-separated, 1st
+	                   column has the group names and 2nd column the estimates).
+	--n-refs           Number of pseudoalignment targets in the input files.
+	--groups           (Optional) which groups to extract from the input reads.
+	--compress         (Optional) Toggle compressing the output files
+                       (default: compress)
+```
+
 
 # License
 The source code from this project is subject to the terms of the MIT

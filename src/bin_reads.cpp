@@ -51,7 +51,7 @@ void MaskProbs(const std::string &header_line, std::vector<std::string> *target_
   (*target_groups) = ordered_targets;
 }
 
-  std::vector<bool> AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &assigned_reads, std::vector<std::vector<uint32_t>> *bins) {
+std::vector<bool> AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &assigned_reads, std::vector<std::vector<uint32_t>> *bins) {
   uint32_t n_groups = thresholds.size();
   std::string line;
   std::getline(probs_file, line); // 1st line is header

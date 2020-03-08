@@ -108,7 +108,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
 }
 
 int main(int argc, char* argv[]) {
-  cxxargs::Arguments args("mGEMS", "Usage: type --help");
+  cxxargs::Arguments args("mGEMS", "Usage: mGEMS -r <input-reads_1>,<input-reads_2> --themisto-alns <input-reads_1 pseudoalignments>,<input-reads_2 pseudoalignments> -o <output directory> --probs <posterior probabilities> -a <abundance estimates> --n-refs <number of pseudoalignment targets> --groups <group names to extract (optional)>");
   try {
     if (argc < 2) {
       std::cerr << args.help() << std::endl;
