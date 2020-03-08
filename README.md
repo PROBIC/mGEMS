@@ -2,8 +2,8 @@
 
 Bacterial sequencing data binning on strain-level based on probabilistic taxonomic classification.
 
-# Installation
-## Dependencies
+## Installation
+### Dependencies
 To run the binning + assembly pipeline, you will need a program that
 does pseudoalignment and another program that estimates an assignment
 probability matrix for the reads to the alignment targets.
@@ -13,12 +13,12 @@ We recommend to use [Themisto](https://github.com/jnalanko/themisto)
 [mSWEEP](https://github.com/probic/msweep-assembly) (v1.3.2 or newer)
 for estimating the probability matrix.
 
-## Compiling from source
-### Requirements
+### Compiling from source
+#### Requirements
 - C++11 compliant compiler.
 - cmake
 
-### Compilation
+#### Compilation
 Clone the repository
 ```
 git clone https://github.com/PROBIC/mGEMS.git
@@ -32,16 +32,15 @@ make
 ```
 This will compile the mGEMS executable in the build/bin/ directory.
 
-# Usage
-## mGEMS
+## Usage
+### mGEMS
 The mGEMS executable provides three commands: mGEMS, mGEMS bin, and
 mGEMS extract. The first command (mGEMS) is shorthand for running both
 mGEMS bin and mGEMS extract, which bin the reads in the input
 pseudoalignment (mGEMS bin) and extract the binned reads from the
 original mixed samples (mGEMS extract).
 
-## Tutorial — Full pipeline with Themisto and mSWEEP
-## Indexing
+### (Pseudo)tutorial — Full pipeline with Themisto and mSWEEP
 Build a [Themisto](https://github.com/jnalanko/themisto) index to
 align against.
 ```
@@ -60,7 +59,7 @@ Estimate the relative abundances with mSWEEP (reference_grouping.txt
 should contain the groups the sequences in 'example.fasta' are
 assigned to. See the [mSWEEP](https://github.com/probic/msweep-assembly) usage instructions for details).
 ```
-mSWEEP --themisto-1 pseudoalignments_1.aln --themisto-2 pseudoalignments_2.aln -o mSWEEP  -i reference_grouping.txt --write-probs
+mSWEEP --themisto-1 pseudoalignments_1.aln --themisto-2 pseudoalignments_2.aln -o mSWEEP -i reference_grouping.txt --write-probs
 ```
 
 Bin the reads and write all bins to the 'mGEMS-out' folder
@@ -109,7 +108,7 @@ mGEMS accepts the following input flags
 ```
 
 
-# License
+## License
 The source code from this project is subject to the terms of the MIT
 license. A copy of the MIT license is supplied with the project, or
 can be obtained at https://opensource.org/licenses/MIT.
