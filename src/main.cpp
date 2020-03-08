@@ -11,10 +11,10 @@
 #include "mGEMS.h"
 
 void ParseExtract(int argc, char* argv[], cxxargs::Arguments &args) {
-  args.add_short_argument<std::string>('1', "Paired-end reads, first strand.");
-  args.add_short_argument<std::string>('2', "Paired-end reads, second strand.");
+  args.add_short_argument<std::vector<std::string>>('r', "Input reads (comma separated list)");
   args.add_short_argument<std::string>('o', "Output directory.");
   args.add_long_argument<std::vector<std::string>>("bins", "Comma-separated list of bins to extract from the paired-end reads.");
+  args.add_long_argument<bool>("compress", "Compress extracted reads with zlib (.gz extension, default: true)", true);
   args.set_not_required("bins");
   args.set_not_required('o');
 
@@ -37,24 +37,21 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
 
 void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<std::string> &target_groups, const cxxargs::Arguments &args) {
   uint32_t n_out_groups = bins.size();
+  uint8_t n_strands = args.value<std::vector<std::string>>('r').size();
+  std::vector<File::In> in_strands(n_strands);
+  std::vector<File::Out> out_strands(n_strands);
   for (uint32_t i = 0; i < n_out_groups; ++i) {
-    File::In istrand_1(args.value<std::string>('1'));
-    File::In istrand_2(args.value<std::string>('2'));
-    std::string out_name;
-    if (args.is_initialized("bins")) {
-      out_name = args.value<std::vector<std::string>>("bins")[i];
-      if (out_name.find(".") != std::string::npos) {
-	out_name.erase(out_name.find("."), out_name.size());
+    for (uint8_t j = 0; j < n_strands; ++j) {
+      in_strands[j].open(args.value<std::vector<std::string>>('r')[j]);
+      std::string out_name = args.value<std::string>('o') + "/" + target_groups[i] + "_" + std::to_string(j + 1) + ".fastq";
+      if (args.value<bool>("compress")) {
+	out_name += ".gz";
+	out_strands[j].open_compressed(out_name);
+      } else {
+	out_strands[j].open(out_name);
       }
-      if (out_name.rfind("/") != std::string::npos) {
-	out_name.erase(0, out_name.rfind("/") + 1);
-      }
-    } else {
-      out_name = target_groups[i];
     }
-    File::Out ostrand_1(args.value<std::string>('o') + "/" + out_name + "_1.fastq");
-    File::Out ostrand_2(args.value<std::string>('o') + "/" + out_name + "_2.fastq");
-    mGEMS::ExtractBin(bins[i], &ostrand_1.stream(), &ostrand_2.stream(), &istrand_1.stream(), &istrand_2.stream());
+    mGEMS::ExtractBin(bins[i], in_strands, &out_strands);
   }
 }
 
@@ -65,7 +62,14 @@ void ReadAndExtract(cxxargs::Arguments &args) {
   for (uint32_t i = 0; i < n_bins; ++i) {
     File::In istream(args.value<std::vector<std::string>>("bins")[i]);
     bins.emplace_back(mGEMS::ReadBin(istream.stream()));
-    std::cerr << bins.back().size() << std::endl;
+    std::string out_name = args.value<std::vector<std::string>>("bins")[i];
+    if (out_name.find(".") != std::string::npos) {
+      out_name.erase(out_name.find("."), out_name.size());
+    }
+    if (out_name.rfind("/") != std::string::npos) {
+      out_name.erase(0, out_name.rfind("/") + 1);
+    }
+    target_groups[i] = out_name;
   }
   Extract(bins, target_groups, args);
 }
@@ -78,9 +82,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   
   std::vector<std::istream*> themisto_alns;
   for (uint32_t i = 0; i < args.value<std::vector<std::string>>("themisto-alns").size(); ++i) {
-    //    File::In themisto_aln(args.value<std::vector<std::string>>("themisto-alns")[i]);
-    //    themisto_alns.push_back(&themisto_aln.stream());
-    themisto_alns.emplace_back(new std::ifstream(args.value<std::vector<std::string>>("themisto-alns")[i]));
+    themisto_alns.emplace_back(new bxz::ifstream(args.value<std::vector<std::string>>("themisto-alns")[i]));
   }
   
   ThemistoAlignment aln;
@@ -108,16 +110,13 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
 int main(int argc, char* argv[]) {
   cxxargs::Arguments args("mGEMS", "Usage: type --help");
   try {
-    std::cerr << "Parsing arguments" << std::endl;
     if (argc < 2) {
       std::cerr << args.help() << std::endl;
       return 0;
     } else if (strcmp(argv[1], "bin") == 0) {
-      std::cerr << "Binning" << std::endl;
       ParseBin(argc, argv, args);
       Bin(args, false);
     } else if (strcmp(argv[1], "extract") == 0) {
-      std::cerr << "Extracting" << std::endl;
       ParseExtract(argc, argv, args);
       if (!args.is_initialized("bins")) {
 	throw std::runtime_error("Bins must be specified.");
@@ -127,13 +126,12 @@ int main(int argc, char* argv[]) {
       }
       ReadAndExtract(args);
     } else {
-      std::cerr << "Both" << std::endl;
       ParseBin(argc, argv, args);
       ParseExtract(argc, argv, args);
       Bin(args, true);
     }
   } catch (std::exception &e) {
-    std::cerr << "Parsing arguments failed:\n"
+    std::cerr << "Error:"
 	      << "\t" << e.what()
 	      << "\nexiting\n";
     return 1;

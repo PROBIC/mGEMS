@@ -33,15 +33,15 @@ std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long 
   return read_bins;
 }
 
-void Extract(const std::vector<std::string> &target_groups, const std::string &outdir, const std::string &strand_1, const std::string &strand_2, std::vector<std::vector<uint32_t>> &bins) {
-  uint32_t n_out_groups = target_groups.size();
-  for (uint32_t i = 0; i < n_out_groups; ++i) {
-    File::In istrand_1(strand_1);
-    File::In istrand_2(strand_2);
-    File::Out ostrand_1(outdir + target_groups[i] + "_1.fastq");
-    File::Out ostrand_2(outdir + target_groups[i] + "_2.fastq");
-    std::sort(bins[i].begin(), bins[i].end());
-    ExtractBin(bins[i], &ostrand_1.stream(), &ostrand_2.stream(), &istrand_1.stream(), &istrand_2.stream());
-  }
-}
+// void Extract(const std::vector<std::string> &target_groups, const std::string &outdir, const std::string &strand_1, const std::string &strand_2, std::vector<std::vector<uint32_t>> &bins) {
+//   uint32_t n_out_groups = target_groups.size();
+//   for (uint32_t i = 0; i < n_out_groups; ++i) {
+//     File::In istrand_1(strand_1);
+//     File::In istrand_2(strand_2);
+//     File::Out ostrand_1(outdir + target_groups[i] + "_1.fastq");
+//     File::Out ostrand_2(outdir + target_groups[i] + "_2.fastq");
+//     std::sort(bins[i].begin(), bins[i].end());
+//     ExtractBin(bins[i], &ostrand_1.stream(), &ostrand_2.stream(), &istrand_1.stream(), &istrand_2.stream());
+//   }
+// }
 }
