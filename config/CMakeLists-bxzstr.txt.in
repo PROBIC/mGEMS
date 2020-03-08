@@ -7,8 +7,7 @@ ExternalProject_Add(bxzstr-download
   GIT_REPOSITORY    https://github.com/tmaklin/bxzstr.git
   GIT_TAG           master
   SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/external/bxzstr"
-  BUILD_IN_SOURCE   1
-  CONFIGURE_COMMAND cmake -DLIBLZMA_FOUND=1 -DBZIP2_FOUND=0
+  BUILD_IN_SOURCE   0
   BUILD_COMMAND	    ""
   INSTALL_COMMAND   ""
   TEST_COMMAND      ""

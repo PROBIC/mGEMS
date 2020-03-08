@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iterator>
 #include <algorithm>
+#include <cmath>
 
 namespace mGEMS {
 uint32_t ReadAbundances(std::istream &stream, std::vector<long double> *abundances, std::vector<std::string> *groups) {
