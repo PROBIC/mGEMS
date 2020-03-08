@@ -12,6 +12,15 @@
 #include "extract_bin.h"
 #include "mGEMS.h"
 
+uint32_t CountLines(std::istream &stream) {
+  std::string line;
+  uint32_t n_lines = 0;
+  while(std::getline(stream, line)) {
+    ++n_lines;
+  }
+  return n_lines;
+}
+
 void ParseExtract(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_short_argument<std::vector<std::string>>('r', "Input reads (comma separated list)");
   args.add_short_argument<std::string>('o', "Output directory.");
@@ -31,7 +40,7 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<std::string>("merge-mode", "How to merge paired-end alignments from Themisto (default: intersection).", "intersection");
   args.add_long_argument<std::vector<std::string>>("groups", "Which reference groups to bin reads to (default: all).");
   args.add_short_argument<long double>('q', "Tuning parameter for the binning thresholds (default: 1.0).", (long double)1);
-  args.add_long_argument<uint32_t>("n-refs", "Number of alignment targets");
+  args.add_long_argument<std::string>("index", "Themisto pseudoalignment index directory.");
   args.set_not_required("groups");
 
   args.parse(argc, argv);
@@ -89,6 +98,12 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   } else {
     throw std::runtime_error("Directory " + args.value<std::string>('o') + " does not seem to exist.");
   }
+  dir = opendir(args.value<std::string>("index").c_str());
+  if (dir) {
+    closedir(dir);
+  } else {
+    throw std::runtime_error("Themisto pseudoalignment index directory " + args.value<std::string>('o') + " does not seem to exist.");
+  }
   std::vector<std::string> groups;
   std::vector<long double> abundances;
   File::In msweep_abundances(args.value<std::string>('a'));
@@ -99,9 +114,12 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     File::In(args.value<std::vector<std::string>>("themisto-alns")[i]);
     themisto_alns.emplace_back(new bxz::ifstream(args.value<std::vector<std::string>>("themisto-alns")[i]));
   }
-  
+
+  std::ifstream themisto_index(args.value<std::string>("index") + "/coloring-names.txt");
+  uint32_t n_refs = CountLines(themisto_index);
+  themisto_index.close();
   ThemistoAlignment aln;
-  ReadThemisto(get_mode(args.value<std::string>("merge-mode")), args.value<uint32_t>("n-refs"), themisto_alns, &aln);
+  ReadThemisto(get_mode(args.value<std::string>("merge-mode")), n_refs, themisto_alns, &aln);
 
   File::In probs_file(args.value<std::string>("probs"));
   std::vector<std::string> target_groups;
@@ -123,7 +141,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
 }
 
 int main(int argc, char* argv[]) {
-  cxxargs::Arguments args("mGEMS", "Usage: mGEMS -r <input-reads_1>,<input-reads_2> --themisto-alns <input-reads_1 pseudoalignments>,<input-reads_2 pseudoalignments> -o <output directory> --probs <posterior probabilities> -a <abundance estimates> --n-refs <number of pseudoalignment targets> --groups <group names to extract (optional)>");
+  cxxargs::Arguments args("mGEMS", "Usage: mGEMS -r <input-reads_1>,<input-reads_2> --themisto-alns <input-reads_1 pseudoalignments>,<input-reads_2 pseudoalignments> -o <output directory> --probs <posterior probabilities> -a <abundance estimates> --index <Themisto index> --groups <group names to extract (optional)>");
   try {
     if (argc < 2) {
       std::cerr << args.help() << std::endl;

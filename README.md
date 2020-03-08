@@ -65,7 +65,7 @@ mSWEEP --themisto-1 pseudoalignments_1.aln --themisto-2 pseudoalignments_2.aln -
 Bin the reads and write all bins to the 'mGEMS-out' folder
 ```
 mkdir mGEMS-out
-mGEMS -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --n-refs $(wc -l reference_grouping.txt)
+mGEMS -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
 ```
 This will write the binned paired-end reads for *all groups* in the
 mSWEEP_abundances.txt file in the mGEMS-out folder (compressed with
@@ -75,13 +75,13 @@ zlib).
 ... or bin and write only the reads that are assigned to "group-3" or
 "group-4" by adding the '--groups group-3,group-4' flag
 ```
-mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --n-refs $(wc -l reference_grouping.txt)
+mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
 ```
 
 Alternatively, find and write only the read bins for "group-3" and
 "group-4", skipping extracting the reads
 ```
-mGEMS bin --groups group-3,group-4 --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --n-refs $(wc -l reference_grouping.txt)
+mGEMS bin --groups group-3,group-4 --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
 ```
 
 ... and extract the reads when feeling like it
@@ -101,7 +101,7 @@ mGEMS accepts the following input flags
 	                   the --write-probs flag).
 	-a                 Relative abundance estimates from mSWEEP (tab-separated, 1st
 	                   column has the group names and 2nd column the estimates).
-	--n-refs           Number of pseudoalignment targets in the input files.
+	--index            Themisto pseudoalignment index directory.
 	--groups           (Optional) which groups to extract from the input reads.
 	--compress         (Optional) Toggle compressing the output files
                        (default: compress)
