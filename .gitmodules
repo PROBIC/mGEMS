@@ -1,9 +1,0 @@
-[submodule "external/cxxargs"]
-	path = external/cxxargs
-	url = https://github.com/tmaklin/cxxargs.git
-[submodule "external/bxzstr"]
-	path = external/bxzstr
-	url = https://github.com/tmaklin/bxzstr.git
-[submodule "external/telescope"]
-	path = external/telescope
-	url = https://github.com/tmaklin/telescope.git
