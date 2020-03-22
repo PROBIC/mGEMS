@@ -20,6 +20,5 @@ echo "check accession number"
 fi
 
 dlpath=$ftppath$dir1$dir2$1"/"
-echo "downloading reads from path: "$dlpath
 
-wget $dlpath"*"
+wget -qO- $dlpath""$1_2.fastq.gz
