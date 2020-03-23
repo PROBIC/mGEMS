@@ -58,11 +58,11 @@ ulimit -n 2048
 Download the supplementary table from the mGEMS manucsript which
 contains the relevant information
 ```
-## ADD
+https://zenodo.org/record/3724144/files/mGEMS_Supplementary_Table_mixed_samples.tsv
 ```
 Filter the table to contain only the *E. coli* (ecoli) experiments
 ```
-grep "ecoli" Supplementary_table_mixed_samples.tsv" > mixed_samples.tsv
+grep "ecoli" mGEMS_Supplementary_Table_mixed_samples.tsv" > mixed_samples.tsv
 ```
 If you want to reproduce the *E. faecalis* experiments, change 'ecoli'
 to 'efaec'. For *S. aureus*, change 'ecoli' to 'saur'. Running these
@@ -70,15 +70,18 @@ other two experiments may require resources beyond the typical laptop or
 desktop computer.
 
 ### <a name="referencedata"></a>Reference data
-Download the relevant reference data from **figshare (TODO:: ADD)**
-- [*E. coli*]()
-- [*E. faecalis*]()
-- [*S. aureus*]()
+Download and extract the relevant reference data from zenodo
+- [*E. coli*](https://zenodo.org/record/3724112)
+- [*E. faecalis*](https://zenodo.org/record/3724101)
+- [*S. aureus*](https://zenodo.org/record/3724135)
 
 by running
 ```
-## ADD
+wget https://zenodo.org/record/3724112/files/mGEMS-ecoli-reference-v1.0.0.tar.gz
+tar -zxvf mGEMS-ecoli-reference-v1.0.0.tar.gz
 ```
+Construction of the reference dataset(s) is describe in more detail in
+Mäklin et al. 2020.
 
 ### <a name="indexing"></a>Indexing
 Create a *31*-mer pseudoalignment index with Themisto using two
@@ -86,7 +89,7 @@ threads and maximum 8192 megabytes of RAM.
 ```
 mkdir mGEMS-ecoli-reference
 mkdir mGEMS-ecoli-reference/tmp
-build_index --k 31 --input-file mGEMS-ecoli-reference-v1.0.0.fasta --auto-colors --index-dir mGEMS-ecoli-reference --temp-dir mGEMS-ecoli-reference/tmp --mem-megas 8192 --n-threads 2
+build_index --k 31 --input-file mGEMS-ecoli-reference-sequences-v1.0.0.fasta.gz --auto-colors --index-dir mGEMS-ecoli-reference --temp-dir mGEMS-ecoli-reference/tmp --mem-megas 8192 --n-threads 2
 ```
 change 'ecoli' to 'efaec' or 'saur' if you are trying to reproduce the
 other experiments.
@@ -134,7 +137,7 @@ probabilities using two threads
 for f1 in *_1.fastq.gz; do
 	f=${f1%_1.fastq.gz}
 	mkdir $f
-	mSWEEP --themisto-1 $f""_1.aln.gz --themisto-2 $f""_2.aln.gz --themisto-index mGEMS-ecoli-reference -i mGEMS-ecoli-reference-v1.0.0.grouping -o $f/$f --write-probs --gzip-probs -t 2
+	mSWEEP --themisto-1 $f""_1.aln.gz --themisto-2 $f""_2.aln.gz --themisto-index mGEMS-ecoli-reference -i mGEMS-ecoli-reference-grouping-v1.0.0.txt -o $f/$f --write-probs --gzip-probs -t 2
 done
 ```
 
