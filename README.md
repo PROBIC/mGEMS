@@ -40,7 +40,12 @@ mGEMS bin and mGEMS extract, which bin the reads in the input
 pseudoalignment (mGEMS bin) and extract the binned reads from the
 original mixed samples (mGEMS extract).
 
-### (Pseudo)tutorial — Full pipeline with Themisto and mSWEEP
+### Tutorial — E. coli ST131 sublineages
+A tutorial for reproducing the *E. coli* ST131 sublineage phylogenetic
+tree presented in Mäklin et al. 2020 using mGEMS is available in the
+[docs folder of this repository](docs/TUTORIAL.md).
+
+### Quickstart — full pipeline
 Build a [Themisto](https://github.com/jnalanko/themisto) index to
 align against.
 ```
