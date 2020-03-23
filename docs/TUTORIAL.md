@@ -74,6 +74,7 @@ The reference data from Mäklin et al. is available from zenodo
 - [*E. coli*](https://zenodo.org/record/3724112)
 - [*E. faecalis*](https://zenodo.org/record/3724101)
 - [*S. aureus*](https://zenodo.org/record/3724135)
+
 Construction of the reference dataset(s) is describe in more detail in
 Mäklin et al. 2020.
 
