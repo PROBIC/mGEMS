@@ -58,7 +58,7 @@ ulimit -n 2048
 Download the supplementary table from the mGEMS manucsript which
 contains the relevant information
 ```
-https://zenodo.org/record/3724144/files/mGEMS_Supplementary_Table_mixed_samples.tsv
+wget https://zenodo.org/record/3724144/files/mGEMS_Supplementary_Table_mixed_samples.tsv
 ```
 Filter the table to contain only the *E. coli* (ecoli) experiments
 ```
@@ -70,18 +70,18 @@ other two experiments may require resources beyond the typical laptop or
 desktop computer.
 
 ### <a name="referencedata"></a>Reference data
-Download and extract the relevant reference data from zenodo
+The reference data from Mäklin et al. is available from zenodo
 - [*E. coli*](https://zenodo.org/record/3724112)
 - [*E. faecalis*](https://zenodo.org/record/3724101)
 - [*S. aureus*](https://zenodo.org/record/3724135)
+Construction of the reference dataset(s) is describe in more detail in
+Mäklin et al. 2020.
 
-by running
+Download and extract the *E. coli* dataset by running
 ```
 wget https://zenodo.org/record/3724112/files/mGEMS-ecoli-reference-v1.0.0.tar.gz
 tar -zxvf mGEMS-ecoli-reference-v1.0.0.tar.gz
 ```
-Construction of the reference dataset(s) is describe in more detail in
-Mäklin et al. 2020.
 
 ### <a name="indexing"></a>Indexing
 Create a *31*-mer pseudoalignment index with Themisto using two
