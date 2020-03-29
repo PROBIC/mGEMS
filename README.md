@@ -8,7 +8,7 @@ To run the binning + assembly pipeline, you will need a program that
 does pseudoalignment and another program that estimates an assignment
 probability matrix for the reads to the alignment targets.
 
-We recommend to use [Themisto](https://github.com/jnalanko/themisto)
+We recommend to use [Themisto](https://github.com/algbio/themisto)
 (v0.1.1 or newer) for pseudoalignment and
 [mSWEEP](https://github.com/probic/msweep-assembly) (v1.3.2 or newer)
 for estimating the probability matrix.
@@ -41,7 +41,7 @@ pseudoalignment (mGEMS bin) and extract the binned reads from the
 original mixed samples (mGEMS extract).
 
 ### (Pseudo)tutorial — Full pipeline with Themisto and mSWEEP
-Build a [Themisto](https://github.com/jnalanko/themisto) index to
+Build a [Themisto](https://github.com/algbio/themisto) index to
 align against.
 ```
 mkdir themisto_index
@@ -51,8 +51,8 @@ build_index --k 31 --input-file example.fasta --auto-colors --index-dir themisto
 
 Align paired-end reads 'reads_1.fastq.gz' and 'reads_2.fastq.gz' with Themisto
 ```
-pseudoalign --index-dir themisto_index --query-file reads_1.fastq.gz --outfile pseudoalignments_1.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192
-pseudoalign --index-dir themisto_index --query-file reads_2.fastq.gz --outfile pseudoalignments_2.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192
+pseudoalign --index-dir themisto_index --query-file reads_1.fastq.gz --outfile pseudoalignments_1.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192 --sort-output
+pseudoalign --index-dir themisto_index --query-file reads_2.fastq.gz --outfile pseudoalignments_2.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192 --sort-output
 ```
 
 Estimate the relative abundances with mSWEEP (reference_grouping.txt
