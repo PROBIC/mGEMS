@@ -107,9 +107,9 @@ mGEMS accepts the following input flags
 	-a                 Relative abundance estimates from mSWEEP (tab-separated, 1st
 	                   column has the group names and 2nd column the estimates).
 	--index            Themisto pseudoalignment index directory.
-	--groups           (Optional) which groups to extract from the input reads.
-	--compress         (Optional) Toggle compressing the output files
-                       (default: compress)
+	--groups           (Optional) Which groups to extract from the input reads.
+	--min-abundance    (Optional) Extract only groups that have a relative abundance higher than this value.
+	--compress         (Optional) Toggle compressing the output files (default: compress)
 ```
 
 
