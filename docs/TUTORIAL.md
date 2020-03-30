@@ -13,7 +13,7 @@ repository.
 
 ## Requirements
 ### mGEMS pipeline
-- [Themisto](https://github.com/jnalanko/Themisto)
+- [Themisto](https://github.com/algbio/Themisto)
 - [mSWEEP](https://github.com/probic/mSWEEP)
 - [mGEMS](https://github.com/probic/mGEMS)
 - [shovill](https://github.com/tseemann/shovill/)
@@ -124,10 +124,8 @@ Align the mixed sample files against the index using two threads
 for f1 in *_1.fastq.gz; do
 	f=${f1%_1.fastq.gz}
 	f2=$f""_2.fastq.gz
-	pseudoalign --query-file $f1 --outfile $f""_1.aln --index-dir mGEMS-ecoli-reference --temp-dir mGEMS-ecoli-reference/tmp --n-threads 2 --rc
-	pseudoalign --query-file $f2 --outfile $f""_2.aln --index-dir mGEMS-ecoli-reference --temp-dir mGEMS-ecoli-reference/tmp --n-threads 2 --rc
-	gzip $f""_1.aln
-	gzip $f""_2.aln
+	pseudoalign --query-file $f1 --outfile $f""_1.aln --index-dir mGEMS-ecoli-reference --temp-dir mGEMS-ecoli-reference/tmp --n-threads 2 --rc --sort-output --gzip-output
+	pseudoalign --query-file $f2 --outfile $f""_2.aln --index-dir mGEMS-ecoli-reference --temp-dir mGEMS-ecoli-reference/tmp --n-threads 2 --rc --sort-output --gzip-output
 done
 ```
 
