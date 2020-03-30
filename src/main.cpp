@@ -39,9 +39,11 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<std::string>("probs", "Posterior probabilities from mSWEEP.");
   args.add_long_argument<std::string>("merge-mode", "How to merge paired-end alignments from Themisto (default: intersection).", "intersection");
   args.add_long_argument<std::vector<std::string>>("groups", "Which reference groups to bin reads to (default: all).");
+  args.add_long_argument<long double>("min-abundance", "Bin only the groups that have a relative abundance higher than this value (optional).");
   args.add_short_argument<long double>('q', "Tuning parameter for the binning thresholds (default: 1.0).", (long double)1);
   args.add_long_argument<std::string>("index", "Themisto pseudoalignment index directory.");
   args.set_not_required("groups");
+  args.set_not_required("min-abundance");
 
   args.parse(argc, argv);
 }
@@ -91,6 +93,15 @@ void ReadAndExtract(cxxargs::Arguments &args) {
   Extract(bins, target_groups, args);
 }
 
+void FilterTargetGroups(const std::vector<std::string> &group_names, const std::vector<long double> &abundances, const long double min_abundance, std::vector<std::string> *target_groups) {
+  uint32_t n_groups = group_names.size();
+  for (uint32_t i = 0; i < n_groups; ++i) {
+    if (abundances[i] < min_abundance && std::find(target_groups->begin(), target_groups->end(), group_names[i]) != target_groups->end()) {
+      target_groups->erase(std::find(target_groups->begin(), target_groups->end(), group_names[i]));
+    }
+  }
+}
+
 void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   DIR* dir = opendir(args.value<std::string>('o').c_str());
   if (dir) {
@@ -128,6 +139,10 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   } else {
     target_groups = groups;
   }
+  if (args.is_initialized("min-abundance")) {
+    FilterTargetGroups(groups, abundances, args.value<long double>("min-abundance"), &target_groups);
+  }
+
   const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, args.value<long double>('q'), abundances, groups, probs_file.stream(), &target_groups);
   if (!extract_bins) {
     uint32_t n_bins = bins.size();

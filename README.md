@@ -40,7 +40,12 @@ mGEMS bin and mGEMS extract, which bin the reads in the input
 pseudoalignment (mGEMS bin) and extract the binned reads from the
 original mixed samples (mGEMS extract).
 
-### (Pseudo)tutorial — Full pipeline with Themisto and mSWEEP
+### Tutorial — E. coli ST131 sublineages
+A tutorial for reproducing the *E. coli* ST131 sublineage phylogenetic
+tree presented in Mäklin et al. 2020 using mGEMS is available in the
+[docs folder of this repository](docs/TUTORIAL.md).
+
+### Quickstart — full pipeline
 Build a [Themisto](https://github.com/algbio/themisto) index to
 align against.
 ```
@@ -49,23 +54,23 @@ mkdir themisto_index/tmp
 build_index --k 31 --input-file example.fasta --auto-colors --index-dir themisto_index --temp-dir themisto_index/tmp
 ```
 
-Align paired-end reads 'reads_1.fastq.gz' and 'reads_2.fastq.gz' with Themisto
+Align paired-end reads 'reads_1.fastq.gz' and 'reads_2.fastq.gz' with Themisto (note the **--sort-output** flag must be used!)
 ```
-pseudoalign --index-dir themisto_index --query-file reads_1.fastq.gz --outfile pseudoalignments_1.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192 --sort-output
-pseudoalign --index-dir themisto_index --query-file reads_2.fastq.gz --outfile pseudoalignments_2.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192 --sort-output
+pseudoalign --index-dir themisto_index --query-file reads_1.fastq.gz --outfile pseudoalignments_1.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192 --sort-output --gzip-output
+pseudoalign --index-dir themisto_index --query-file reads_2.fastq.gz --outfile pseudoalignments_2.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192 --sort-output --gzip-output
 ```
 
 Estimate the relative abundances with mSWEEP (reference_grouping.txt
 should contain the groups the sequences in 'example.fasta' are
 assigned to. See the [mSWEEP](https://github.com/probic/msweep-assembly) usage instructions for details).
 ```
-mSWEEP --themisto-1 pseudoalignments_1.aln --themisto-2 pseudoalignments_2.aln -o mSWEEP -i reference_grouping.txt --write-probs
+mSWEEP --themisto-1 pseudoalignments_1.aln.gz --themisto-2 pseudoalignments_2.aln.gz -o mSWEEP -i reference_grouping.txt --write-probs
 ```
 
 Bin the reads and write all bins to the 'mGEMS-out' folder
 ```
 mkdir mGEMS-out
-mGEMS -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
+mGEMS -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
 ```
 This will write the binned paired-end reads for *all groups* in the
 mSWEEP_abundances.txt file in the mGEMS-out folder (compressed with
@@ -75,13 +80,13 @@ zlib).
 ... or bin and write only the reads that are assigned to "group-3" or
 "group-4" by adding the '--groups group-3,group-4' flag
 ```
-mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
+mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
 ```
 
 Alternatively, find and write only the read bins for "group-3" and
 "group-4", skipping extracting the reads
 ```
-mGEMS bin --groups group-3,group-4 --themisto-alns pseudoalignments_1.txt,pseudoalignments_2.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
+mGEMS bin --groups group-3,group-4 --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
 ```
 
 ... and extract the reads when feeling like it
@@ -102,9 +107,9 @@ mGEMS accepts the following input flags
 	-a                 Relative abundance estimates from mSWEEP (tab-separated, 1st
 	                   column has the group names and 2nd column the estimates).
 	--index            Themisto pseudoalignment index directory.
-	--groups           (Optional) which groups to extract from the input reads.
-	--compress         (Optional) Toggle compressing the output files
-                       (default: compress)
+	--groups           (Optional) Which groups to extract from the input reads.
+	--min-abundance    (Optional) Extract only groups that have a relative abundance higher than this value.
+	--compress         (Optional) Toggle compressing the output files (default: compress)
 ```
 
 
