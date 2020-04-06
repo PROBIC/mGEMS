@@ -2,6 +2,10 @@
 
 Bacterial sequencing data binning on strain-level based on probabilistic taxonomic classification.
 
+More about mGEMS in the preprint [Genomic epidemiology with mixed
+samples](https://www.biorxiv.org/content/10.1101/2020.04.03.021501v1)
+in bioRxiv (not peer reviewed).
+
 ## Installation
 ### Dependencies
 To run the binning + assembly pipeline, you will need a program that

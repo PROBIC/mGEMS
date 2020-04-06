@@ -1,7 +1,7 @@
 # Genomic epidemiology with mixed samples: a tutorial
 This tutorial constains instructions on how to repproduce the results
-of the three main synthetic experiments from *Genomic epidemiology
-with mixed samples*, Mäklin et al. 2020, in preparation.
+of the three main synthetic experiments from the preprint [Genomic epidemiology with mixed
+samples](https://www.biorxiv.org/content/10.1101/2020.04.03.021501v1).
 
 The tutorial will focus on reproducing the *Escherichia coli*
 experiment but contains instructions on how to adapt the scripts to
@@ -62,7 +62,7 @@ wget https://zenodo.org/record/3724144/files/mGEMS_Supplementary_Table_mixed_sam
 ```
 Filter the table to contain only the *E. coli* (ecoli) experiments
 ```
-grep "ecoli" mGEMS_Supplementary_Table_mixed_samples.tsv" > mixed_samples.tsv
+grep "ecoli" mGEMS_Supplementary_Table_mixed_samples.tsv > mixed_samples.tsv
 ```
 If you want to reproduce the *E. faecalis* experiments, change 'ecoli'
 to 'efaec'. For *S. aureus*, change 'ecoli' to 'saur'. Running these
@@ -70,13 +70,13 @@ other two experiments may require resources beyond the typical laptop or
 desktop computer.
 
 ### <a name="referencedata"></a>Reference data
-The reference data from Mäklin et al. is available from zenodo
+The reference data from [the preprint](https://www.biorxiv.org/content/10.1101/2020.04.03.021501v1) available from zenodo
 - [*E. coli*](https://zenodo.org/record/3724112)
 - [*E. faecalis*](https://zenodo.org/record/3724101)
 - [*S. aureus*](https://zenodo.org/record/3724135)
 
 Construction of the reference dataset(s) is describe in more detail in
-Mäklin et al. 2020.
+the preprint.
 
 Download and extract the *E. coli* dataset by running
 ```
