@@ -3,7 +3,7 @@
 Bacterial sequencing data binning on strain-level based on probabilistic taxonomic classification.
 
 More about mGEMS in the preprint [Genomic epidemiology with mixed
-samples](https://www.biorxiv.org/content/10.1101/2020.04.03.021501v1)
+samples](https://www.biorxiv.org/content/10.1101/2020.04.03.021501v2)
 in bioRxiv (not peer reviewed).
 
 ## Installation
@@ -14,7 +14,7 @@ probability matrix for the reads to the alignment targets.
 
 We recommend to use [Themisto](https://github.com/algbio/themisto)
 (v0.1.1 or newer) for pseudoalignment and
-[mSWEEP](https://github.com/probic/msweep-assembly) (v1.3.2 or newer)
+[mSWEEP](https://github.com/probic/mSWEEP) (v1.3.2 or newer)
 for estimating the probability matrix.
 
 ### Compiling from source
@@ -66,7 +66,7 @@ pseudoalign --index-dir themisto_index --query-file reads_2.fastq.gz --outfile p
 
 Estimate the relative abundances with mSWEEP (reference_grouping.txt
 should contain the groups the sequences in 'example.fasta' are
-assigned to. See the [mSWEEP](https://github.com/probic/msweep-assembly) usage instructions for details).
+assigned to. See the [mSWEEP](https://github.com/probic/mSWEEP) usage instructions for details).
 ```
 mSWEEP --themisto-1 pseudoalignments_1.aln.gz --themisto-2 pseudoalignments_2.aln.gz -o mSWEEP -i reference_grouping.txt --write-probs
 ```
