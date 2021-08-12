@@ -14,8 +14,13 @@ probability matrix for the reads to the alignment targets.
 
 We recommend to use [Themisto](https://github.com/algbio/themisto)
 (v0.1.1 or newer) for pseudoalignment and
-[mSWEEP](https://github.com/probic/mSWEEP) (v1.3.2 or newer)
-for estimating the probability matrix.
+[mSWEEP](https://github.com/probic/mSWEEP) (v1.3.2 or newer) for
+estimating the probability matrix. For assembling the bins output by
+mGEMS, we recommend [shovill](https://github.com/tseemann/shovill) for
+typical use-cases but metagenomic assemblers like
+[MEGAHIT](https://github.com/voutcn/megahit) may perform better when
+the differences between the bins are especially small (see
+Supplementary Figure 2 of the mGEMS preprint).
 
 ### Compiling from source
 #### Requirements
