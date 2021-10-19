@@ -36,7 +36,7 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.parse(argc, argv);
 }
 
-void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<std::string> &target_groups, const cxxargs::Arguments &args) {
+void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<uint32_t> &unassigned_bin, const std::vector<std::string> &target_groups, const cxxargs::Arguments &args) {
   uint32_t n_out_groups = bins.size();
   uint8_t n_strands = args.value<std::vector<std::string>>('r').size();
   std::vector<cxxio::In> in_strands(n_strands);
@@ -53,6 +53,20 @@ void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<s
       }
     }
     mGEMS::ExtractBin(bins[i], in_strands, &out_strands);
+  }
+  // Extract unassigned reads
+  for (uint8_t j = 0; j < n_strands; ++j) {
+    in_strands[j].open(args.value<std::vector<std::string>>('r')[j]);
+    std::string out_name = args.value<std::string>('o') + '/' + "unassigned_reads" + '_' + std::to_string(j + 1) + ".fastq";
+    if (args.value<bool>("compress")) {
+      out_name += ".gz";
+      out_strands[j].open_compressed(out_name);
+    } else {
+      out_strands[j].open(out_name);
+    }
+    if (unassigned_bin.size() > 0) {
+      mGEMS::ExtractBin(unassigned_bin, in_strands, &out_strands);
+    }
   }
 }
 
@@ -73,7 +87,7 @@ void ReadAndExtract(cxxargs::Arguments &args) {
     }
     target_groups[i] = out_name;
   }
-  Extract(bins, target_groups, args);
+  Extract(bins, std::vector<uint32_t>(), target_groups, args);
 }
 
 void FilterTargetGroups(const std::vector<std::string> &group_names, const std::vector<long double> &abundances, const long double min_abundance, std::vector<std::string> *target_groups) {
@@ -128,7 +142,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     cxxio::Out of(args.value<std::string>('o') + '/' + "unassigned_reads.bin");
     mGEMS::WriteBin(unassigned_bin, of.stream());
   } else {
-    Extract(bins, target_groups, args);
+    Extract(bins, unassigned_bin, target_groups, args);
   }
 }
 
