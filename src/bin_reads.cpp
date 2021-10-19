@@ -113,6 +113,8 @@ std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long 
       std::sort(out_bins.back().begin(), out_bins.back().end());
     }
   }
+  std::sort(unassigned_bin->begin(), unassigned_bin->end());
+
   return out_bins;
 }
 }
