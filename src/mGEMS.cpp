@@ -6,7 +6,7 @@
 #include "extract_bin.h"
 
 namespace mGEMS {
-std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::vector<std::string> &group_names, std::istream &probs_file, std::vector<std::string> *target_groups) {
+std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups) {
   uint32_t num_ecs = aln.size();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);

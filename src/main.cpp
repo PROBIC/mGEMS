@@ -143,7 +143,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     FilterTargetGroups(groups, abundances, args.value<long double>("min-abundance"), &target_groups);
   }
 
-  const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, args.value<long double>('q'), abundances, groups, probs_file.stream(), &target_groups);
+  const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, args.value<long double>('q'), abundances, probs_file.stream(), &target_groups);
   if (!extract_bins) {
     uint32_t n_bins = bins.size();
     for (uint32_t i = 0; i < n_bins; ++i) {
