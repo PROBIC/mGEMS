@@ -15,6 +15,7 @@ void ParseExtract(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<std::vector<std::string>>("bins", "Comma-separated list of bins to extract from the paired-end reads.");
   args.add_long_argument<bool>("compress", "Compress extracted reads with zlib (.gz extension, default: true)", true);
   args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequence but were not assigned to any group.", false);
+  args.add_long_argument<bool>("write-assignment-table", "Write the read-group assignment table.", false);
   args.set_not_required("bins");
   args.set_not_required('o');
 
@@ -145,6 +146,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   std::vector<std::vector<bool>> assignments_mat(aln.size(), std::vector<bool>(n_groups, false));
   const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, args.value<long double>('q'), abundances, probs_file.stream(), &target_groups, &unassigned_bin, &assignments_mat);
 
+  std::cerr << args.value<bool>("write-assignment-table") << std::endl;
   if (args.value<bool>("write-assignment-table")) {
     cxxio::Out of(args.value<std::string>('o') + '/' + "reads_to_groups.tsv");
     of.stream() << "#read" << '\t';
@@ -156,6 +158,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     }
     of.stream() << '\n';
     mGEMS::WriteAssignments(assignments_mat, aln, of.stream());
+    of.close();
   }
 
   if (!extract_bins) {
