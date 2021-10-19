@@ -86,6 +86,13 @@ mSWEEP_abundances.txt file in the mGEMS-out folder (compressed with
 zlib).
 
 ### Advanced use
+You can also extract the read-to-group assignments table that mGEMS
+uses internally by adding the `--write-assignment-table` toggle to the
+call to `mGEMS` or `mGEMS bin`:
+```
+mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index --write-assignment-table
+```
+
 ... or bin and write only the reads that are assigned to "group-3" or
 "group-4" by adding the '--groups group-3,group-4' flag
 ```
