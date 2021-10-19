@@ -48,6 +48,7 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
 //   `probs_file`: Read probability matrix (.probs file) from mSWEEP.
 //   `*target_groups`: Names of the groups that bins will be created for.
 // Output:
+//   `*target_groups`: The names will be reordered to match the order of the bins.
 //   `out_bins`: Vector containing the bins for the groups given in `*target_groups`.
 std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups);
 
