@@ -14,7 +14,7 @@ void ParseExtract(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_short_argument<std::string>('o', "Output directory.");
   args.add_long_argument<std::vector<std::string>>("bins", "Comma-separated list of bins to extract from the paired-end reads.");
   args.add_long_argument<bool>("compress", "Compress extracted reads with zlib (.gz extension, default: true)", true);
-  args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequnce but were not assigned to any group.", false);
+  args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequence but were not assigned to any group.", false);
   args.set_not_required("bins");
   args.set_not_required('o');
 
@@ -31,7 +31,7 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<long double>("min-abundance", "Bin only the groups that have a relative abundance higher than this value (optional).");
   args.add_short_argument<long double>('q', "Tuning parameter for the binning thresholds (default: 1.0).", (long double)1);
   args.add_long_argument<std::string>("index", "Themisto pseudoalignment index directory.");
-  args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequnce but were not assigned to any group.", false);
+  args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequence but were not assigned to any group.", false);
   args.set_not_required("groups");
   args.set_not_required("min-abundance");
 

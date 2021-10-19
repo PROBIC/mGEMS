@@ -92,15 +92,21 @@ zlib).
 mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
 ```
 
-Alternatively, find and write only the read bins for "group-3" and
-"group-4", skipping extracting the reads
+... write the reads that pseudoaligned to a reference sequence but were not assigned to any group by adding the `--write-unassigned` flag:
 ```
-mGEMS bin --groups group-3,group-4 --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
+mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index --write-unassigned
+```
+
+Alternatively, find and write only the read bins for "group-3",
+"group-4", and the reads that pseudoaligned but were not assigned to
+any group; skipping extracting the reads
+```
+mGEMS bin --groups group-3,group-4 --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index --write-unassigned
 ```
 
 ... and extract the reads when feeling like it
 ```
-mGEMS extract --bins mGEMS-out/group-3.bin,mGEMS-out/group-4.bin -r
+mGEMS extract --bins mGEMS-out/group-3.bin,mGEMS-out/group-4.bin,mGEMS-out/unassigned_reads.bin -r
 reads_1.fastq.gz,reads_2.fastq.gz -o mGEMS-out
 ```
 
@@ -119,6 +125,7 @@ mGEMS accepts the following input flags
 	--groups           (Optional) Which groups to extract from the input reads.
 	--min-abundance    (Optional) Extract only groups that have a relative abundance higher than this value.
 	--compress         (Optional) Toggle compressing the output files (default: compress)
+	--write-unassigned (Optional) Extract reads that pseudoaligned to a reference sequence but were not assigned to any group. (default: off)
 ```
 
 
