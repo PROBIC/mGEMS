@@ -15,8 +15,9 @@ uint32_t ReadAbundances(std::istream &stream, std::vector<long double> *abundanc
 // Input:
 //   `num_ecs`: How many equivalence classes (unique pseudoalignments) there are in total.
 //   `theta_frac`: Tuning parameter for the thresholds. Can be used to loosen/tighten the
-//                 rule defined in Equation (7). Should be between 0 and 1 (not validated!).
+//                 rule defined in Equation (7).
 //   `abundances`: Relative abundances from mSWEEP.
+// Output:
 //   `*thresholds`: Holds the output values, i. e. the thresholds. Should be initialized to
 //                  the correct size (number of groups in `abundances`) by the caller.
 void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, const std::vector<long double> &abundances, std::vector<long double> *thresholds);
@@ -26,11 +27,13 @@ void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, c
 //   `thresholds`: The binning thresholds from CalculateThresholds.
 //    `probs_file`: Read probability matrix (.probs file) from mSWEEP.
 //    `mask`: Boolean vector defining which groups (value 1) to perform binning on.
-//    `*assignments`: `num_ecs` x `n_groups` boolean matrix that contains a 1 if
-//                    the ec corresponding to the row was assigned to the column.
 //    `aligned_reads`: 2D vector containing the ids of the pseudoaligned reads in
 //                     each equivalence class
-//    `bins`: 2D output vector containing the ids of the reads binned to each group.
+// Output:
+//    `*assignments`: `num_ecs` x `n_groups` boolean matrix that contains a 1 if
+//                    the ec corresponding to the row was assigned to the column.
+//    `*bins`: 2D output vector containing the ids of the reads binned to each group.
+//    `*unassigned_bin`: Vector containing the ids of reads that were not assigned to any bin.
 void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin);
 
 void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
@@ -40,8 +43,7 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
 // that were requested.
 // Input:
 //   `aln`: Pseudoalignments from Themisto.
-//   `theta_frac`: Tuning parameter for the thresholds,
-//                 should be between 0 and 1 (not validated!).
+//   `theta_frac`: Tuning parameter for the thresholds..
 //   `abundances`: Relative abundances from mSWEEP.
 //   `probs_file`: Read probability matrix (.probs file) from mSWEEP.
 //   `*target_groups`: Names of the groups that bins will be created for.
