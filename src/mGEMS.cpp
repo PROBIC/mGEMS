@@ -14,6 +14,7 @@ void ParseExtract(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_short_argument<std::string>('o', "Output directory.");
   args.add_long_argument<std::vector<std::string>>("bins", "Comma-separated list of bins to extract from the paired-end reads.");
   args.add_long_argument<bool>("compress", "Compress extracted reads with zlib (.gz extension, default: true)", true);
+  args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequnce but were not assigned to any group.", false);
   args.set_not_required("bins");
   args.set_not_required('o');
 
@@ -30,6 +31,7 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<long double>("min-abundance", "Bin only the groups that have a relative abundance higher than this value (optional).");
   args.add_short_argument<long double>('q', "Tuning parameter for the binning thresholds (default: 1.0).", (long double)1);
   args.add_long_argument<std::string>("index", "Themisto pseudoalignment index directory.");
+  args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequnce but were not assigned to any group.", false);
   args.set_not_required("groups");
   args.set_not_required("min-abundance");
 
@@ -54,18 +56,20 @@ void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<u
     }
     mGEMS::ExtractBin(bins[i], in_strands, &out_strands);
   }
-  // Extract unassigned reads
-  for (uint8_t j = 0; j < n_strands; ++j) {
-    in_strands[j].open(args.value<std::vector<std::string>>('r')[j]);
-    std::string out_name = args.value<std::string>('o') + '/' + "unassigned_reads" + '_' + std::to_string(j + 1) + ".fastq";
-    if (args.value<bool>("compress")) {
-      out_name += ".gz";
-      out_strands[j].open_compressed(out_name);
-    } else {
-      out_strands[j].open(out_name);
-    }
-    if (unassigned_bin.size() > 0) {
-      mGEMS::ExtractBin(unassigned_bin, in_strands, &out_strands);
+  if (args.value<bool>("write-unassigned")) {
+    // Extract unassigned reads
+    for (uint8_t j = 0; j < n_strands; ++j) {
+      in_strands[j].open(args.value<std::vector<std::string>>('r')[j]);
+      std::string out_name = args.value<std::string>('o') + '/' + "unassigned_reads" + '_' + std::to_string(j + 1) + ".fastq";
+      if (args.value<bool>("compress")) {
+	out_name += ".gz";
+	out_strands[j].open_compressed(out_name);
+      } else {
+	out_strands[j].open(out_name);
+      }
+      if (unassigned_bin.size() > 0) {
+	mGEMS::ExtractBin(unassigned_bin, in_strands, &out_strands);
+      }
     }
   }
 }
@@ -139,8 +143,10 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
       cxxio::Out of(args.value<std::string>('o') + '/' + target_groups[i] + ".bin");
       mGEMS::WriteBin(bins[i], of.stream());
     }
-    cxxio::Out of(args.value<std::string>('o') + '/' + "unassigned_reads.bin");
-    mGEMS::WriteBin(unassigned_bin, of.stream());
+    if (args.value<bool>("write-unassigned")) {
+      cxxio::Out of(args.value<std::string>('o') + '/' + "unassigned_reads.bin");
+      mGEMS::WriteBin(unassigned_bin, of.stream());
+    }
   } else {
     Extract(bins, unassigned_bin, target_groups, args);
   }
