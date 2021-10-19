@@ -25,13 +25,13 @@ void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, c
 // Input:
 //   `thresholds`: The binning thresholds from CalculateThresholds.
 //    `probs_file`: Read probability matrix (.probs file) from mSWEEP.
-//    `*target_groups`: Names of the groups that  the bins will be created for.
+//    `mask`: Boolean vector defining which groups (value 1) to perform binning on.
 //    `*assignments`: `num_ecs` x `n_groups` boolean matrix that contains a 1 if
 //                    the ec corresponding to the row was assigned to the column.
 //    `aligned_reads`: 2D vector containing the ids of the pseudoaligned reads in
 //                     each equivalence class
 //    `bins`: 2D output vector containing the ids of the reads binned to each group.
-void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins);
+void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins);
 
 void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
 

@@ -51,13 +51,11 @@ void MaskProbs(const std::string &header_line, std::vector<std::string> *target_
   (*target_groups) = ordered_targets;
 }
 
-void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins) {
-  std::string line;
-  std::getline(probs_file, line); // 1st line is header
-  std::vector<bool> mask(thresholds.size(), false);
+void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins) {
   std::vector<uint32_t> n_reads(thresholds.size(), 0);
-  MaskProbs(line, target_groups, &mask);
   uint32_t ec_id = 0;
+
+  std::string line;
   while (std::getline(probs_file, line)) {
     std::string part;
     std::stringstream partition(line);
@@ -93,7 +91,12 @@ std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long 
   std::vector<std::vector<bool>> assignments(num_ecs, std::vector<bool>(n_groups, false));
   std::vector<std::vector<uint32_t>> read_bins(n_groups, std::vector<uint32_t>());
 
-  AssignProbs(thresholds, probs_file, target_groups, &assignments, aln.aligned_reads, &read_bins);
+  std::string probs_header;
+  std::getline(probs_file, probs_header); // 1st line is header
+  std::vector<bool> mask(n_groups, false);
+  MaskProbs(probs_header, target_groups, &mask);
+
+  AssignProbs(thresholds, probs_file, mask, &assignments, aln.aligned_reads, &read_bins);
 
   std::vector<std::vector<uint32_t>> out_bins;
   for (uint32_t i = 0; i < n_groups; ++i) {
