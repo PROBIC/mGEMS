@@ -83,6 +83,27 @@ else()
 endif()
 include_directories("${CMAKE_CXXARGS_HEADERS}")
 
+## cxxio
+if (DEFINED CMAKE_CXXIO_HEADERS)
+  message(STATUS "cxxio headers provided in: ${CMAKE_CXXIO_HEADERS}")
+else()
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/CMakeLists-cxxio.txt.in ${CMAKE_BINARY_DIR}/external/cxxio-download/CMakeLists.txt)
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/cxxio-download )
+  if(result)
+    message(FATAL_ERROR "CMake step for cxxio failed: ${result}")
+  endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/cxxio-download )
+  if(result)
+    message(FATAL_ERROR "Build step for cxxio failed: ${result}")
+  endif()
+  set(CMAKE_CXXIO_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/external/cxxio/include)
+endif()
+include_directories("${CMAKE_CXXIO_HEADERS}")
+
 ## Check dependencies and download them if not given
 ## telescope
 if (DEFINED CMAKE_TELESCOPE_LIBRARY AND DEFINED CMAKE_TELESCOPE_HEADERS)
@@ -130,8 +151,7 @@ string(TIMESTAMP _BUILD_TIMESTAMP)
 ## Generate a version.h file containing build version and timestamp
 configure_file(${CMAKE_SOURCE_DIR}/include/version.h.in ${CMAKE_BINARY_DIR}/include/version.h @ONLY)
 
-## external/include has the version info
-include_directories(include ${CMAKE_SOURCE_DIR}/external)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 ## mGEMS library
 add_library(libmgems

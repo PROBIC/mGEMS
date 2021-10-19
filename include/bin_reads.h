@@ -7,8 +7,6 @@
 
 #include "telescope.hpp"
 
-#include "file.hpp"
-
 namespace mGEMS {
 uint32_t ReadAbundances(std::istream &stream, std::vector<long double> *abundances, std::vector<std::string> *groups);
 void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, const std::vector<long double> &abundances, std::vector<long double> *thresholds);

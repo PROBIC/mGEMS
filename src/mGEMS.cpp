@@ -1,24 +1,13 @@
-#include <dirent.h>
-
 #include <exception>
 #include <iostream>
 #include <cstring>
 
 #include "telescope.hpp"
 #include "cxxargs.hpp"
+#include "cxxio.hpp"
 
-#include "file.hpp"
 #include "bin_reads.h"
 #include "extract_bin.h"
-
-uint32_t CountLines(std::istream &stream) {
-  std::string line;
-  uint32_t n_lines = 0;
-  while(std::getline(stream, line)) {
-    ++n_lines;
-  }
-  return n_lines;
-}
 
 void ParseExtract(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_short_argument<std::vector<std::string>>('r', "Input reads (comma separated list)");
@@ -50,8 +39,8 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
 void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<std::string> &target_groups, const cxxargs::Arguments &args) {
   uint32_t n_out_groups = bins.size();
   uint8_t n_strands = args.value<std::vector<std::string>>('r').size();
-  std::vector<File::In> in_strands(n_strands);
-  std::vector<File::Out> out_strands(n_strands);
+  std::vector<cxxio::In> in_strands(n_strands);
+  std::vector<cxxio::Out> out_strands(n_strands);
   for (uint32_t i = 0; i < n_out_groups; ++i) {
     for (uint8_t j = 0; j < n_strands; ++j) {
       in_strands[j].open(args.value<std::vector<std::string>>('r')[j]);
@@ -68,17 +57,12 @@ void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<s
 }
 
 void ReadAndExtract(cxxargs::Arguments &args) {
-  DIR* dir = opendir(args.value<std::string>('o').c_str());
-  if (dir) {
-    closedir(dir);
-  } else {
-    throw std::runtime_error("Directory " + args.value<std::string>('o') + " does not seem to exist.");
-  }
+  cxxio::directory_exists(args.value<std::string>('o'));
   uint32_t n_bins = args.value<std::vector<std::string>>("bins").size();
   std::vector<std::vector<uint32_t>> bins;
   std::vector<std::string> target_groups(n_bins);
   for (uint32_t i = 0; i < n_bins; ++i) {
-    File::In istream(args.value<std::vector<std::string>>("bins")[i]);
+    cxxio::In istream(args.value<std::vector<std::string>>("bins")[i]);
     bins.emplace_back(mGEMS::ReadBin(istream.stream()));
     std::string out_name = args.value<std::vector<std::string>>("bins")[i];
     if (out_name.find(".") != std::string::npos) {
@@ -102,36 +86,27 @@ void FilterTargetGroups(const std::vector<std::string> &group_names, const std::
 }
 
 void Bin(const cxxargs::Arguments &args, bool extract_bins) {
-  DIR* dir = opendir(args.value<std::string>('o').c_str());
-  if (dir) {
-    closedir(dir);
-  } else {
-    throw std::runtime_error("Directory " + args.value<std::string>('o') + " does not seem to exist.");
-  }
-  dir = opendir(args.value<std::string>("index").c_str());
-  if (dir) {
-    closedir(dir);
-  } else {
-    throw std::runtime_error("Themisto pseudoalignment index directory " + args.value<std::string>('o') + " does not seem to exist.");
-  }
+  cxxio::directory_exists(args.value<std::string>('o').c_str());
+  cxxio::directory_exists(args.value<std::string>("index").c_str());
+
   std::vector<std::string> groups;
   std::vector<long double> abundances;
-  File::In msweep_abundances(args.value<std::string>('a'));
+  cxxio::In msweep_abundances(args.value<std::string>('a'));
   mGEMS::ReadAbundances(msweep_abundances.stream(), &abundances, &groups);
   
   std::vector<std::istream*> themisto_alns;
   for (uint32_t i = 0; i < args.value<std::vector<std::string>>("themisto-alns").size(); ++i) {
-    File::In(args.value<std::vector<std::string>>("themisto-alns")[i]);
+    cxxio::In(args.value<std::vector<std::string>>("themisto-alns")[i]);
     themisto_alns.emplace_back(new bxz::ifstream(args.value<std::vector<std::string>>("themisto-alns")[i]));
   }
 
-  std::ifstream themisto_index(args.value<std::string>("index") + "/coloring-names.txt");
-  uint32_t n_refs = CountLines(themisto_index);
+  cxxio::In themisto_index(args.value<std::string>("index") + "/coloring-names.txt");
+  uint32_t n_refs = themisto_index.count_lines<uint32_t>();
   themisto_index.close();
   ThemistoAlignment aln;
   ReadThemisto(get_mode(args.value<std::string>("merge-mode")), n_refs, themisto_alns, &aln);
 
-  File::In probs_file(args.value<std::string>("probs"));
+  cxxio::In probs_file(args.value<std::string>("probs"));
   std::vector<std::string> target_groups;
   if (args.is_initialized("groups")) {
     target_groups = args.value<std::vector<std::string>>("groups");
@@ -146,7 +121,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   if (!extract_bins) {
     uint32_t n_bins = bins.size();
     for (uint32_t i = 0; i < n_bins; ++i) {
-      File::Out of(args.value<std::string>('o') + '/' + target_groups[i] + ".bin");
+      cxxio::Out of(args.value<std::string>('o') + '/' + target_groups[i] + ".bin");
       mGEMS::WriteBin(bins[i], of.stream());
     }
   } else {
