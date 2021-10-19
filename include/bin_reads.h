@@ -31,7 +31,7 @@ void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, c
 //    `aligned_reads`: 2D vector containing the ids of the pseudoaligned reads in
 //                     each equivalence class
 //    `bins`: 2D output vector containing the ids of the reads binned to each group.
-void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins);
+void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin);
 
 void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
 

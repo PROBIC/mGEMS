@@ -51,25 +51,33 @@ void MaskProbs(const std::string &header_line, std::vector<std::string> *target_
   (*target_groups) = ordered_targets;
 }
 
-void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins) {
+void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
   std::vector<uint32_t> n_reads(thresholds.size(), 0);
   uint32_t ec_id = 0;
-
   std::string line;
   while (std::getline(probs_file, line)) {
     std::string part;
     std::stringstream partition(line);
     std::getline(partition, part, ','); // first element is the ec id
     uint32_t ref_id = 0;
+    bool any_assigned = false;
     while(std::getline(partition, part, ',')) {
       long double abundance = std::stold(part);
-      (*assignments)[ec_id][ref_id] = (abundance >= thresholds[ref_id]) && mask[ref_id];
-      if ((*assignments)[ec_id][ref_id]) {
+      bool assigned = (abundance >= thresholds[ref_id]);
+      (*assignments)[ec_id][ref_id] = assigned;
+      any_assigned = any_assigned || assigned;
+      if (assigned && mask[ref_id]) {
 	for (uint32_t i = 0; i < aligned_reads[ec_id].size(); ++i) {
 	  (*bins)[ref_id].push_back(aligned_reads[ec_id][i] + 1);
 	}
       }
       ++ref_id;
+    }
+    if (!any_assigned) {
+      // Send reads to aligned but unassigned bin.
+      for (uint32_t i = 0; i < aligned_reads[ec_id].size(); ++i) {
+	unassigned_bin->push_back(aligned_reads[ec_id][i] + 1);
+      }
     }
     ++ec_id;
   }
@@ -96,7 +104,8 @@ std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long 
   std::vector<bool> mask(n_groups, false);
   MaskProbs(probs_header, target_groups, &mask);
 
-  AssignProbs(thresholds, probs_file, mask, &assignments, aln.aligned_reads, &read_bins);
+  std::vector<uint32_t> unassigned_bin;
+  AssignProbs(thresholds, probs_file, mask, &assignments, aln.aligned_reads, &read_bins, &unassigned_bin);
 
   std::vector<std::vector<uint32_t>> out_bins;
   for (uint32_t i = 0; i < n_groups; ++i) {
