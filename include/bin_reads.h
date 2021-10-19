@@ -37,6 +37,7 @@ void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, c
 void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin);
 
 void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
+void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, const ThemistoAlignment &aln, std::ostream &of);
 
 // Returns a 2D vector that contains the ids (line numbers in the
 // .fastq files divided by 4) of reads assigned to the groups
@@ -51,7 +52,8 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
 //   `*target_groups`: The names will be reordered to match the order of the bins.
 //    `*unassigned_bin`: Vector containing the ids of reads that were not assigned to any bin.
 //   `out_bins`: Vector containing the bins for the groups given in `*target_groups`.
-std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin);
+//    `*assignments_mat`: The read assignment matrix from AssignProbs.
+  std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat);
 
   void Extract(const std::vector<std::string> &target_groups, const std::string &outdir, const std::string &strand_1, const std::string &strand_2, std::vector<std::vector<uint32_t>> &bins);
 }

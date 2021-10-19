@@ -32,6 +32,7 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_short_argument<long double>('q', "Tuning parameter for the binning thresholds (default: 1.0).", (long double)1);
   args.add_long_argument<std::string>("index", "Themisto pseudoalignment index directory.");
   args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequence but were not assigned to any group.", false);
+  args.add_long_argument<bool>("write-assignment-table", "Write the read-group assignment table.", false);
   args.set_not_required("groups");
   args.set_not_required("min-abundance");
 
@@ -139,8 +140,24 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     FilterTargetGroups(groups, abundances, args.value<long double>("min-abundance"), &target_groups);
   }
 
+  uint32_t n_groups = abundances.size();
   std::vector<uint32_t> unassigned_bin;
-  const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, args.value<long double>('q'), abundances, probs_file.stream(), &target_groups, &unassigned_bin);
+  std::vector<std::vector<bool>> assignments_mat(aln.size(), std::vector<bool>(n_groups, false));
+  const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, args.value<long double>('q'), abundances, probs_file.stream(), &target_groups, &unassigned_bin, &assignments_mat);
+
+  if (args.value<bool>("write-assignment-table")) {
+    cxxio::Out of(args.value<std::string>('o') + '/' + "reads_to_groups.tsv");
+    of.stream() << "#read" << '\t';
+    for (uint32_t i = 0; i < n_groups; ++i) {
+      of.stream() << groups[i];
+      if (i < n_groups - 1) {
+	of.stream() << '\t';
+      }
+    }
+    of.stream() << '\n';
+    mGEMS::WriteAssignments(assignments_mat, aln, of.stream());
+  }
+
   if (!extract_bins) {
     uint32_t n_bins = bins.size();
     for (uint32_t i = 0; i < n_bins; ++i) {

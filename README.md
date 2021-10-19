@@ -113,21 +113,21 @@ reads_1.fastq.gz,reads_2.fastq.gz -o mGEMS-out
 ### Accepted input flags
 mGEMS accepts the following input flags
 ```
-	-r                 Comma-separated list of input read(s).
-	--themisto-alns    Comma-separated list of pseudoalignment file(s) 
-	                   for the reads from themisto.
-	-o                 Output directory (must exist before running!).
-	--probs            Comma-separated Posterior probability matrix (output from mSWEEP with
-	                   the --write-probs flag).
-	-a                 Relative abundance estimates from mSWEEP (tab-separated, 1st
-	                   column has the group names and 2nd column the estimates).
-	--index            Themisto pseudoalignment index directory.
-	--groups           (Optional) Which groups to extract from the input reads.
-	--min-abundance    (Optional) Extract only groups that have a relative abundance higher than this value.
-	--compress         (Optional) Toggle compressing the output files (default: compress)
-	--write-unassigned (Optional) Extract reads that pseudoaligned to a reference sequence but were not assigned to any group. (default: off)
+	-r                       Comma-separated list of input read(s).
+	--themisto-alns          Comma-separated list of pseudoalignment file(s) 
+	                         for the reads from themisto.
+	-o                       Output directory (must exist before running!).
+	--probs                  Comma-separated Posterior probability matrix (output from mSWEEP with
+	                         the --write-probs flag).
+	-a                       Relative abundance estimates from mSWEEP (tab-separated, 1st
+	                         column has the group names and 2nd column the estimates).
+	--index                  Themisto pseudoalignment index directory.
+	--groups                 (Optional) Which groups to extract from the input reads.
+	--min-abundance          (Optional) Extract only groups that have a relative abundance higher than this value.
+	--compress               (Optional) Toggle compressing the output files (default: compress)
+	--write-unassigned       (Optional) Extract reads that pseudoaligned to a reference sequence but were not assigned to any group. (default: off)
+	--write-assignment-table (Optional) Write the read to group assignments table to `reads_to_groups.tsv` in the output directory. (default: off).
 ```
-
 
 ## License
 The source code from this project is subject to the terms of the MIT

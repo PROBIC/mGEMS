@@ -90,13 +90,33 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of) {
   of.flush();
 }
 
-std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin) {
+void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, const ThemistoAlignment &aln, std::ostream &of) {
+  uint32_t n_groups = assignments_mat[0].size();
+  uint32_t n_ecs = assignments_mat.size();
+  for (uint32_t i = 0; i < n_ecs; ++i) {
+    for (uint32_t j = 0; j < aln.aligned_reads[i].size(); ++j) {
+      of << aln.aligned_reads[i][j] + 1<< '\t';
+      for (uint32_t k = 0; k < n_groups; ++k) {
+	of << assignments_mat[i][k];
+	if (k < n_groups - 1) {
+	  of << '\t';
+	} else {
+	  if (i < n_ecs - 1) {
+	    of << '\n';
+	  }
+	}
+      }
+    }
+  }
+  of << std::endl;
+}
+
+std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
   uint32_t num_ecs = aln.size();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);
   ConstructThresholds(num_ecs, theta_frac, abundances, &thresholds);
 
-  std::vector<std::vector<bool>> assignments(num_ecs, std::vector<bool>(n_groups, false));
   std::vector<std::vector<uint32_t>> read_bins(n_groups, std::vector<uint32_t>());
 
   std::string probs_header;
@@ -104,7 +124,7 @@ std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long 
   std::vector<bool> mask(n_groups, false);
   MaskProbs(probs_header, target_groups, &mask);
 
-  AssignProbs(thresholds, probs_file, mask, &assignments, aln.aligned_reads, &read_bins, unassigned_bin);
+  AssignProbs(thresholds, probs_file, mask, assignments_mat, aln.aligned_reads, &read_bins, unassigned_bin);
 
   std::vector<std::vector<uint32_t>> out_bins;
   for (uint32_t i = 0; i < n_groups; ++i) {
