@@ -22,7 +22,7 @@ else()
 endif()
 
 ## mGEMS executable
-add_executable(mGEMS ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+add_executable(mGEMS ${CMAKE_CURRENT_SOURCE_DIR}/src/mGEMS.cpp)
 
 ## Check supported compression types
 find_package(BZip2)
