@@ -78,27 +78,6 @@ std::vector<bool> AssignProbs(const std::vector<long double> &thresholds, std::i
   return mask;
 }
 
-void BinReads(const std::vector<std::vector<bool>> &assignments, const std::vector<bool> &groups_to_assign, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *assigned_reads) {
-  // This function DOES NOT WORK and the AssignProbs func will do what
-  // this function is supposed to do.
-  uint32_t num_ecs = assignments.size();
-  uint32_t n_groups = assignments[0].size();
-  uint32_t aln_total = 0;
-  for (uint32_t j = 0; j < num_ecs; ++j) {
-    uint32_t n_aligned_reads = aligned_reads[j].size();
-    aln_total += n_aligned_reads;
-    uint32_t bin_id = 0;
-    for (uint32_t k = 0; k < n_groups; ++k) {
-      if (assignments[j][k] && groups_to_assign[k]) {
-  	for (uint32_t h = 0; h < n_aligned_reads; ++h) {
-  	  (*assigned_reads)[bin_id].emplace_back(aligned_reads[j][h] + 1);
-  	}
-  	++bin_id;
-      }
-    }
-  }
-}
-
 void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of) {
   for (uint32_t i = 0; i < binned_reads.size(); ++i) {
     of << binned_reads[i] << '\n';
@@ -114,9 +93,8 @@ std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long 
 
   std::vector<std::vector<bool>> assignments(num_ecs, std::vector<bool>(n_groups, false));
   std::vector<std::vector<uint32_t>> read_bins(n_groups, std::vector<uint32_t>());
-  const std::vector<bool> &groups_to_assign = AssignProbs(thresholds, probs_file, target_groups, &assignments, aln.aligned_reads, &read_bins);
 
-  //BinReads(assignments, groups_to_assign, aln.aligned_reads, &read_bins);
+  const std::vector<bool> &groups_to_assign = AssignProbs(thresholds, probs_file, target_groups, &assignments, aln.aligned_reads, &read_bins);
 
   std::vector<std::vector<uint32_t>> out_bins;
   for (uint32_t i = 0; i < n_groups; ++i) {
