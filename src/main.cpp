@@ -10,7 +10,6 @@
 #include "file.hpp"
 #include "bin_reads.h"
 #include "extract_bin.h"
-#include "mGEMS.h"
 
 uint32_t CountLines(std::istream &stream) {
   std::string line;

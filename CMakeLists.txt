@@ -134,10 +134,10 @@ configure_file(${CMAKE_SOURCE_DIR}/include/version.h.in ${CMAKE_BINARY_DIR}/incl
 include_directories(include ${CMAKE_SOURCE_DIR}/external)
 
 ## mGEMS library
-add_library(libmgems ${CMAKE_CURRENT_SOURCE_DIR}/src/mGEMS.cpp
+add_library(libmgems
 ${CMAKE_CURRENT_SOURCE_DIR}/src/bin_reads.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/extract_bin.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/src/mGEMS.cpp)
+)
 set_target_properties(libmgems PROPERTIES OUTPUT_NAME mgems)
 
 # Link libraries
