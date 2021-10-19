@@ -54,7 +54,11 @@ void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<u
 	out_strands[j].open(out_name);
       }
     }
-    mGEMS::ExtractBin(bins[i], in_strands, &out_strands);
+    if (bins[i].size() > 0) {
+      mGEMS::ExtractBin(bins[i], in_strands, &out_strands);
+    } else {
+      std::cerr << "WARNING: No reads assigned to bin " << target_groups[i] << '.' << std::endl;
+    }
   }
   if (args.value<bool>("write-unassigned")) {
     // Extract unassigned reads
