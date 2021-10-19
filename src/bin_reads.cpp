@@ -51,7 +51,7 @@ void MaskProbs(const std::string &header_line, std::vector<std::string> *target_
   (*target_groups) = ordered_targets;
 }
 
-std::vector<bool> AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &assigned_reads, std::vector<std::vector<uint32_t>> *bins) {
+void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins) {
   std::string line;
   std::getline(probs_file, line); // 1st line is header
   std::vector<bool> mask(thresholds.size(), false);
@@ -67,15 +67,14 @@ std::vector<bool> AssignProbs(const std::vector<long double> &thresholds, std::i
       long double abundance = std::stold(part);
       (*assignments)[ec_id][ref_id] = (abundance >= thresholds[ref_id]) && mask[ref_id];
       if ((*assignments)[ec_id][ref_id]) {
-	for (uint32_t i = 0; i < assigned_reads[ec_id].size(); ++i) {
-	  (*bins)[ref_id].push_back(assigned_reads[ec_id][i] + 1);
+	for (uint32_t i = 0; i < aligned_reads[ec_id].size(); ++i) {
+	  (*bins)[ref_id].push_back(aligned_reads[ec_id][i] + 1);
 	}
       }
       ++ref_id;
     }
     ++ec_id;
   }
-  return mask;
 }
 
 void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of) {
@@ -94,7 +93,7 @@ std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long 
   std::vector<std::vector<bool>> assignments(num_ecs, std::vector<bool>(n_groups, false));
   std::vector<std::vector<uint32_t>> read_bins(n_groups, std::vector<uint32_t>());
 
-  const std::vector<bool> &groups_to_assign = AssignProbs(thresholds, probs_file, target_groups, &assignments, aln.aligned_reads, &read_bins);
+  AssignProbs(thresholds, probs_file, target_groups, &assignments, aln.aligned_reads, &read_bins);
 
   std::vector<std::vector<uint32_t>> out_bins;
   for (uint32_t i = 0; i < n_groups; ++i) {
