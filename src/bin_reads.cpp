@@ -90,7 +90,7 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of) {
   of.flush();
 }
 
-std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups) {
+std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin) {
   uint32_t num_ecs = aln.size();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);
@@ -104,8 +104,7 @@ std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long 
   std::vector<bool> mask(n_groups, false);
   MaskProbs(probs_header, target_groups, &mask);
 
-  std::vector<uint32_t> unassigned_bin;
-  AssignProbs(thresholds, probs_file, mask, &assignments, aln.aligned_reads, &read_bins, &unassigned_bin);
+  AssignProbs(thresholds, probs_file, mask, &assignments, aln.aligned_reads, &read_bins, unassigned_bin);
 
   std::vector<std::vector<uint32_t>> out_bins;
   for (uint32_t i = 0; i < n_groups; ++i) {

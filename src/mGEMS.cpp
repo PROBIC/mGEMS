@@ -117,13 +117,16 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     FilterTargetGroups(groups, abundances, args.value<long double>("min-abundance"), &target_groups);
   }
 
-  const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, args.value<long double>('q'), abundances, probs_file.stream(), &target_groups);
+  std::vector<uint32_t> unassigned_bin;
+  const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, args.value<long double>('q'), abundances, probs_file.stream(), &target_groups, &unassigned_bin);
   if (!extract_bins) {
     uint32_t n_bins = bins.size();
     for (uint32_t i = 0; i < n_bins; ++i) {
       cxxio::Out of(args.value<std::string>('o') + '/' + target_groups[i] + ".bin");
       mGEMS::WriteBin(bins[i], of.stream());
     }
+    cxxio::Out of(args.value<std::string>('o') + '/' + "unassigned_reads.bin");
+    mGEMS::WriteBin(unassigned_bin, of.stream());
   } else {
     Extract(bins, target_groups, args);
   }

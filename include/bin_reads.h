@@ -49,10 +49,11 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
 //   `*target_groups`: Names of the groups that bins will be created for.
 // Output:
 //   `*target_groups`: The names will be reordered to match the order of the bins.
+//    `*unassigned_bin`: Vector containing the ids of reads that were not assigned to any bin.
 //   `out_bins`: Vector containing the bins for the groups given in `*target_groups`.
-std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups);
+std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin);
 
-void Extract(const std::vector<std::string> &target_groups, const std::string &outdir, const std::string &strand_1, const std::string &strand_2, std::vector<std::vector<uint32_t>> &bins);
+  void Extract(const std::vector<std::string> &target_groups, const std::string &outdir, const std::string &strand_1, const std::string &strand_2, std::vector<std::vector<uint32_t>> &bins);
 }
 
 #endif
