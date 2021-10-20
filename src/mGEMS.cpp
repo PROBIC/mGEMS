@@ -16,6 +16,7 @@ void ParseExtract(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<bool>("compress", "Compress extracted reads with zlib (.gz extension, default: true)", true);
   args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequence but were not assigned to any group.", false);
   args.add_long_argument<bool>("write-assignment-table", "Write the read-group assignment table.", false);
+  args.add_long_argument<bool>("unique-only", "Extract only the reads that are assigned to a single lineage.", false);
   args.set_not_required("bins");
   args.set_not_required('o');
 
@@ -34,6 +35,7 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<std::string>("index", "Themisto pseudoalignment index directory.");
   args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequence but were not assigned to any group.", false);
   args.add_long_argument<bool>("write-assignment-table", "Write the read-group assignment table.", false);
+  args.add_long_argument<bool>("unique-only", "Extract only the reads that are assigned to a single lineage.", false);
   args.set_not_required("groups");
   args.set_not_required("min-abundance");
 
@@ -144,9 +146,8 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   uint32_t n_groups = abundances.size();
   std::vector<uint32_t> unassigned_bin;
   std::vector<std::vector<bool>> assignments_mat(aln.size(), std::vector<bool>(n_groups, false));
-  const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, args.value<long double>('q'), abundances, probs_file.stream(), &target_groups, &unassigned_bin, &assignments_mat);
+  const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, abundances, args.value<long double>('q'), args.value<bool>("unique-only"), probs_file.stream(), &target_groups, &unassigned_bin, &assignments_mat);
 
-  std::cerr << args.value<bool>("write-assignment-table") << std::endl;
   if (args.value<bool>("write-assignment-table")) {
     cxxio::Out of(args.value<std::string>('o') + '/' + "reads_to_groups.tsv");
     of.stream() << "#read" << '\t';

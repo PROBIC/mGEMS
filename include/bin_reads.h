@@ -29,12 +29,13 @@ void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, c
 //    `mask`: Boolean vector defining which groups (value 1) to perform binning on.
 //    `aligned_reads`: 2D vector containing the ids of the pseudoaligned reads in
 //                     each equivalence class
+//    `single_only`: Only assign reads that are assigned to just a single lineage.
 // Output:
 //    `*assignments`: `num_ecs` x `n_groups` boolean matrix that contains a 1 if
 //                    the ec corresponding to the row was assigned to the column.
 //    `*bins`: 2D output vector containing the ids of the reads binned to each group.
 //    `*unassigned_bin`: Vector containing the ids of reads that were not assigned to any bin.
-void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, const std::vector<std::vector<uint32_t>> &aligned_reads, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin);
+void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, const std::vector<std::vector<uint32_t>> &aligned_reads, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin);
 
 void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
 void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, const ThemistoAlignment &aln, std::ostream &of);
@@ -44,8 +45,9 @@ void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, con
 // that were requested.
 // Input:
 //   `aln`: Pseudoalignments from Themisto.
-//   `theta_frac`: Tuning parameter for the thresholds..
 //   `abundances`: Relative abundances from mSWEEP.
+//   `theta_frac`: Tuning parameter for the thresholds..
+//   `single_only`: Only assign reads that are assigned to just a single lineage.
 //   `probs_file`: Read probability matrix (.probs file) from mSWEEP.
 //   `*target_groups`: Names of the groups that bins will be created for.
 // Output:
@@ -53,9 +55,9 @@ void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, con
 //    `*unassigned_bin`: Vector containing the ids of reads that were not assigned to any bin.
 //   `out_bins`: Vector containing the bins for the groups given in `*target_groups`.
 //    `*assignments_mat`: The read assignment matrix from AssignProbs.
-  std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const long double theta_frac, const std::vector<long double> &abundances, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat);
+std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const std::vector<long double> &abundances, const long double theta_frac, const bool single_only, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat);
 
-  void Extract(const std::vector<std::string> &target_groups, const std::string &outdir, const std::string &strand_1, const std::string &strand_2, std::vector<std::vector<uint32_t>> &bins);
+void Extract(const std::vector<std::string> &target_groups, const std::string &outdir, const std::string &strand_1, const std::string &strand_2, std::vector<std::vector<uint32_t>> &bins);
 }
 
 #endif

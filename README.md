@@ -134,6 +134,7 @@ mGEMS accepts the following input flags
 	--compress               (Optional) Toggle compressing the output files (default: compress)
 	--write-unassigned       (Optional) Extract reads that pseudoaligned to a reference sequence but were not assigned to any group. (default: off)
 	--write-assignment-table (Optional) Write the read to group assignments table to `reads_to_groups.tsv` in the output directory. (default: off).
+	--unique-only            (Optional) Write only the reads that are assigned to a single group.
 ```
 
 ## License
