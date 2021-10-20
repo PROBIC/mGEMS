@@ -36,6 +36,7 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequence but were not assigned to any group.", false);
   args.add_long_argument<bool>("write-assignment-table", "Write the read-group assignment table.", false);
   args.add_long_argument<bool>("unique-only", "Extract only the reads that are assigned to a single lineage.", false);
+  args.add_long_argument<bool>("compress", "Compress extracted reads with zlib (.gz extension, default: true)", true);
   args.set_not_required("groups");
   args.set_not_required("min-abundance");
 
@@ -149,7 +150,14 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, abundances, args.value<long double>('q'), args.value<bool>("unique-only"), probs_file.stream(), &target_groups, &unassigned_bin, &assignments_mat);
 
   if (args.value<bool>("write-assignment-table")) {
-    cxxio::Out of(args.value<std::string>('o') + '/' + "reads_to_groups.tsv");
+    std::string out_name = args.value<std::string>('o') + '/' + "reads_to_groups.tsv";
+    cxxio::Out of;
+    if (args.value<bool>("compress")) {
+      out_name += ".gz";
+      of.open_compressed(out_name);
+    } else {
+      of.open(out_name);
+    }
     of.stream() << "#read" << '\t';
     for (uint32_t i = 0; i < n_groups; ++i) {
       of.stream() << groups[i];
