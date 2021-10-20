@@ -29,7 +29,7 @@ void ProcessStrand(const std::vector<uint32_t> &bin_assignments, std::istream &i
   outstrand->flush();
 }
 
-void ExtractBin(const std::vector<uint32_t> &bin_assignments, std::vector<File::In> &in_strands, std::vector<File::Out> *out_strands) {
+void ExtractBin(const std::vector<uint32_t> &bin_assignments, std::vector<cxxio::In> &in_strands, std::vector<cxxio::Out> *out_strands) {
   uint8_t n_strands = in_strands.size();
   for (uint8_t i = 0; i < n_strands; ++i) {
     ProcessStrand(bin_assignments, in_strands[i].stream(), &(*out_strands)[i].stream());
