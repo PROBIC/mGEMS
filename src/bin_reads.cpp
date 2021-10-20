@@ -25,6 +25,16 @@ uint32_t ReadAbundances(std::istream &stream, std::vector<long double> *abundanc
 }
 
 void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, const std::vector<long double> &abundances, std::vector<long double> *thresholds) {
+  // Constructs the thresholds according to Equation (7) in the mGEMS
+  // manuscript. Output will be stored in `thresholds`
+  // Input:
+  //   `num_ecs`: How many equivalence classes (unique pseudoalignments) there are in total.
+  //   `theta_frac`: Tuning parameter for the thresholds. Can be used to loosen/tighten the
+  //                 rule defined in Equation (7).
+  //   `abundances`: Relative abundances from mSWEEP.
+  // Output:
+  //   `*thresholds`: Holds the output values, i. e. the thresholds. Should be initialized to
+  //                  the correct size (number of groups in `abundances`) by the caller.
   long double log_thresh = std::log1pl(-(long double)abundances.size()/(long double)num_ecs);
   log_thresh += std::log(theta_frac);
   uint32_t n_refs = abundances.size();
@@ -52,6 +62,19 @@ void MaskProbs(const std::string &header_line, std::vector<std::string> *target_
 }
 
 void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, const std::vector<std::vector<uint32_t>> &aligned_reads, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+  // Performs the actual binning based on the precaculated thresholds.
+  // Input:
+  //   `thresholds`: The binning thresholds from CalculateThresholds.
+  //    `probs_file`: Read probability matrix (.probs file) from mSWEEP.
+  //    `mask`: Boolean vector defining which groups (value 1) to perform binning on.
+  //    `aligned_reads`: 2D vector containing the ids of the pseudoaligned reads in
+  //                     each equivalence class
+  //    `single_only`: Only assign reads that are assigned to just a single lineage.
+  // Output:
+  //    `*assignments`: `num_ecs` x `n_groups` boolean matrix that contains a 1 if
+  //                    the ec corresponding to the row was assigned to the column.
+  //    `*bins`: 2D output vector containing the ids of the reads binned to each group.
+  //    `*unassigned_bin`: Vector containing the ids of reads that were not assigned to any bin.
   std::vector<uint32_t> n_reads(thresholds.size(), 0);
   uint32_t ec_id = 0;
   std::string line;
