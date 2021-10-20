@@ -7,9 +7,8 @@
 #include <cmath>
 
 namespace mGEMS {
-uint32_t ReadAbundances(std::istream &stream, std::vector<long double> *abundances, std::vector<std::string> *groups) {
+void ReadAbundances(std::istream &stream, std::vector<long double> *abundances, std::vector<std::string> *groups) {
   std::string line;
-  uint32_t n_groups = 0;
   while(std::getline(stream, line)) {
     if (line.at(0) != '#') {
       std::string part;
@@ -18,10 +17,8 @@ uint32_t ReadAbundances(std::istream &stream, std::vector<long double> *abundanc
       groups->emplace_back(part);
       std::getline(parts, part, '\t');
       abundances->emplace_back(std::stold(part));
-      ++n_groups;
     }
   }
-  return n_groups;
 }
 
 void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, const std::vector<long double> &abundances, std::vector<long double> *thresholds) {
