@@ -22,6 +22,12 @@ typical use-cases but metagenomic assemblers like
 the differences between the bins are especially small (see
 Supplementary Figure 2 of the mGEMS preprint).
 
+### mGEMS binaries
+mGEMS can be obtained in the form of a precompiled binary
+* [Linux 64-bit binary](https://github.com/PROBIC/mGEMS/releases/download/v1.0.0/mGEMS_linux-v1.1.0.tar.gz)
+* [macOS 64-bit binary](https://github.com/PROBIC/mGEMS/releases/download/v1.0.0/mGEMS_macOS-v1.1.0.tar.gz)
+or by following the instructions below for compiling mGEMS from source.
+
 ### Compiling from source
 #### Requirements
 - C++11 compliant compiler.
