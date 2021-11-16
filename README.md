@@ -2,9 +2,28 @@
 
 Bacterial sequencing data binning on strain-level based on probabilistic taxonomic classification.
 
-More about mGEMS in the preprint [Genomic epidemiology with mixed
-samples](https://www.biorxiv.org/content/10.1101/2020.04.03.021501v2)
-in bioRxiv (not peer reviewed).
+More about mGEMS in the article [Bacterial genomic epidemiology with mixed
+samples](https://www.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000691)
+in Microbial Genomics.
+
+If you use mGEMS, please cite us as "Mäklin T, Kallonen T, Alanko J et
+al. Bacterial genomic epidemiology with mixed samples. Microb Genom
+2021, 7:11 (https://doi.org/10.1099/mgen.0.000691)"
+
+You should also cite the method that you used to estimate the input
+probability matrix to mGEMS, which is likely to be
+[mSWEEP](https://github.com/PROBIC/mSWEEP).
+
+To cite a specific version of mGEMS, visit the [releases
+page](https://github.com/PROBIC/mGEMS/releases) and find the doi for
+the version of the program that you used. Then, cite the version
+(v1.1.0 in the example) as "Tommi Mäklin. (2021). PROBIC/mGEMS:
+mGEMS-v1.1.0 (20 October 2021)
+(v1.1.0). Zenodo. (https://doi.org/10.5281/zenodo.5583245)". Citing
+the source code properly helps ensure that your analyses are
+reproducible. Please also cite [the
+article](https://www.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000691)
+if you use mGEMS.
 
 ## Installation
 ### Dependencies
