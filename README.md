@@ -159,6 +159,7 @@ reads_1.fastq.gz,reads_2.fastq.gz -o mGEMS-out
 mGEMS accepts the following input flags
 ```
 	-r                       Comma-separated list of input read(s).
+	-i                       Group identifiers file used with the mSWEEP call.
 	--themisto-alns          Comma-separated list of pseudoalignment file(s) 
 	                         for the reads from themisto.
 	-o                       Output directory (must exist before running!).
