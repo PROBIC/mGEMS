@@ -31,13 +31,13 @@ To run the binning + assembly pipeline, you will need a program that
 does pseudoalignment and another program that estimates an assignment
 probability matrix for the reads to the alignment targets.
 
-*Note:* This version and the previous versions of mGEMS assume that
-you are using a Themisto version between v0.1.1 and v1.2.0. Update
+__Note:__ This version and the previous versions of mGEMS assume that
+you are using a *Themisto version between v0.1.1 and v1.2.0*. Update
 your mGEMS installation for compatibility with newer versions of
 Themisto.
 
 We recommend to use [Themisto](https://github.com/algbio/themisto)
-(versions between v0.1.1 or v1.2.0, update mGEMS for compatibility
+(*versions between v0.1.1 or v1.2.0*, update mGEMS for compatibility
 with newer versions) for pseudoalignment and
 [mSWEEP](https://github.com/probic/mSWEEP) (v1.3.2 or newer) for
 estimating the probability matrix. For assembling the bins output by
@@ -87,9 +87,11 @@ tree presented in Mäklin et al. 2020 using mGEMS is available in the
 [docs folder of this repository](docs/TUTORIAL.md).
 
 ### Quickstart — full pipeline
-*Themisto versions v0.1.1 to v1.2.0*
 Build a [Themisto](https://github.com/algbio/themisto) index to
 align against.
+
+__Themisto versions v0.1.1 to v1.2.0__
+
 ```
 mkdir themisto_index
 mkdir themisto_index/tmp
@@ -97,6 +99,9 @@ build_index --k 31 --input-file example.fasta --auto-colors --index-dir themisto
 ```
 
 Align paired-end reads 'reads_1.fastq.gz' and 'reads_2.fastq.gz' with Themisto (note the **--sort-output** flag must be used!)
+
+__Themisto versions v0.1.1 to v1.2.0__
+
 ```
 pseudoalign --index-dir themisto_index --query-file reads_1.fastq.gz --outfile pseudoalignments_1.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192 --sort-output --gzip-output
 pseudoalign --index-dir themisto_index --query-file reads_2.fastq.gz --outfile pseudoalignments_2.aln --rc --temp-dir themisto_index/tmp --n-threads 16 --mem-megas 8192 --sort-output --gzip-output
