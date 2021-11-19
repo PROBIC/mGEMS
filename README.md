@@ -87,8 +87,17 @@ tree presented in Mäklin et al. 2020 using mGEMS is available in the
 [docs folder of this repository](docs/TUTORIAL.md).
 
 ### Quickstart — full pipeline
+#### Index the reference sequences
 Build a [Themisto](https://github.com/algbio/themisto) index to
 align against.
+
+__Themisto version v2.0.0 or newer__
+
+```
+mkdir themisto_index
+mkdir themisto_index/tmp
+themisto build -k 31 -i example.fasta -o themisto_index/index --temp-dir themisto_index/tmp
+```
 
 __Themisto versions v0.1.1 to v1.2.0__
 
@@ -98,7 +107,15 @@ mkdir themisto_index/tmp
 build_index --k 31 --input-file example.fasta --auto-colors --index-dir themisto_index --temp-dir themisto_index/tmp
 ```
 
+#### Pseudoalign the reads
 Align paired-end reads 'reads_1.fastq.gz' and 'reads_2.fastq.gz' with Themisto (note the **--sort-output** flag must be used!)
+
+__Themisto version v2.0.0 or newer__
+
+```
+themisto pseudoalign -q reads_1.fastq.gz -o pseudoalignments_1.aln -i themisto_index/index --temp-dir themisto_index/tmp --rc --n-threads 16 --sort-output --gzip-output
+themisto pseudoalign -q reads_2.fastq.gz -o pseudoalignments_2.aln -i themisto_index/index --temp-dir themisto_index/tmp --rc --n-threads 16 --sort-output --gzip-output
+```
 
 __Themisto versions v0.1.1 to v1.2.0__
 
@@ -117,7 +134,7 @@ mSWEEP --themisto-1 pseudoalignments_1.aln.gz --themisto-2 pseudoalignments_2.al
 Bin the reads and write all bins to the 'mGEMS-out' folder
 ```
 mkdir mGEMS-out
-mGEMS -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
+mGEMS -r reads_1.fastq.gz,reads_2.fastq.gz -i reference_grouping.txt --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
 ```
 This will write the binned paired-end reads for *all groups* in the
 mSWEEP_abundances.txt file in the mGEMS-out folder (compressed with
@@ -128,25 +145,25 @@ You can also extract the read-to-group assignments table that mGEMS
 uses internally by adding the `--write-assignment-table` toggle to the
 call to `mGEMS` or `mGEMS bin`:
 ```
-mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index --write-assignment-table
+mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz -i reference_grouping.txt --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index --write-assignment-table
 ```
 
 ... or bin and write only the reads that are assigned to "group-3" or
 "group-4" by adding the '--groups group-3,group-4' flag
 ```
-mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
+mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz -i reference_grouping.txt --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index
 ```
 
 ... write the reads that pseudoaligned to a reference sequence but were not assigned to any group by adding the `--write-unassigned` flag:
 ```
-mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index --write-unassigned
+mGEMS --groups group-3,group-4 -r reads_1.fastq.gz,reads_2.fastq.gz -i reference_grouping.txt --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index --write-unassigned
 ```
 
 Alternatively, find and write only the read bins for "group-3",
 "group-4", and the reads that pseudoaligned but were not assigned to
 any group; skipping extracting the reads
 ```
-mGEMS bin --groups group-3,group-4 --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index --write-unassigned
+mGEMS bin --groups group-3,group-4 --themisto-alns pseudoalignments_1.aln.gz,pseudoalignments_2.aln.gz -i reference_grouping.txt -o mGEMS-out --probs mSWEEP_probs.csv -a mSWEEP_abundances.txt --index themisto_index --write-unassigned
 ```
 
 ... and extract the reads when feeling like it
