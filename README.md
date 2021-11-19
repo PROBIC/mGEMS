@@ -31,8 +31,14 @@ To run the binning + assembly pipeline, you will need a program that
 does pseudoalignment and another program that estimates an assignment
 probability matrix for the reads to the alignment targets.
 
+*Note:* This version and the previous versions of mGEMS assume that
+you are using a Themisto version between v0.1.1 and v1.2.0. Update
+your mGEMS installation for compatibility with newer versions of
+Themisto.
+
 We recommend to use [Themisto](https://github.com/algbio/themisto)
-(v0.1.1 or newer) for pseudoalignment and
+(versions between v0.1.1 or v1.2.0, update mGEMS for compatibility
+with newer versions) for pseudoalignment and
 [mSWEEP](https://github.com/probic/mSWEEP) (v1.3.2 or newer) for
 estimating the probability matrix. For assembling the bins output by
 mGEMS, we recommend [shovill](https://github.com/tseemann/shovill) for
@@ -81,6 +87,7 @@ tree presented in Mäklin et al. 2020 using mGEMS is available in the
 [docs folder of this repository](docs/TUTORIAL.md).
 
 ### Quickstart — full pipeline
+*Themisto versions v0.1.1 to v1.2.0*
 Build a [Themisto](https://github.com/algbio/themisto) index to
 align against.
 ```

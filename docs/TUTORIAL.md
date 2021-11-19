@@ -11,9 +11,16 @@ For quick instructions on how to run the pipeline in a general
 setting, please refer to the README.md file in the root of this
 repository.
 
+*Note:* This version of the tutorial assumes that you are using a
+Themisto version between v0.1.1 and v1.2.0. Check the tutorial from an
+updated version of mGEMS for instructions on how to use newer versions
+of Themisto.
+
 ## Requirements
 ### mGEMS pipeline
 - [Themisto](https://github.com/algbio/Themisto)
+- - Themisto version should be between v0.1.1 and v1.2.0
+- - For compatibility with newer versions of Themisto, update your mGEMS installation.
 - [mSWEEP](https://github.com/probic/mSWEEP)
 - [mGEMS](https://github.com/probic/mGEMS)
 - [shovill](https://github.com/tseemann/shovill/)
@@ -85,6 +92,7 @@ tar -zxvf mGEMS-ecoli-reference-v1.0.0.tar.gz
 ```
 
 ### <a name="indexing"></a>Indexing
+*Themisto versions v0.1.1 to v1.2.0*
 Create a *31*-mer pseudoalignment index with Themisto using two
 threads and maximum 8192 megabytes of RAM.
 ```
@@ -119,6 +127,7 @@ gzip $oldid""_2.fastq
 ```
 
 ### <a name="pseudoalignment"></a>Pseudoalignment
+*Themisto versions v0.1.1 to v1.2.0*
 Align the mixed sample files against the index using two threads
 ```
 for f1 in *_1.fastq.gz; do
