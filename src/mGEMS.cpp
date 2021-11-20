@@ -27,6 +27,8 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<std::vector<std::string>>("themisto-alns", "Comma-separated list of paired-end alignments from Themisto.");
   args.add_short_argument<std::string>('o', "Output directory (must exist before running).");
   args.add_short_argument<std::string>('a', "Relative abundances estimates from mSWEEP.");
+  args.add_short_argument<std::string>('i', "Group identifiers file used with the mSWEEP call.");
+  args.set_not_required('i');
   args.add_long_argument<std::string>("probs", "Posterior probabilities from mSWEEP.");
   args.add_long_argument<std::string>("merge-mode", "How to merge paired-end alignments from Themisto (default: intersection).", "intersection");
   args.add_long_argument<std::vector<std::string>>("groups", "Which reference groups to bin reads to (default: all).");
@@ -127,9 +129,22 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     themisto_alns.emplace_back(new bxz::ifstream(args.value<std::vector<std::string>>("themisto-alns")[i]));
   }
 
-  cxxio::In themisto_index(args.value<std::string>("index") + "/coloring-names.txt");
-  uint32_t n_refs = themisto_index.count_lines<uint32_t>();
-  themisto_index.close();
+  uint32_t n_refs;
+  if (!args.is_initialized('i')) {
+    // Compatibility with Themisto <=v1.2.0.
+    try {
+      cxxio::In themisto_index(args.value<std::string>("index") + "/coloring-names.txt");
+      n_refs = themisto_index.count_lines<uint32_t>();
+      themisto_index.close();
+    } catch (const std::exception &e) {
+      // Using mGEMS with Themisto >v1.2.0 requires the indicators argument.
+      throw std::runtime_error("Could not read the number of reference sequences from the Themisto index. Try running mGEMS again with the -i argument.");
+    }
+  } else {
+    cxxio::In groups_indicators(args.value<std::string>('i'));
+    n_refs = groups_indicators.count_lines<uint32_t>();
+    groups_indicators.close();
+  }
   ThemistoAlignment aln;
   ReadThemisto(get_mode(args.value<std::string>("merge-mode")), n_refs, themisto_alns, &aln);
 
@@ -186,7 +201,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
 }
 
 int main(int argc, char* argv[]) {
-  cxxargs::Arguments args("mGEMS", "Usage: mGEMS -r <input-reads_1>,<input-reads_2> --themisto-alns <input-reads_1 pseudoalignments>,<input-reads_2 pseudoalignments> -o <output directory> --probs <posterior probabilities> -a <abundance estimates> --index <Themisto index> --groups <group names to extract (optional)>");
+  cxxargs::Arguments args("mGEMS", "Usage: mGEMS -r <input-reads_1>,<input-reads_2> -i <group-indicators> --themisto-alns <input-reads_1 pseudoalignments>,<input-reads_2 pseudoalignments> -o <output directory> --probs <posterior probabilities> -a <abundance estimates> --index <Themisto index> --groups <group names to extract (optional)>");
   try {
     if (argc < 2) {
       std::cerr << args.help() << std::endl;

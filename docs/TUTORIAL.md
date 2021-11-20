@@ -11,9 +11,16 @@ For quick instructions on how to run the pipeline in a general
 setting, please refer to the README.md file in the root of this
 repository.
 
+*Note:* This version of the tutorial assumes that you are using a
+Themisto version between v0.1.1 and v1.2.0. Check the tutorial from an
+updated version of mGEMS for instructions on how to use newer versions
+of Themisto.
+
 ## Requirements
 ### mGEMS pipeline
 - [Themisto](https://github.com/algbio/Themisto)
+- - Themisto version should be between *v0.1.1 and v1.2.0*
+- - For compatibility with newer versions of Themisto, update your mGEMS installation.
 - [mSWEEP](https://github.com/probic/mSWEEP)
 - [mGEMS](https://github.com/probic/mGEMS)
 - [shovill](https://github.com/tseemann/shovill/)
@@ -87,6 +94,17 @@ tar -zxvf mGEMS-ecoli-reference-v1.0.0.tar.gz
 ### <a name="indexing"></a>Indexing
 Create a *31*-mer pseudoalignment index with Themisto using two
 threads and maximum 8192 megabytes of RAM.
+
+__Themisto version v2.0.0 or newer__
+
+```
+mkdir mGEMS-ecoli-reference
+mkdir mGEMS-ecoli-reference/tmp
+themisto build -k 31 -i mGEMS-ecoli-reference-sequences-v1.0.0.fasta.gz -o mGEMS-ecoli-reference/index --temp-dir mGEMS-ecoli-reference/tmp --mem-megas 8192 --n-threads 2
+```
+
+__Themisto versions v0.1.1 to v1.2.0__
+
 ```
 mkdir mGEMS-ecoli-reference
 mkdir mGEMS-ecoli-reference/tmp
@@ -120,6 +138,20 @@ gzip $oldid""_2.fastq
 
 ### <a name="pseudoalignment"></a>Pseudoalignment
 Align the mixed sample files against the index using two threads
+
+__Themisto version v2.0.0 or newer__
+
+```
+for f1 in *_1.fastq.gz; do
+	f=${f1%_1.fastq.gz}
+	f2=$f""_2.fastq.gz
+	themisto pseudoalign -q $f1 -o $f""_1.aln -i mGEMS-ecoli-reference/index --temp-dir mGEMS-ecoli-reference/tmp --n-threads 2 --rc --sort-output --gzip-output
+	themisto pseudoalign -q $f2 -o $f""_2.aln -i mGEMS-ecoli-reference/index --temp-dir mGEMS-ecoli-reference/tmp --n-threads 2 --rc --sort-output --gzip-output
+done
+```
+
+__Themisto versions v0.1.1 to v1.2.0__
+
 ```
 for f1 in *_1.fastq.gz; do
 	f=${f1%_1.fastq.gz}
@@ -147,7 +179,7 @@ Bin the reads with mGEMS and write the binned samples to the
 while read line; do
 	id=$(echo $line | cut -f3 -d' ')
 	cluster=$(echo $line | cut -f2 -d' ')
-	mGEMS --groups $cluster -r $id""_1.fastq.gz,$id""_2.fastq.gz --themisto-alns $id""_1.aln.gz,$id""_2.aln.gz -o $id --probs $id/$id""_probs.csv.gz -a $id/$id""_abundances.txt --index mGEMS-ecoli-reference
+	mGEMS --groups $cluster -r $id""_1.fastq.gz,$id""_2.fastq.gz -i mGEMS-ecoli-reference-grouping-v1.0.0.txt --themisto-alns $id""_1.aln.gz,$id""_2.aln.gz -o $id --probs $id/$id""_probs.csv.gz -a $id/$id""_abundances.txt --index mGEMS-ecoli-reference
 done < mixed_samples.tsv
 ```
 Note that by default mGEMS creates bins for **all** reference lineages. If know
