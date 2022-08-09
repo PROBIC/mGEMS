@@ -32,7 +32,7 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
 //     `aln`: Themisto pseudoalignments.
 //     `of`: Stream for the output.
 void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat,
-		      const ThemistoAlignment &aln, std::ostream &of);
+		      const telescope::ThemistoAlignment &aln, std::ostream &of);
 
 // mGEMS::Bin
 //   Returns a 2D vector that contains the ids (line numbers in the
@@ -50,7 +50,7 @@ void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat,
 //      `*unassigned_bin`: Vector containing the ids of reads that were not assigned to any bin.
 //      `out_bins`: Vector containing the bins for the groups given in `*target_groups`.
 //      `*assignments_mat`: The read assignment matrix from AssignProbs.
-std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln,
+std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln,
 				       const std::vector<long double> &abundances,
 				       const long double theta_frac,
 				       const bool single_only,

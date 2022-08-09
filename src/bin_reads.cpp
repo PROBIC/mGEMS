@@ -58,7 +58,7 @@ void MaskProbs(const std::string &header_line, std::vector<std::string> *target_
   (*target_groups) = ordered_targets;
 }
 
-void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, const std::vector<std::vector<uint32_t>> &aligned_reads, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, const telescope::ThemistoAlignment &alignment, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
   // Performs the actual binning based on the precaculated thresholds.
   // Input:
   //   `thresholds`: The binning thresholds from CalculateThresholds.
@@ -93,23 +93,23 @@ void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs
     if (single_only && n_assignments == 1) {
       for (uint32_t j = 0; j < (*assignments)[ec_id].size(); ++j) {
 	if ((*assignments)[ec_id][j] && mask[j]) {
-	  for (uint32_t i = 0; i < aligned_reads[ec_id].size(); ++i) {
-	    (*bins)[j].push_back(aligned_reads[ec_id][i] + 1);
+	  for (uint32_t i = 0; i < alignment.reads_assigned_to_ec(ec_id).size(); ++i) {
+	    (*bins)[j].push_back(alignment.reads_assigned_to_ec(ec_id)[i] + 1);
 	  }
 	}
       }
     } else if (!single_only && n_assignments > 0) {
       for (uint32_t j = 0; j < (*assignments)[ec_id].size(); ++j) {
 	if ((*assignments)[ec_id][j] && mask[j]) {
-	  for (uint32_t i = 0; i < aligned_reads[ec_id].size(); ++i) {
-	    (*bins)[j].push_back(aligned_reads[ec_id][i] + 1);
+	  for (uint32_t i = 0; i < alignment.reads_assigned_to_ec(ec_id).size(); ++i) {
+	    (*bins)[j].push_back(alignment.reads_assigned_to_ec(ec_id)[i] + 1);
 	  }
 	}
       }
     } else if (n_assignments == 0) {
       // Send reads to aligned but unassigned bin.
-      for (uint32_t i = 0; i < aligned_reads[ec_id].size(); ++i) {
-	unassigned_bin->push_back(aligned_reads[ec_id][i] + 1);
+      for (uint32_t i = 0; i < alignment.reads_assigned_to_ec(ec_id).size(); ++i) {
+	unassigned_bin->push_back(alignment.reads_assigned_to_ec(ec_id)[i] + 1);
       }
     }
     ++ec_id;
@@ -123,12 +123,12 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of) {
   of.flush();
 }
 
-void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, const ThemistoAlignment &aln, std::ostream &of) {
+void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, const telescope::ThemistoAlignment &aln, std::ostream &of) {
   uint32_t n_groups = assignments_mat[0].size();
   uint32_t n_ecs = assignments_mat.size();
   for (uint32_t i = 0; i < n_ecs; ++i) {
-    for (uint32_t j = 0; j < aln.aligned_reads[i].size(); ++j) {
-      of << aln.aligned_reads[i][j] + 1<< '\t';
+    for (uint32_t j = 0; j < aln.reads_assigned_to_ec(i).size(); ++j) {
+      of << aln.reads_assigned_to_ec(i)[j] + 1<< '\t';
       for (uint32_t k = 0; k < n_groups; ++k) {
 	of << assignments_mat[i][k];
 	if (k < n_groups - 1) {
@@ -144,8 +144,8 @@ void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, con
   of << std::endl;
 }
 
-std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const std::vector<long double> &abundances, const long double theta_frac, const bool single_only, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
-  uint32_t num_ecs = aln.size();
+std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln, const std::vector<long double> &abundances, const long double theta_frac, const bool single_only, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
+  uint32_t num_ecs = aln.compressed_size();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);
   ConstructThresholds(num_ecs, theta_frac, abundances, &thresholds);
@@ -157,7 +157,7 @@ std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln, const std::
   std::vector<bool> mask(n_groups, false);
   MaskProbs(probs_header, target_groups, &mask);
 
-  AssignProbs(thresholds, probs_file, mask, aln.aligned_reads, single_only, assignments_mat, &read_bins, unassigned_bin);
+  AssignProbs(thresholds, probs_file, mask, aln, single_only, assignments_mat, &read_bins, unassigned_bin);
 
   std::vector<std::vector<uint32_t>> out_bins;
   for (uint32_t i = 0; i < n_groups; ++i) {
