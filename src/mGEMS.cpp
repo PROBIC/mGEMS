@@ -147,7 +147,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     groups_indicators.close();
   }
   telescope::ThemistoAlignment aln(n_refs);
-  telescope::read::Themisto(telescope::get_mode(args.value<std::string>("merge-mode")), themisto_alns, &aln);
+  telescope::read::ThemistoAlignedReads(telescope::get_mode(args.value<std::string>("merge-mode")), themisto_alns, &aln);
 
   cxxio::In probs_file(args.value<std::string>("probs"));
   std::vector<std::string> target_groups;
