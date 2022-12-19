@@ -7,7 +7,7 @@
 #include <cmath>
 
 namespace mGEMS {
-void ReadAbundances(std::istream &stream, std::vector<long double> *abundances, std::vector<std::string> *groups) {
+void ReadAbundances(std::istream &stream, std::vector<double> *abundances, std::vector<std::string> *groups) {
   std::string line;
   while(std::getline(stream, line)) {
     if (line.at(0) != '#') {
@@ -21,7 +21,7 @@ void ReadAbundances(std::istream &stream, std::vector<long double> *abundances, 
   }
 }
 
-void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, const std::vector<long double> &abundances, std::vector<long double> *thresholds, bool logscale = false) {
+void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, const std::vector<double> &abundances, std::vector<long double> *thresholds, bool logscale = false) {
   // Constructs the thresholds according to Equation (7) in the mGEMS
   // manuscript. Output will be stored in `thresholds`
   // Input:
@@ -53,14 +53,14 @@ void ReadHeader(const std::string &header_line, const size_t n_groups, std::vect
   }
 }
 
-void MaskProbs(std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups, std::vector<bool> *mask) {
+void MaskProbs(const std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups, std::vector<bool> *mask) {
   std::vector<std::string> ordered_targets(target_groups->size());
   uint32_t ref_id = 0;
   uint32_t target_id = 0;
   for (size_t i = 0; i < all_group_names.size(); ++i) {
     if (std::find(target_groups->begin(), target_groups->end(), all_group_names[i]) != target_groups->end()) {
       (*mask)[ref_id] = true;
-      ordered_targets[target_id] = std::move(all_group_names[i]);
+      ordered_targets[target_id] = all_group_names[i];
       ++target_id;
     }
     ++ref_id;
@@ -227,10 +227,11 @@ std::vector<std::vector<uint32_t>> BuildOutBins(const size_t n_groups, std::vect
   return out_bins;
 }
 
-std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::GroupedAlignment &aln, const std::vector<long double> &abundances, const long double theta_frac, const bool single_only, const seamat::Matrix<double> &probs_mat, std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
+std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::GroupedAlignment &aln, const std::vector<double> &abundances, const seamat::Matrix<double> &probs_mat, const std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups) {
   uint32_t num_ecs = aln.compressed_size();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);
+  long double theta_frac = 1.0;
   ConstructThresholds(num_ecs, theta_frac, abundances, &thresholds, true);
 
   std::vector<std::vector<uint32_t>> read_bins(n_groups, std::vector<uint32_t>());
@@ -239,15 +240,17 @@ std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::GroupedAlignme
   std::vector<bool> mask(n_groups, false);
   MaskProbs(all_group_names, target_groups, &mask);
 
-  AssignProbsMatrix(thresholds, probs_mat, mask, aln, single_only, assignments_mat, &read_bins, unassigned_bin);
+  bool single_only = false;
+  std::vector<std::vector<bool>> assignments_mat(num_ecs, std::vector<bool>(n_groups, false));
+  std::vector<uint32_t> unassigned_bin;
+  AssignProbsMatrix(thresholds, probs_mat, mask, aln, single_only, &assignments_mat, &read_bins, &unassigned_bin);
 
-  const std::vector<std::vector<uint32_t>> &out_bins = BuildOutBins(n_groups, read_bins, unassigned_bin);
-  std::sort(unassigned_bin->begin(), unassigned_bin->end());
+  const std::vector<std::vector<uint32_t>> &out_bins = BuildOutBins(n_groups, read_bins, &unassigned_bin);
 
   return out_bins;
 }
 
-std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln, const std::vector<long double> &abundances, const long double theta_frac, const bool single_only, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
+std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln, const std::vector<double> &abundances, const long double theta_frac, const bool single_only, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
   uint32_t num_ecs = aln.compressed_size();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);

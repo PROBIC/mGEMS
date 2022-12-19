@@ -34,7 +34,7 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<std::string>("probs", "Posterior probabilities from mSWEEP.");
   args.add_long_argument<std::string>("merge-mode", "How to merge paired-end alignments from Themisto (default: intersection).", "intersection");
   args.add_long_argument<std::vector<std::string>>("groups", "Which reference groups to bin reads to (default: all).");
-  args.add_long_argument<long double>("min-abundance", "Bin only the groups that have a relative abundance higher than this value (optional).");
+  args.add_long_argument<double>("min-abundance", "Bin only the groups that have a relative abundance higher than this value (optional).");
   args.add_short_argument<long double>('q', "Tuning parameter for the binning thresholds (default: 1.0).", (long double)1);
   args.add_long_argument<std::string>("index", "Themisto pseudoalignment index directory.");
   args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequence but were not assigned to any group.", false);
@@ -108,7 +108,7 @@ void ReadAndExtract(cxxargs::Arguments &args) {
   Extract(bins, std::vector<uint32_t>(), target_groups, args);
 }
 
-void FilterTargetGroups(const std::vector<std::string> &group_names, const std::vector<long double> &abundances, const long double min_abundance, std::vector<std::string> *target_groups) {
+void FilterTargetGroups(const std::vector<std::string> &group_names, const std::vector<double> &abundances, const long double min_abundance, std::vector<std::string> *target_groups) {
   uint32_t n_groups = group_names.size();
   for (uint32_t i = 0; i < n_groups; ++i) {
     if (abundances[i] < min_abundance && std::find(target_groups->begin(), target_groups->end(), group_names[i]) != target_groups->end()) {
@@ -122,7 +122,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   cxxio::directory_exists(args.value<std::string>("index").c_str());
 
   std::vector<std::string> groups;
-  std::vector<long double> abundances;
+  std::vector<double> abundances;
   cxxio::In msweep_abundances(args.value<std::string>('a'));
   mGEMS::ReadAbundances(msweep_abundances.stream(), &abundances, &groups);
   
@@ -162,7 +162,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     target_groups = groups;
   }
   if (args.is_initialized("min-abundance")) {
-    FilterTargetGroups(groups, abundances, args.value<long double>("min-abundance"), &target_groups);
+    FilterTargetGroups(groups, abundances, args.value<double>("min-abundance"), &target_groups);
   }
 
   uint32_t n_groups = abundances.size();
