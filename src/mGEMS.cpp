@@ -108,15 +108,6 @@ void ReadAndExtract(cxxargs::Arguments &args) {
   Extract(bins, std::vector<uint32_t>(), target_groups, args);
 }
 
-void FilterTargetGroups(const std::vector<std::string> &group_names, const std::vector<double> &abundances, const long double min_abundance, std::vector<std::string> *target_groups) {
-  uint32_t n_groups = group_names.size();
-  for (uint32_t i = 0; i < n_groups; ++i) {
-    if (abundances[i] < min_abundance && std::find(target_groups->begin(), target_groups->end(), group_names[i]) != target_groups->end()) {
-      target_groups->erase(std::find(target_groups->begin(), target_groups->end(), group_names[i]));
-    }
-  }
-}
-
 void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   cxxio::directory_exists(args.value<std::string>('o').c_str());
   cxxio::directory_exists(args.value<std::string>("index").c_str());
@@ -162,7 +153,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     target_groups = groups;
   }
   if (args.is_initialized("min-abundance")) {
-    FilterTargetGroups(groups, abundances, args.value<double>("min-abundance"), &target_groups);
+    mGEMS::FilterTargetGroups(groups, abundances, args.value<double>("min-abundance"), &target_groups);
   }
 
   uint32_t n_groups = abundances.size();

@@ -7,6 +7,15 @@
 #include <cmath>
 
 namespace mGEMS {
+void FilterTargetGroups(const std::vector<std::string> &group_names, const std::vector<double> &abundances, const double min_abundance, std::vector<std::string> *target_groups) {
+  uint32_t n_groups = group_names.size();
+  for (uint32_t i = 0; i < n_groups; ++i) {
+    if (abundances[i] < min_abundance && std::find(target_groups->begin(), target_groups->end(), group_names[i]) != target_groups->end()) {
+      target_groups->erase(std::find(target_groups->begin(), target_groups->end(), group_names[i]));
+    }
+  }
+}
+
 void ReadAbundances(std::istream &stream, std::vector<double> *abundances, std::vector<std::string> *groups) {
   std::string line;
   while(std::getline(stream, line)) {

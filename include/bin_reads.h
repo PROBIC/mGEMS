@@ -9,6 +9,10 @@
 #include "Matrix.hpp"
 
 namespace mGEMS {
+void FilterTargetGroups(const std::vector<std::string> &group_names,
+			const std::vector<double> &abundances,
+			const double min_abundance,
+			std::vector<std::string> *target_groups);
 // mGEMS::ReadAbundances
 //   Reads in the `_abundances.txt` file from mSWEEP.
 //   Input:
