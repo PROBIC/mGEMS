@@ -21,7 +21,7 @@ void ReadAbundances(std::istream &stream, std::vector<long double> *abundances, 
   }
 }
 
-void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, const std::vector<long double> &abundances, std::vector<long double> *thresholds) {
+void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, const std::vector<long double> &abundances, std::vector<long double> *thresholds, bool logscale = false) {
   // Constructs the thresholds according to Equation (7) in the mGEMS
   // manuscript. Output will be stored in `thresholds`
   // Input:
@@ -36,7 +36,9 @@ void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, c
   log_thresh += std::log(theta_frac);
   uint32_t n_refs = abundances.size();
   for (uint32_t i = 0; i < n_refs; ++i) {
-    (*thresholds)[i] = std::exp(std::log(abundances[i]) + log_thresh);
+    (*thresholds)[i] = std::log(abundances[i]) + log_thresh;
+    if (!logscale)
+      (*thresholds)[i] = std::exp((*thresholds)[i]);
   }
 }
 
