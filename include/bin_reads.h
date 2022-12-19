@@ -6,6 +6,7 @@
 #include <string>
 
 #include "telescope.hpp"
+#include "Matrix.hpp"
 
 namespace mGEMS {
 // mGEMS::ReadAbundances
@@ -65,7 +66,7 @@ std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::ThemistoAlignm
 						 const std::vector<long double> &abundances,
 						 const long double theta_frac,
 						 const bool single_only,
-						 const std::vector<std::vector<double>> &probs_mat,
+						 const seamat::Matrix<double> &probs_mat,
 						 std::vector<std::string> &all_group_names,
 						 std::vector<std::string> *target_groups,
 						 std::vector<uint32_t> *unassigned_bin,
