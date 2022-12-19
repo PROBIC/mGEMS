@@ -62,7 +62,7 @@ std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln,
 // mGEMS::BinFromMatrix
 //   Same as above but perform the binning on a probability
 //   matrix that has already been read into memory.
-std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::ThemistoAlignment &aln,
+std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::GroupedAlignment &aln,
 						 const std::vector<long double> &abundances,
 						 const long double theta_frac,
 						 const bool single_only,
