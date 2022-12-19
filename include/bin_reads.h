@@ -58,6 +58,18 @@ std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln,
 				       std::vector<std::string> *target_groups,
 				       std::vector<uint32_t> *unassigned_bin,
 				       std::vector<std::vector<bool>> *assignments_mat);
+// mGEMS::BinFromMatrix
+//   Same as above but perform the binning on a probability
+//   matrix that has already been read into memory.
+std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::ThemistoAlignment &aln,
+						 const std::vector<long double> &abundances,
+						 const long double theta_frac,
+						 const bool single_only,
+						 const std::vector<std::vector<double>> &probs_mat,
+						 std::vector<std::string> &all_group_names,
+						 std::vector<std::string> *target_groups,
+						 std::vector<uint32_t> *unassigned_bin,
+						 std::vector<std::vector<bool>> *assignments_mat);
 }
 
 #endif
