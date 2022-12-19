@@ -148,7 +148,6 @@ void AssignProbsMatrix(const std::vector<long double> &thresholds, const seamat:
     bool any_assigned = false;
     uint32_t n_assignments = 0;
     for (size_t j = 0; j < n_groups; ++j) {
-      std::cerr << probs_mat(j, i) << '\t' << thresholds[j] << std::endl;
       (*assignments)[i][j] = EvaluateAssignment(probs_mat(j, i), thresholds[j], &n_assignments, &any_assigned);
     }
     InsertAssigned(i, single_only, n_assignments, alignment, mask, assignments, bins, unassigned_bin);
