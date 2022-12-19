@@ -100,7 +100,32 @@ void InsertAssigned(const size_t ec_id, const bool single_only, const size_t n_a
   }
 }
 
-void AssignProbsMatrix(const std::vector<long double> &thresholds, const seamat::Matrix<double> &probs_mat, const std::vector<bool> &mask, const telescope::ThemistoAlignment &alignment, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+void InsertAssigned(const size_t ec_id, const bool single_only, const size_t n_assignments, const telescope::GroupedAlignment &alignment, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+  if (single_only && n_assignments == 1) {
+    for (uint32_t j = 0; j < (*assignments)[ec_id].size(); ++j) {
+      if ((*assignments)[ec_id][j] && mask[j]) {
+	for (uint32_t i = 0; i < alignment.reads_assigned_to_ec(ec_id).size(); ++i) {
+	  (*bins)[j].push_back(alignment.reads_assigned_to_ec(ec_id)[i] + 1);
+	}
+      }
+    }
+  } else if (!single_only && n_assignments > 0) {
+    for (uint32_t j = 0; j < (*assignments)[ec_id].size(); ++j) {
+      if ((*assignments)[ec_id][j] && mask[j]) {
+	for (uint32_t i = 0; i < alignment.reads_assigned_to_ec(ec_id).size(); ++i) {
+	  (*bins)[j].push_back(alignment.reads_assigned_to_ec(ec_id)[i] + 1);
+	}
+      }
+    }
+  } else if (n_assignments == 0) {
+    // Send reads to aligned but unassigned bin.
+    for (uint32_t i = 0; i < alignment.reads_assigned_to_ec(ec_id).size(); ++i) {
+      unassigned_bin->push_back(alignment.reads_assigned_to_ec(ec_id)[i] + 1);
+    }
+  }
+}
+
+void AssignProbsMatrix(const std::vector<long double> &thresholds, const seamat::Matrix<double> &probs_mat, const std::vector<bool> &mask, const telescope::GroupedAlignment &alignment, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
   // Performs the actual binning based on the precaculated thresholds.
   // Input:
   //   `thresholds`: The binning thresholds from CalculateThresholds.
@@ -116,14 +141,15 @@ void AssignProbsMatrix(const std::vector<long double> &thresholds, const seamat:
   //    `*unassigned_bin`: Vector containing the ids of reads that were not assigned to any bin.
   std::vector<uint32_t> n_reads(thresholds.size(), 0);
 
-  size_t n_alignments = probs_mat.get_rows();
-  size_t n_groups = probs_mat.get_cols();
+  size_t n_alignments = probs_mat.get_cols();
+  size_t n_groups = probs_mat.get_rows();
 
   for (size_t i = 0; i < n_alignments; ++i) {
     bool any_assigned = false;
     uint32_t n_assignments = 0;
     for (size_t j = 0; j < n_groups; ++j) {
-      (*assignments)[i][j] = EvaluateAssignment(probs_mat(i, j), thresholds[j], &n_assignments, &any_assigned);
+      std::cerr << probs_mat(j, i) << '\t' << thresholds[j] << std::endl;
+      (*assignments)[i][j] = EvaluateAssignment(probs_mat(j, i), thresholds[j], &n_assignments, &any_assigned);
     }
     InsertAssigned(i, single_only, n_assignments, alignment, mask, assignments, bins, unassigned_bin);
   }
@@ -201,11 +227,11 @@ std::vector<std::vector<uint32_t>> BuildOutBins(const size_t n_groups, std::vect
   return out_bins;
 }
 
-std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::ThemistoAlignment &aln, const std::vector<long double> &abundances, const long double theta_frac, const bool single_only, const seamat::Matrix<double> &probs_mat, std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
+std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::GroupedAlignment &aln, const std::vector<long double> &abundances, const long double theta_frac, const bool single_only, const seamat::Matrix<double> &probs_mat, std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
   uint32_t num_ecs = aln.compressed_size();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);
-  ConstructThresholds(num_ecs, theta_frac, abundances, &thresholds);
+  ConstructThresholds(num_ecs, theta_frac, abundances, &thresholds, true);
 
   std::vector<std::vector<uint32_t>> read_bins(n_groups, std::vector<uint32_t>());
 
