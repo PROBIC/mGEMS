@@ -127,8 +127,8 @@ include_directories("${CMAKE_CXXIO_HEADERS}")
 
 ## Check dependencies and download them if not given
 ## telescope
-if (DEFINED CMAKE_TELESCOPE_LIBRARY AND DEFINED CMAKE_TELESCOPE_HEADERS)
-  target_link_libraries(mGEMS ${CMAKE_TELESCOPE_LIBRARY})
+if (DEFINED CMAKE_TELESCOPE_HEADERS)
+  target_link_libraries(mGEMS libtelescope)
 else()
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/CMakeLists-telescope.txt.in ${CMAKE_CURRENT_BINARY_DIR}/external/telescope-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -147,7 +147,7 @@ else()
                    ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/build)
   set_target_properties(telescope PROPERTIES EXCLUDE_FROM_ALL 1)
   target_link_libraries(mGEMS libtelescope)
-  set(CMAKE_TELESCOPE_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/include)
+  set(CMAKE_TELESCOPE_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/include ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/build/include)
 endif()
 include_directories(${CMAKE_TELESCOPE_HEADERS})
 
