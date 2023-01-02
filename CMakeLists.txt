@@ -125,7 +125,6 @@ else()
 endif()
 include_directories("${CMAKE_CXXIO_HEADERS}")
 
-
 ## alignment-writer
 if (DEFINED CMAKE_ALIGNMENT_WRITER_HEADERS)
   message(STATUS "alignment-writer headers provided in: ${CMAKE_ALIGNMENT_WRITER_HEADERS}")
@@ -171,7 +170,7 @@ else()
   add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/external/telescope
                    ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/build)
   set_target_properties(telescope PROPERTIES EXCLUDE_FROM_ALL 1)
-  target_link_libraries(mGEMS libtelescope)
+  target_link_libraries(mGEMS libtelescope libalignmentwriter)
   set(CMAKE_TELESCOPE_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/include ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/build/include)
   set(CMAKE_ALIGNMENT_WRITER_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/build/external/alignment-writer/include)
 endif()
