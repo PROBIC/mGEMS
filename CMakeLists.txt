@@ -62,27 +62,6 @@ else()
 endif()
 include_directories(${CMAKE_BXZSTR_HEADERS})
 
-## BitMagic
-if (DEFINED CMAKE_BITMAGIC_HEADERS)
-  message(STATUS "BitMagic headers provided in: ${CMAKE_BITMAGIC_HEADERS}")
-else()
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/CMakeLists-bitmagic.txt.in ${CMAKE_CURRENT_BINARY_DIR}/external/bitmagic-download/CMakeLists.txt)
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/external/bitmagic-download )
-  if(result)
-    message(FATAL_ERROR "CMake step for BitMagic failed: ${result}")
-  endif()
-  execute_process(COMMAND ${CMAKE_COMMAND} --build .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/external/bitmagic-download )
-  if(result)
-    message(FATAL_ERROR "Build step for BitMagic failed: ${result}")
-  endif()
-  set(CMAKE_BITMAGIC_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/external/bitmagic/src/)
-endif()
-include_directories(${CMAKE_BITMAGIC_HEADERS})
-
 ## cxxargs
 if (DEFINED CMAKE_CXXARGS_HEADERS)
   message(STATUS "cxxargs headers provided in: ${CMAKE_CXXARGS_HEADERS}")
@@ -172,9 +151,12 @@ else()
   set_target_properties(telescope PROPERTIES EXCLUDE_FROM_ALL 1)
   target_link_libraries(mGEMS libtelescope libalignmentwriter)
   set(CMAKE_TELESCOPE_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/include ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/build/include)
-  set(CMAKE_ALIGNMENT_WRITER_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/build/external/alignment-writer/include)
+  if (NOT DEFINED CMAKE_BITMAGIC_HEADERS)
+    set(CMAKE_BITMAGIC_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/external/telescope/external/BitMagic-7.12.3/src)
+  endif()
 endif()
-include_directories(${CMAKE_TELESCOPE_HEADERS})
+
+include_directories(${CMAKE_TELESCOPE_HEADERS} ${CMAKE_BITMAGIC_HEADERS})
 
 ## seamat
 if (DEFINED CMAKE_SEAMAT_HEADERS)
