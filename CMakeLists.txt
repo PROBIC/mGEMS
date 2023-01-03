@@ -13,12 +13,12 @@ elseif(CMAKE_BUILD_TYPE MATCHES Debug)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -g -Wall -Wextra -Wpedantic")
 endif()
 
-## Set C++11 support depending on cmake version
+## Set C++17 support depending on cmake version
 if (${CMAKE_MAJOR_VERSION} GREATER 2 AND ${CMAKE_MINOR_VERSION} GREATER 0)
-  set (CMAKE_CXX_STANDARD 11)
+  set (CMAKE_CXX_STANDARD 17)
   set (CMAKE_CXX_STANDARD_REQUIRED ON)
 else()
-  add_compile_options(-std=c++11)
+  add_compile_options(-std=c++17)
 endif()
 
 ## mGEMS executable
