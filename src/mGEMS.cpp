@@ -18,7 +18,6 @@ void ParseExtract(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequence but were not assigned to any group.", false);
   args.add_long_argument<bool>("write-assignment-table", "Write the read-group assignment table.", false);
   args.add_long_argument<bool>("unique-only", "Extract only the reads that are assigned to a single lineage.", false);
-  args.add_long_argument<bool>("read-compact", "Compress extracted reads with zlib (.gz extension, default: true)", false);
   args.set_not_required("bins");
   args.set_not_required('o');
 
@@ -41,7 +40,6 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<bool>("write-assignment-table", "Write the read-group assignment table.", false);
   args.add_long_argument<bool>("unique-only", "Extract only the reads that are assigned to a single lineage.", false);
   args.add_long_argument<bool>("compress", "Compress extracted reads with zlib (.gz extension, default: true)", true);
-  args.add_long_argument<bool>("read-compact", "Input alignments are in compact format. (default: false)", false);
   args.set_not_required("groups");
   args.set_not_required("min-abundance");
 
@@ -138,9 +136,6 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     cxxio::In groups_indicators(args.value<std::string>('i'));
     n_refs = groups_indicators.count_lines<uint32_t>();
     groups_indicators.close();
-  }
-  if (args.value<bool>("read-compact")) {
-    //aln.set_parse_from_buffered();
   }
   telescope::ThemistoAlignment aln = telescope::read::Themisto(telescope::get_mode(args.value<std::string>("merge-mode")), n_refs, themisto_alns);
 
