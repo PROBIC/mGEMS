@@ -139,11 +139,10 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     n_refs = groups_indicators.count_lines<uint32_t>();
     groups_indicators.close();
   }
-  telescope::ThemistoAlignment aln(n_refs);
   if (args.value<bool>("read-compact")) {
-      aln.set_parse_from_buffered();
+    //aln.set_parse_from_buffered();
   }
-  telescope::read::ThemistoAlignedReads(telescope::get_mode(args.value<std::string>("merge-mode")), themisto_alns, &aln);
+  telescope::ThemistoAlignment aln = telescope::read::Themisto(telescope::get_mode(args.value<std::string>("merge-mode")), n_refs, themisto_alns);
 
   cxxio::In probs_file(args.value<std::string>("probs"));
   std::vector<std::string> target_groups;
@@ -158,7 +157,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
 
   uint32_t n_groups = abundances.size();
   std::vector<uint32_t> unassigned_bin;
-  std::vector<std::vector<bool>> assignments_mat(aln.size(), std::vector<bool>(n_groups, false));
+  std::vector<std::vector<bool>> assignments_mat(aln.n_ecs(), std::vector<bool>(n_groups, false));
   const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, abundances, args.value<long double>('q'), args.value<bool>("unique-only"), probs_file.stream(), &target_groups, &unassigned_bin, &assignments_mat);
 
   if (args.value<bool>("write-assignment-table")) {

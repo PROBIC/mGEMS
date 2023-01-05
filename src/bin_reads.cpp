@@ -236,7 +236,7 @@ std::vector<std::vector<uint32_t>> BuildOutBins(const size_t n_groups, std::vect
 }
 
 std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::GroupedAlignment &aln, const std::vector<double> &abundances, const seamat::Matrix<double> &probs_mat, const std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups) {
-  uint32_t num_ecs = aln.compressed_size();
+  uint32_t num_ecs = aln.n_ecs();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);
   long double theta_frac = 1.0;
@@ -259,7 +259,7 @@ std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::GroupedAlignme
 }
 
 std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln, const std::vector<double> &abundances, const long double theta_frac, const bool single_only, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
-  uint32_t num_ecs = aln.compressed_size();
+  uint32_t num_ecs = aln.n_ecs();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);
   ConstructThresholds(num_ecs, theta_frac, abundances, &thresholds);
