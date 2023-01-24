@@ -109,32 +109,32 @@ void InsertAssigned(const size_t ec_id, const bool single_only, const size_t n_a
   }
 }
 
-void InsertAssigned(const size_t ec_id, const bool single_only, const size_t n_assignments, const telescope::GroupedAlignment &alignment, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+  void InsertAssigned(const size_t ec_id, const bool single_only, const size_t n_assignments, const std::vector<std::vector<uint32_t>> &reads_to_ecs, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
   if (single_only && n_assignments == 1) {
     for (uint32_t j = 0; j < (*assignments)[ec_id].size(); ++j) {
       if ((*assignments)[ec_id][j] && mask[j]) {
-	for (uint32_t i = 0; i < alignment.reads_assigned_to_ec(ec_id).size(); ++i) {
-	  (*bins)[j].push_back(alignment.reads_assigned_to_ec(ec_id)[i] + 1);
+	for (uint32_t i = 0; i < reads_to_ecs[ec_id].size(); ++i) {
+	  (*bins)[j].push_back(reads_to_ecs[ec_id][i] + 1);
 	}
       }
     }
   } else if (!single_only && n_assignments > 0) {
     for (uint32_t j = 0; j < (*assignments)[ec_id].size(); ++j) {
       if ((*assignments)[ec_id][j] && mask[j]) {
-	for (uint32_t i = 0; i < alignment.reads_assigned_to_ec(ec_id).size(); ++i) {
-	  (*bins)[j].push_back(alignment.reads_assigned_to_ec(ec_id)[i] + 1);
+	for (uint32_t i = 0; i < reads_to_ecs[ec_id].size(); ++i) {
+	  (*bins)[j].push_back(reads_to_ecs[ec_id][i] + 1);
 	}
       }
     }
   } else if (n_assignments == 0) {
     // Send reads to aligned but unassigned bin.
-    for (uint32_t i = 0; i < alignment.reads_assigned_to_ec(ec_id).size(); ++i) {
-      unassigned_bin->push_back(alignment.reads_assigned_to_ec(ec_id)[i] + 1);
+    for (uint32_t i = 0; i < reads_to_ecs[ec_id].size(); ++i) {
+      unassigned_bin->push_back(reads_to_ecs[ec_id][i] + 1);
     }
   }
 }
 
-void AssignProbsMatrix(const std::vector<long double> &thresholds, const seamat::Matrix<double> &probs_mat, const std::vector<bool> &mask, const telescope::GroupedAlignment &alignment, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+void AssignProbsMatrix(const std::vector<long double> &thresholds, const seamat::Matrix<double> &probs_mat, const std::vector<bool> &mask, const std::vector<std::vector<uint32_t>> &reads_to_ecs, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
   // Performs the actual binning based on the precaculated thresholds.
   // Input:
   //   `thresholds`: The binning thresholds from CalculateThresholds.
@@ -159,7 +159,7 @@ void AssignProbsMatrix(const std::vector<long double> &thresholds, const seamat:
     for (size_t j = 0; j < n_groups; ++j) {
       (*assignments)[i][j] = EvaluateAssignment(probs_mat(j, i), thresholds[j], &n_assignments, &any_assigned);
     }
-    InsertAssigned(i, single_only, n_assignments, alignment, mask, assignments, bins, unassigned_bin);
+    InsertAssigned(i, single_only, n_assignments, reads_to_ecs, mask, assignments, bins, unassigned_bin);
   }
 }
 
@@ -235,8 +235,8 @@ std::vector<std::vector<uint32_t>> BuildOutBins(const size_t n_groups, std::vect
   return out_bins;
 }
 
-std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::GroupedAlignment &aln, const std::vector<double> &abundances, const seamat::Matrix<double> &probs_mat, const std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups) {
-  uint32_t num_ecs = aln.n_ecs();
+std::vector<std::vector<uint32_t>> BinFromMatrix(, const std::vector<double> &abundances, const seamat::Matrix<double> &probs_mat, const std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups) {
+  uint32_t num_ecs = probs_mat.get_cols(); // Probs mat is of size n_groups x num_ecs
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);
   long double theta_frac = 1.0;
@@ -251,7 +251,7 @@ std::vector<std::vector<uint32_t>> BinFromMatrix(const telescope::GroupedAlignme
   bool single_only = false;
   std::vector<std::vector<bool>> assignments_mat(num_ecs, std::vector<bool>(n_groups, false));
   std::vector<uint32_t> unassigned_bin;
-  AssignProbsMatrix(thresholds, probs_mat, mask, aln, single_only, &assignments_mat, &read_bins, &unassigned_bin);
+  AssignProbsMatrix(thresholds, probs_mat, mask, reads_to_ecs, single_only, &assignments_mat, &read_bins, &unassigned_bin);
 
   const std::vector<std::vector<uint32_t>> &out_bins = BuildOutBins(n_groups, read_bins, &unassigned_bin);
 
