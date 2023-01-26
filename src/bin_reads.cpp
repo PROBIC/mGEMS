@@ -235,7 +235,7 @@ std::vector<std::vector<uint32_t>> BuildOutBins(const size_t n_groups, std::vect
   return out_bins;
 }
 
-std::vector<std::vector<uint32_t>> BinFromMatrix(, const std::vector<double> &abundances, const seamat::Matrix<double> &probs_mat, const std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups) {
+std::vector<std::vector<uint32_t>> BinFromMatrix(const std::vector<std::vector<uint32_t>> &reads_to_ecs, const std::vector<double> &abundances, const seamat::Matrix<double> &probs_mat, const std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups) {
   uint32_t num_ecs = probs_mat.get_cols(); // Probs mat is of size n_groups x num_ecs
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);
