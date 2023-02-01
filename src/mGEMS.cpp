@@ -57,7 +57,7 @@ void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<u
       std::string out_name = args.value<std::string>('o') + "/" + target_groups[i] + "_" + std::to_string(j + 1) + ".fastq";
       if (args.value<bool>("compress")) {
 	out_name += ".gz";
-	out_strands[j].open_compressed(out_name);
+	out_strands[j].open_compressed(out_name, bxz::z);
       } else {
 	out_strands[j].open(out_name);
       }
@@ -75,7 +75,7 @@ void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<u
       std::string out_name = args.value<std::string>('o') + '/' + "unassigned_reads" + '_' + std::to_string(j + 1) + ".fastq";
       if (args.value<bool>("compress")) {
 	out_name += ".gz";
-	out_strands[j].open_compressed(out_name);
+	out_strands[j].open_compressed(out_name, bxz::z);
       } else {
 	out_strands[j].open(out_name);
       }
@@ -160,7 +160,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     cxxio::Out of;
     if (args.value<bool>("compress")) {
       out_name += ".gz";
-      of.open_compressed(out_name);
+      of.open_compressed(out_name, bxz::z);
     } else {
       of.open(out_name);
     }
