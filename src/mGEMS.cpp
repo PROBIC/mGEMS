@@ -1,6 +1,7 @@
 #include <exception>
 #include <iostream>
 #include <cstring>
+#include <algorithm>
 
 #include "telescope.hpp"
 #include "cxxargs.hpp"
@@ -32,7 +33,7 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_long_argument<std::string>("probs", "Posterior probabilities from mSWEEP.");
   args.add_long_argument<std::string>("merge-mode", "How to merge paired-end alignments from Themisto (default: intersection).", "intersection");
   args.add_long_argument<std::vector<std::string>>("groups", "Which reference groups to bin reads to (default: all).");
-  args.add_long_argument<long double>("min-abundance", "Bin only the groups that have a relative abundance higher than this value (optional).");
+  args.add_long_argument<double>("min-abundance", "Bin only the groups that have a relative abundance higher than this value (optional).");
   args.add_short_argument<long double>('q', "Tuning parameter for the binning thresholds (default: 1.0).", (long double)1);
   args.add_long_argument<std::string>("index", "Themisto pseudoalignment index directory.");
   args.add_long_argument<bool>("write-unassigned", "Extract reads that pseudoaligned to a reference sequence but were not assigned to any group.", false);
@@ -56,7 +57,7 @@ void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<u
       std::string out_name = args.value<std::string>('o') + "/" + target_groups[i] + "_" + std::to_string(j + 1) + ".fastq";
       if (args.value<bool>("compress")) {
 	out_name += ".gz";
-	out_strands[j].open_compressed(out_name);
+	out_strands[j].open_compressed(out_name, bxz::z);
       } else {
 	out_strands[j].open(out_name);
       }
@@ -74,7 +75,7 @@ void Extract(const std::vector<std::vector<uint32_t>> &bins, const std::vector<u
       std::string out_name = args.value<std::string>('o') + '/' + "unassigned_reads" + '_' + std::to_string(j + 1) + ".fastq";
       if (args.value<bool>("compress")) {
 	out_name += ".gz";
-	out_strands[j].open_compressed(out_name);
+	out_strands[j].open_compressed(out_name, bxz::z);
       } else {
 	out_strands[j].open(out_name);
       }
@@ -105,21 +106,12 @@ void ReadAndExtract(cxxargs::Arguments &args) {
   Extract(bins, std::vector<uint32_t>(), target_groups, args);
 }
 
-void FilterTargetGroups(const std::vector<std::string> &group_names, const std::vector<long double> &abundances, const long double min_abundance, std::vector<std::string> *target_groups) {
-  uint32_t n_groups = group_names.size();
-  for (uint32_t i = 0; i < n_groups; ++i) {
-    if (abundances[i] < min_abundance && std::find(target_groups->begin(), target_groups->end(), group_names[i]) != target_groups->end()) {
-      target_groups->erase(std::find(target_groups->begin(), target_groups->end(), group_names[i]));
-    }
-  }
-}
-
 void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   cxxio::directory_exists(args.value<std::string>('o').c_str());
   cxxio::directory_exists(args.value<std::string>("index").c_str());
 
   std::vector<std::string> groups;
-  std::vector<long double> abundances;
+  std::vector<double> abundances;
   cxxio::In msweep_abundances(args.value<std::string>('a'));
   mGEMS::ReadAbundances(msweep_abundances.stream(), &abundances, &groups);
   
@@ -145,8 +137,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     n_refs = groups_indicators.count_lines<uint32_t>();
     groups_indicators.close();
   }
-  ThemistoAlignment aln;
-  ReadThemisto(get_mode(args.value<std::string>("merge-mode")), n_refs, themisto_alns, &aln);
+  telescope::ThemistoAlignment aln = telescope::read::Themisto(telescope::get_mode(args.value<std::string>("merge-mode")), n_refs, themisto_alns);
 
   cxxio::In probs_file(args.value<std::string>("probs"));
   std::vector<std::string> target_groups;
@@ -156,12 +147,12 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     target_groups = groups;
   }
   if (args.is_initialized("min-abundance")) {
-    FilterTargetGroups(groups, abundances, args.value<long double>("min-abundance"), &target_groups);
+    mGEMS::FilterTargetGroups(groups, abundances, args.value<double>("min-abundance"), &target_groups);
   }
 
   uint32_t n_groups = abundances.size();
   std::vector<uint32_t> unassigned_bin;
-  std::vector<std::vector<bool>> assignments_mat(aln.size(), std::vector<bool>(n_groups, false));
+  std::vector<std::vector<bool>> assignments_mat(aln.n_ecs(), std::vector<bool>(n_groups, false));
   const std::vector<std::vector<uint32_t>> &bins = mGEMS::Bin(aln, abundances, args.value<long double>('q'), args.value<bool>("unique-only"), probs_file.stream(), &target_groups, &unassigned_bin, &assignments_mat);
 
   if (args.value<bool>("write-assignment-table")) {
@@ -169,7 +160,7 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     cxxio::Out of;
     if (args.value<bool>("compress")) {
       out_name += ".gz";
-      of.open_compressed(out_name);
+      of.open_compressed(out_name, bxz::z);
     } else {
       of.open(out_name);
     }

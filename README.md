@@ -56,7 +56,7 @@ or by following the instructions below for compiling mGEMS from source.
 
 ### Compiling from source
 #### Requirements
-- C++11 compliant compiler.
+- C++17 compliant compiler.
 - cmake
 
 #### Compilation

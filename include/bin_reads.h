@@ -6,8 +6,13 @@
 #include <string>
 
 #include "telescope.hpp"
+#include "Matrix.hpp"
 
 namespace mGEMS {
+void FilterTargetGroups(const std::vector<std::string> &group_names,
+			const std::vector<double> &abundances,
+			const double min_abundance,
+			std::vector<std::string> *target_groups);
 // mGEMS::ReadAbundances
 //   Reads in the `_abundances.txt` file from mSWEEP.
 //   Input:
@@ -15,7 +20,7 @@ namespace mGEMS {
 //   Output:
 //     `abundances`: The relative abundances (2nd column in the file).
 //     `groups`: Names of the reference lineages (1st column).
-void ReadAbundances(std::istream &stream, std::vector<long double> *abundances,
+void ReadAbundances(std::istream &stream, std::vector<double> *abundances,
 		    std::vector<std::string> *groups);
 
 // mGEMS::WriteBin
@@ -32,7 +37,7 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of);
 //     `aln`: Themisto pseudoalignments.
 //     `of`: Stream for the output.
 void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat,
-		      const ThemistoAlignment &aln, std::ostream &of);
+		      const telescope::ThemistoAlignment &aln, std::ostream &of);
 
 // mGEMS::Bin
 //   Returns a 2D vector that contains the ids (line numbers in the
@@ -50,14 +55,22 @@ void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat,
 //      `*unassigned_bin`: Vector containing the ids of reads that were not assigned to any bin.
 //      `out_bins`: Vector containing the bins for the groups given in `*target_groups`.
 //      `*assignments_mat`: The read assignment matrix from AssignProbs.
-std::vector<std::vector<uint32_t>> Bin(const ThemistoAlignment &aln,
-				       const std::vector<long double> &abundances,
+std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln,
+				       const std::vector<double> &abundances,
 				       const long double theta_frac,
 				       const bool single_only,
 				       std::istream &probs_file,
 				       std::vector<std::string> *target_groups,
 				       std::vector<uint32_t> *unassigned_bin,
 				       std::vector<std::vector<bool>> *assignments_mat);
+// mGEMS::BinFromMatrix
+//   Same as above but perform the binning on a probability
+//   matrix that has already been read into memory.
+std::vector<std::vector<uint32_t>> BinFromMatrix(const std::vector<std::vector<uint32_t>> &reads_to_ecs,
+						 const std::vector<double> &abundances,
+						 const seamat::Matrix<double> &probs_mat,
+						 const std::vector<std::string> &all_group_names,
+						 std::vector<std::string> *target_groups);
 }
 
 #endif
