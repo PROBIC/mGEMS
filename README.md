@@ -25,8 +25,9 @@ mGEMS
 
 ### mGEMS binaries
 Precompiled binaries are available for
-* [Linux 64-bit binary](https://github.com/PROBIC/mGEMS/releases/download/v1.2.0/mGEMS_linux-v1.2.0.tar.gz)
-* [macOS 64-bit binary](https://github.com/PROBIC/mGEMS/releases/download/v1.2.0/mGEMS_macOS-v1.2.0.tar.gz)
+* [Linux x86_64](https://github.com/PROBIC/mGEMS/releases/download/v1.3.1/mGEMS_linux-v1.3.1.tar.gz)
+* [macOS arm64](https://github.com/PROBIC/mGEMS/releases/download/v1.3.1/mGEMS-v1.3.1-arm64-apple-darwin22.tar.gz)
+* [macOS x86_64](https://github.com/PROBIC/mGEMS/releases/download/v1.3.1/mGEMS-v1.3.1-x86_64-apple-darwin22.tar.gz)
 
 ### Compiling from source
 #### Requirements
