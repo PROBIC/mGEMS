@@ -29,6 +29,7 @@ void ParseBin(int argc, char* argv[], cxxargs::Arguments &args) {
   args.add_short_argument<std::string>('a', "Relative abundances estimates from mSWEEP.");
   args.add_short_argument<std::string>('i', "Group identifiers file used with the mSWEEP call.");
   args.set_not_required('i');
+  args.add_short_argument<size_t>('t', "Number of threads to use (default: 1).", (size_t)1);
   args.add_long_argument<std::string>("probs", "Posterior probabilities from mSWEEP.");
   args.add_long_argument<std::string>("merge-mode", "How to merge paired-end alignments from Themisto (default: intersection).", "intersection");
   args.add_long_argument<std::vector<std::string>>("groups", "Which reference groups to bin reads to (default: all).");
@@ -113,7 +114,12 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
   std::vector<double> abundances;
   cxxio::In msweep_abundances(args.value<std::string>('a'));
   mGEMS::ReadAbundances(msweep_abundances.stream(), &abundances, &groups);
-  
+
+#if defined(MGEMS_OPENMP_SUPPORT) && (MGEMS_OPENMP_SUPPORT) == 1
+  size_t n_threads = args.value<size_t>('t');
+  omp_set_num_threads(n_threads);
+#endif
+
   std::vector<std::istream*> themisto_alns;
   for (uint32_t i = 0; i < args.value<std::vector<std::string>>("themisto-alns").size(); ++i) {
     cxxio::In(args.value<std::vector<std::string>>("themisto-alns")[i]);
