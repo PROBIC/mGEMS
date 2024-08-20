@@ -273,7 +273,7 @@ endif()
 string(TIMESTAMP _BUILD_TIMESTAMP)
 
 ## Generate a version.h file containing build version and timestamp
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/version.h @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/mGEMS_version.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/mGEMS_version.h @ONLY)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
