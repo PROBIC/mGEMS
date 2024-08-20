@@ -153,9 +153,16 @@ public:
 			hash ^= j + 0x517cc1b727220a95 + (hash << 6) + (hash >> 2);
 		    }
 		}
+#if defined(MGEMS_OPENMP_SUPPORT) && (MGEMS_OPENMP_SUPPORT) == 1
 		auto got = mymap[omp_get_thread_num()].find(hash);
 		if (got == mymap[omp_get_thread_num()].end()) {
 		    mymap[omp_get_thread_num()].insert(std::make_pair(hash, std::vector<uint32_t>({(uint32_t)i})));
+#else
+		auto got = mymap[0].find(hash);
+		if (got == mymap[0].end()) {
+		    mymap[0].insert(std::make_pair(hash, std::vector<uint32_t>({(uint32_t)i})));
+
+#endif
 		} else {
 		    got->second.emplace_back(i);
 		}
