@@ -52,14 +52,19 @@ void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, c
 }
 
 
-void ReadHeader(const std::string &header_line, const size_t n_groups, std::vector<std::string> *group_names) {
+char ReadHeader(const std::string &header_line, const size_t n_groups, std::vector<std::string> *group_names) {
   std::string part;
   std::stringstream partition(header_line);
-  std::getline(partition, part, ',');
+  char separator = ',';
+  if (header_line.at(5) == '\t') {
+      separator = '\t';
+  }
+  std::getline(partition, part, separator);
   for (size_t i = 0; i < n_groups; ++i) {
-    std::getline(partition, part, ',');
+    std::getline(partition, part, separator);
     group_names->emplace_back(std::move(part));
   }
+  return separator;
 }
 
 void MaskProbs(const std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups, std::vector<bool> *mask) {
@@ -163,7 +168,7 @@ void AssignProbsMatrix(const std::vector<long double> &thresholds, const seamat:
   }
 }
 
-void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, const mGEMS::Alignment &alignment, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, char separator, const std::vector<bool> &mask, const mGEMS::Alignment &alignment, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
   // Performs the actual binning based on the precaculated thresholds.
   // Input:
   //   `thresholds`: The binning thresholds from CalculateThresholds.
@@ -183,11 +188,11 @@ void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs
   while (std::getline(probs_file, line) && !line.empty()) {
     std::string part;
     std::stringstream partition(line);
-    std::getline(partition, part, ','); // first element is the ec id
+    std::getline(partition, part, separator); // first element is the ec id
     uint32_t ref_id = 0;
     bool any_assigned = false;
     uint32_t n_assignments = 0;
-    while(std::getline(partition, part, ',')) {
+    while(std::getline(partition, part, separator)) {
       (*assignments)[ec_id][ref_id] = EvaluateAssignment(std::stold(part), thresholds[ref_id], &n_assignments, &any_assigned);
       ++ref_id;
     }
@@ -270,13 +275,13 @@ std::vector<std::vector<uint32_t>> Bin(const mGEMS::Alignment &aln, const std::v
   std::string probs_header;
   std::getline(probs_file, probs_header); // 1st line is header
   std::vector<std::string> all_group_names;
-  ReadHeader(probs_header, n_groups, &all_group_names);
+  char separator = ReadHeader(probs_header, n_groups, &all_group_names);
 
   // Build a binary vector indicating which groups to output
   std::vector<bool> mask(n_groups, false);
   MaskProbs(all_group_names, target_groups, &mask);
 
-  AssignProbs(thresholds, probs_file, mask, aln, single_only, assignments_mat, &read_bins, unassigned_bin);
+  AssignProbs(thresholds, probs_file, separator, mask, aln, single_only, assignments_mat, &read_bins, unassigned_bin);
 
   const std::vector<std::vector<uint32_t>> &out_bins = BuildOutBins(n_groups, read_bins, unassigned_bin);
   std::sort(unassigned_bin->begin(), unassigned_bin->end());
