@@ -34,14 +34,20 @@ set_target_properties(libmgems PROPERTIES OUTPUT_NAME mgems)
 
 ## Dependencies
 ### OpenMP
+## Check dependencies
 find_package(OpenMP)
 if (OPENMP_FOUND)
-  target_link_libraries(mGEMS OpenMP::OpenMP_CXX)
-  target_link_libraries(libmgems OpenMP::OpenMP_CXX)
+  set(MGEMS_OPENMP_SUPPORT 1)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_PARALLEL")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -D_GLIBCXX_PARALLEL")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -D_GLIBCXX_PARALLEL")
+else()
+  set(MGEMS_OPENMP_SUPPORT 0)
 endif()
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+## Configure OpenMP if it supported on the system.
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/mGEMS_openmp_config.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/mGEMS_openmp_config.hpp @ONLY)
 
 ### Check supported compression types
 #### zlib
@@ -278,4 +284,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/mGEMS_version.h.in ${CMAKE_CU
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Link libraries
-target_link_libraries(mGEMS libmgems)
+if (OPENMP_FOUND)
+  target_link_libraries(mGEMS libmgems OpenMP::OpenMP_CXX)
+else()
+  target_link_libraries(mGEMS libmgems)
+endif()
