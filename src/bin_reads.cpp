@@ -52,14 +52,19 @@ void ConstructThresholds(const uint32_t num_ecs, const long double theta_frac, c
 }
 
 
-void ReadHeader(const std::string &header_line, const size_t n_groups, std::vector<std::string> *group_names) {
+char ReadHeader(const std::string &header_line, const size_t n_groups, std::vector<std::string> *group_names) {
   std::string part;
   std::stringstream partition(header_line);
-  std::getline(partition, part, ',');
+  char separator = ',';
+  if (header_line.at(5) == '\t') {
+      separator = '\t';
+  }
+  std::getline(partition, part, separator);
   for (size_t i = 0; i < n_groups; ++i) {
-    std::getline(partition, part, ',');
+    std::getline(partition, part, separator);
     group_names->emplace_back(std::move(part));
   }
+  return separator;
 }
 
 void MaskProbs(const std::vector<std::string> &all_group_names, std::vector<std::string> *target_groups, std::vector<bool> *mask) {
@@ -84,7 +89,7 @@ bool EvaluateAssignment(const double abundance, const double threshold, uint32_t
       return assigned;
 }
 
-void InsertAssigned(const size_t ec_id, const bool single_only, const size_t n_assignments, const telescope::ThemistoAlignment &alignment, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+void InsertAssigned(const size_t ec_id, const bool single_only, const size_t n_assignments, const mGEMS::Alignment &alignment, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
   if (single_only && n_assignments == 1) {
     for (uint32_t j = 0; j < (*assignments)[ec_id].size(); ++j) {
       if ((*assignments)[ec_id][j] && mask[j]) {
@@ -163,7 +168,7 @@ void AssignProbsMatrix(const std::vector<long double> &thresholds, const seamat:
   }
 }
 
-void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, const telescope::ThemistoAlignment &alignment, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, char separator, const std::vector<bool> &mask, const mGEMS::Alignment &alignment, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
   // Performs the actual binning based on the precaculated thresholds.
   // Input:
   //   `thresholds`: The binning thresholds from CalculateThresholds.
@@ -183,11 +188,11 @@ void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs
   while (std::getline(probs_file, line) && !line.empty()) {
     std::string part;
     std::stringstream partition(line);
-    std::getline(partition, part, ','); // first element is the ec id
+    std::getline(partition, part, separator); // first element is the ec id
     uint32_t ref_id = 0;
     bool any_assigned = false;
     uint32_t n_assignments = 0;
-    while(std::getline(partition, part, ',')) {
+    while(std::getline(partition, part, separator)) {
       (*assignments)[ec_id][ref_id] = EvaluateAssignment(std::stold(part), thresholds[ref_id], &n_assignments, &any_assigned);
       ++ref_id;
     }
@@ -203,7 +208,7 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of) {
   of.flush();
 }
 
-void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, const telescope::ThemistoAlignment &aln, std::ostream &of) {
+void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, const mGEMS::Alignment &aln, std::ostream &of) {
   uint32_t n_groups = assignments_mat[0].size();
   uint32_t n_ecs = assignments_mat.size();
   for (uint32_t i = 0; i < n_ecs; ++i) {
@@ -258,7 +263,7 @@ std::vector<std::vector<uint32_t>> BinFromMatrix(const std::vector<std::vector<u
   return out_bins;
 }
 
-std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln, const std::vector<double> &abundances, const long double theta_frac, const bool single_only, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
+std::vector<std::vector<uint32_t>> Bin(const mGEMS::Alignment &aln, const std::vector<double> &abundances, const long double theta_frac, const bool single_only, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
   uint32_t num_ecs = aln.n_ecs();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);
@@ -270,13 +275,13 @@ std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln, 
   std::string probs_header;
   std::getline(probs_file, probs_header); // 1st line is header
   std::vector<std::string> all_group_names;
-  ReadHeader(probs_header, n_groups, &all_group_names);
+  char separator = ReadHeader(probs_header, n_groups, &all_group_names);
 
   // Build a binary vector indicating which groups to output
   std::vector<bool> mask(n_groups, false);
   MaskProbs(all_group_names, target_groups, &mask);
 
-  AssignProbs(thresholds, probs_file, mask, aln, single_only, assignments_mat, &read_bins, unassigned_bin);
+  AssignProbs(thresholds, probs_file, separator, mask, aln, single_only, assignments_mat, &read_bins, unassigned_bin);
 
   const std::vector<std::vector<uint32_t>> &out_bins = BuildOutBins(n_groups, read_bins, unassigned_bin);
   std::sort(unassigned_bin->begin(), unassigned_bin->end());

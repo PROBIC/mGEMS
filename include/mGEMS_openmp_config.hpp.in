@@ -1,0 +1,12 @@
+#ifndef MGEMS_OPENMP_CONFIG_HPP
+#define MGEMS_OPENMP_CONFIG_HPP
+
+#define MGEMS_OPENMP_SUPPORT @MGEMS_OPENMP_SUPPORT@
+
+#if defined(MGEMS_OPENMP_SUPPORT) && (MGEMS_OPENMP_SUPPORT) == 1
+#include <omp.h>
+#include <algorithm>
+#endif
+
+
+#endif

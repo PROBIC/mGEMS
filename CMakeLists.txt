@@ -34,14 +34,20 @@ set_target_properties(libmgems PROPERTIES OUTPUT_NAME mgems)
 
 ## Dependencies
 ### OpenMP
+## Check dependencies
 find_package(OpenMP)
 if (OPENMP_FOUND)
-  target_link_libraries(mGEMS OpenMP::OpenMP_CXX)
-  target_link_libraries(libmgems OpenMP::OpenMP_CXX)
+  set(MGEMS_OPENMP_SUPPORT 1)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_PARALLEL")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -D_GLIBCXX_PARALLEL")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -D_GLIBCXX_PARALLEL")
+else()
+  set(MGEMS_OPENMP_SUPPORT 0)
 endif()
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+## Configure OpenMP if it supported on the system.
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/mGEMS_openmp_config.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/mGEMS_openmp_config.hpp @ONLY)
 
 ### Check supported compression types
 #### zlib
@@ -192,48 +198,19 @@ else()
   set_target_properties(alignment-writer PROPERTIES EXCLUDE_FROM_ALL 1)
   set(CMAKE_ALIGNMENT_WRITER_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/external/alignment-writer/include)
   set(CMAKE_ALIGNMENT_WRITER_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/lib/libalignment-writer.a)
+  set(CMAKE_BITMAGIC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/external/alignment-writer/external/BitMagic-7.12.3/src)
 endif()
 include_directories(${CMAKE_ALIGNMENT_WRITER_HEADERS})
 target_link_libraries(mGEMS ${CMAKE_ALIGNMENT_WRITER_LIBRARY})
 target_link_libraries(libmgems ${CMAKE_ALIGNMENT_WRITER_LIBRARY})
 
-## telescope
-if (DEFINED CMAKE_TELESCOPE_LIBRARY AND DEFINED CMAKE_TELESCOPE_HEADERS)
-  message(STATUS "telescope headers provided in: ${CMAKE_TELESCOPE_HEADERS}")
-  message(STATUS "telescope library provided in: ${CMAKE_TELESCOPE_LIBRARY}")
+## BitMagic
+if (DEFINED CMAKE_BITMAGIC_HEADERS)
+  message(STATUS "BitMagic headers provided in: ${CMAKE_BITMAGIC_HEADERS}")
 else()
-  FetchContent_Declare(telescope
-    GIT_REPOSITORY    https://github.com/tmaklin/telescope.git
-    GIT_TAG           v0.7.0-prerelease
-    PREFIX            "external"
-    SOURCE_DIR        "${CMAKE_CURRENT_SOURCE_DIR}/external/telescope"
-    BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/external/telescope"
-    BUILD_IN_SOURCE   0
-    CMAKE_ARGS      -D CMAKE_BXZSTR_HEADERS=${CMAKE_BXZSTR_HEADERS}
-		    -D CMAKE_CXXARGS_HEADERS=${CMAKE_CXXARGS_HEADERS}
-		    -D CMAKE_CXXIO_HEADERS=${CMAKE_CXXIO_HEADERS}
-		    -D CMAKE_ALIGNMENT_WRITER_HEADERS=${CMAKE_ALIGNMENT_WRITER_HEADERS}
-		    -D CMAKE_ALIGNMENT_WRITER_LIBRARY=${CMAKE_ALIGNMENT_WRITER_LIBRARY}
-		    -D CMAKE_BITMAGIC_HEADERS=${CMAKE_CURRENT_SOURCE_DIR}/external/telescope/external/BitMagic-7.12.3/src
-		    -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-		    -D "CMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
-		    -D "CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}"
-		    -D "CMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
-		    -D "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
-    INSTALL_COMMAND   ""
-    )
-  FetchContent_MakeAvailable(telescope)
-  add_dependencies(mGEMS libalignmentwriter)
-  add_dependencies(telescope libalignmentwriter)
-  add_dependencies(mGEMS telescope)
-  set_target_properties(telescope PROPERTIES EXCLUDE_FROM_ALL 1)
-  set(CMAKE_TELESCOPE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/external/telescope/include)
-  set(CMAKE_TELESCOPE_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/lib/libtelescope.a)
-  set(CMAKE_BITMAGIC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/external/telescope/external/BitMagic-7.12.3/src)
+  message(FATAL_ERROR "Provide BitMagic C++ headers with -DCMAKE_BITMAGIC_HEADERS")
 endif()
-include_directories(${CMAKE_TELESCOPE_HEADERS} ${CMAKE_BITMAGIC_HEADERS})
-target_link_libraries(mGEMS ${CMAKE_TELESCOPE_LIBRARY})
-target_link_libraries(libmgems ${CMAKE_TELESCOPE_LIBRARY})
+include_directories(${CMAKE_BITMAGIC_HEADERS})
 
 ## seamat
 if (DEFINED CMAKE_SEAMAT_HEADERS)
@@ -273,9 +250,13 @@ endif()
 string(TIMESTAMP _BUILD_TIMESTAMP)
 
 ## Generate a version.h file containing build version and timestamp
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/version.h @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/mGEMS_version.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/mGEMS_version.h @ONLY)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Link libraries
-target_link_libraries(mGEMS libmgems)
+if (OPENMP_FOUND)
+  target_link_libraries(mGEMS libmgems OpenMP::OpenMP_CXX)
+else()
+  target_link_libraries(mGEMS libmgems)
+endif()
