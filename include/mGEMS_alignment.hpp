@@ -192,7 +192,10 @@ public:
 #pragma omp parallel
 	{
 	    size_t i = 0;
-	    size_t thread_id = omp_get_thread_num();
+	    size_t thread_id = 0;
+#if defined(MGEMS_OPENMP_SUPPORT) && (MGEMS_OPENMP_SUPPORT) == 1
+	    thread_id = omp_get_thread_num();
+#endif
 	    collapsed_bits[thread_id].resize(n_ecs*this->n_targets);
 	    for(auto element = map.begin(); element !=map.end(); ++element, i++) {
 		if(i%n_threads == thread_id) {
