@@ -84,7 +84,7 @@ bool EvaluateAssignment(const double abundance, const double threshold, uint32_t
       return assigned;
 }
 
-void InsertAssigned(const size_t ec_id, const bool single_only, const size_t n_assignments, const telescope::ThemistoAlignment &alignment, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+void InsertAssigned(const size_t ec_id, const bool single_only, const size_t n_assignments, const mGEMS::Alignment &alignment, const std::vector<bool> &mask, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
   if (single_only && n_assignments == 1) {
     for (uint32_t j = 0; j < (*assignments)[ec_id].size(); ++j) {
       if ((*assignments)[ec_id][j] && mask[j]) {
@@ -163,7 +163,7 @@ void AssignProbsMatrix(const std::vector<long double> &thresholds, const seamat:
   }
 }
 
-void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, const telescope::ThemistoAlignment &alignment, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
+void AssignProbs(const std::vector<long double> &thresholds, std::istream &probs_file, const std::vector<bool> &mask, const mGEMS::Alignment &alignment, const bool single_only, std::vector<std::vector<bool>> *assignments, std::vector<std::vector<uint32_t>> *bins, std::vector<uint32_t> *unassigned_bin) {
   // Performs the actual binning based on the precaculated thresholds.
   // Input:
   //   `thresholds`: The binning thresholds from CalculateThresholds.
@@ -203,7 +203,7 @@ void WriteBin(const std::vector<uint32_t> &binned_reads, std::ostream &of) {
   of.flush();
 }
 
-void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, const telescope::ThemistoAlignment &aln, std::ostream &of) {
+void WriteAssignments(const std::vector<std::vector<bool>> &assignments_mat, const mGEMS::Alignment &aln, std::ostream &of) {
   uint32_t n_groups = assignments_mat[0].size();
   uint32_t n_ecs = assignments_mat.size();
   for (uint32_t i = 0; i < n_ecs; ++i) {
@@ -258,7 +258,7 @@ std::vector<std::vector<uint32_t>> BinFromMatrix(const std::vector<std::vector<u
   return out_bins;
 }
 
-std::vector<std::vector<uint32_t>> Bin(const telescope::ThemistoAlignment &aln, const std::vector<double> &abundances, const long double theta_frac, const bool single_only, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
+std::vector<std::vector<uint32_t>> Bin(const mGEMS::Alignment &aln, const std::vector<double> &abundances, const long double theta_frac, const bool single_only, std::istream &probs_file, std::vector<std::string> *target_groups, std::vector<uint32_t> *unassigned_bin, std::vector<std::vector<bool>> *assignments_mat) {
   uint32_t num_ecs = aln.n_ecs();
   uint32_t n_groups = abundances.size();
   std::vector<long double> thresholds(n_groups);

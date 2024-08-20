@@ -3,7 +3,6 @@
 #include <cstring>
 #include <algorithm>
 
-#include "telescope.hpp"
 #include "cxxargs.hpp"
 #include "cxxio.hpp"
 
@@ -137,7 +136,9 @@ void Bin(const cxxargs::Arguments &args, bool extract_bins) {
     n_refs = groups_indicators.count_lines<uint32_t>();
     groups_indicators.close();
   }
-  telescope::ThemistoAlignment aln = telescope::read::Themisto(telescope::get_mode(args.value<std::string>("merge-mode")), n_refs, themisto_alns);
+  mGEMS::Alignment aln(n_refs);
+  aln.read(args.value<std::string>("merge-mode"), themisto_alns);
+  aln.collapse();
 
   cxxio::In probs_file(args.value<std::string>("probs"));
   std::vector<std::string> target_groups;
