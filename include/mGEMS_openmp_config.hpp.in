@@ -6,12 +6,6 @@
 #if defined(MGEMS_OPENMP_SUPPORT) && (MGEMS_OPENMP_SUPPORT) == 1
 #include <omp.h>
 #include <algorithm>
-#pragma omp declare reduction(vec_double_plus2 : std::vector<double> :	\
-                              std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), std::plus<double>())) \
-                    initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
-#pragma omp declare reduction(vec_size_t_plus2 : std::vector<size_t> :	\
-                              std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), std::plus<size_t>())) \
-                    initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
 #endif
 
 
